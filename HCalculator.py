@@ -6,6 +6,7 @@ html_content = """
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HCalculator - Hydraulic Calculator</title>
 <style>
   body {
@@ -24,11 +25,14 @@ html_content = """
     box-sizing: border-box;
   }
   
-  /* Wybór języka */
-  .lang-selector {
+  /* Wybór języka i O programie w jednym pasku */
+  .top-bar {
     background-color: #002244;
-    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
     padding: 8px 15px;
+    gap: 15px;
   }
   .lang-selector select {
     background-color: #003366;
@@ -41,6 +45,19 @@ html_content = """
     outline: none;
   }
   
+  .about-btn {
+    background: none;
+    border: none;
+    color: #a0c4e8;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  .about-btn:hover {
+    color: #fff;
+  }
+  
   /* Nawigacja (Zakładki) */
   .br-tabs {
     display: flex;
@@ -49,6 +66,7 @@ html_content = """
     border-bottom: 2px solid #0055a5;
     position: sticky;
     top: 0;
+    z-index: 10;
   }
   .br-tab-btn {
     flex: 1 1 auto;
@@ -144,6 +162,36 @@ html_content = """
     background-color: #004080;
   }
   
+  /* Przycisk Dotacji (Coffee) */
+  .br-coffee-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #ffaa00;
+    color: #003366;
+    padding: 14px;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+    margin-top: 25px;
+    text-decoration: none;
+    box-shadow: 0 4px 10px rgba(255, 170, 0, 0.3);
+  }
+  .br-coffee-btn:hover {
+    background-color: #ffb732;
+    transform: translateY(-2px);
+  }
+  .br-coffee-btn svg {
+    margin-right: 10px;
+    width: 20px;
+    height: 20px;
+  }
+  
   /* Wyniki */
   .br-results {
     margin-top: 25px;
@@ -203,13 +251,16 @@ html_content = """
 
 <div id="toast">Wystąpił błąd!</div>
 
-<div class="lang-selector">
-  <select id="lang-switch">
-    <option value="pl">🇵🇱 Polski</option>
-    <option value="en">🇬🇧 English</option>
-    <option value="de">🇩🇪 Deutsch</option>
-    <option value="ro">🇷🇴 Română</option>
-  </select>
+<div class="top-bar">
+  <button class="about-btn" id="show-about-btn" data-i18n="about">ℹ️ O Programie</button>
+  <div class="lang-selector">
+    <select id="lang-switch">
+      <option value="pl">🇵🇱 Polski</option>
+      <option value="en">🇬🇧 English</option>
+      <option value="de">🇩🇪 Deutsch</option>
+      <option value="ro">🇷🇴 Română</option>
+    </select>
+  </div>
 </div>
 
 <div class="br-app-container">
@@ -348,17 +399,50 @@ html_content = """
       <p><strong data-i18n="rec">Rekomendowana pojemność:</strong> <span id="res-tank-range" style="color: #d9534f; font-weight: bold;">0</span> <span data-i18n="liters">litrów</span></p>
     </div>
   </div>
+  
+  <div class="br-tab-content" id="tab-about">
+    <h3 data-i18n="about_title">HCalculator v1.0</h3>
+    <p class="desc" data-i18n="about_desc">Profesjonalny Kalkulator Hydrauliczny</p>
+    
+    <div style="background-color: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; line-height: 1.6;">
+        <p data-i18n="about_text" style="color: #444; font-size: 15px; margin-top: 0;">
+            Ten program tworzę hobbystycznie. Jest w 100% darmowy, nie wyświetla reklam i szanuje Twoją prywatność działając offline. Jeśli HCalculator zaoszczędził Twój czas w warsztacie lub przy projekcie, możesz wesprzeć jego dalszy rozwój, stawiając mi symboliczną kawę. Dziękuję!
+        </p>
+        
+        <a href="https://www.buymeacoffee.com/hcalculator" target="_blank" class="br-coffee-btn" id="coffee-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+            <line x1="6" y1="1" x2="6" y2="4"></line>
+            <line x1="10" y1="1" x2="10" y2="4"></line>
+            <line x1="14" y1="1" x2="14" y2="4"></line>
+          </svg>
+          <span data-i18n="btn_coffee">Postaw mi kawę</span>
+        </a>
+    </div>
+  </div>
+
 </div>
 
 <div class="br-footer">
-  2026 &copy; Daniel Kaliski
+  <span id="currentYear"></span> &copy; Daniel Kaliski
 </div>
 
 <script>
-// Słownik wielojęzyczny z powiadomieniami o błędach
+// Funkcja wywoływana z Pythona, aby otworzyć link w zewnętrznej przeglądarce
+document.getElementById('coffee-link').addEventListener('click', function(e) {
+    e.preventDefault();
+    if(window.pywebview) {
+        window.pywebview.api.open_url(this.href);
+    } else {
+        window.open(this.href, '_blank');
+    }
+});
+
+// Słownik wielojęzyczny z powiadomieniami o błędach i sekcją o programie
 const langDict = {
   "pl": {
-    "tab_force": "Siła", "tab_speed": "Prędkość", "tab_power": "Moc", "tab_flow": "Wydajność", "tab_tank": "Zbiornik",
+    "about": "ℹ️ O Programie", "tab_force": "Siła", "tab_speed": "Prędkość", "tab_power": "Moc", "tab_flow": "Wydajność", "tab_tank": "Zbiornik",
     "force_title": "Siła Siłownika", "force_desc": "Oblicz siłę pchania i ciągnięcia.",
     "pressure": "Ciśnienie robocze (bar):", "bore": "Wewn. średnica tłoka (mm):", "rod": "Średnica tłoczyska (mm):",
     "btn_force": "Oblicz siłę", "push": "Siła pchania:", "pull": "Siła ciągnięcia:",
@@ -377,12 +461,15 @@ const langDict = {
     "tank_title": "Pojemność Zbiornika", "tank_desc": "Zadbaj o właściwe chłodzenie oleju.",
     "sys_type": "Typ układu:", "mob": "Maszyny mobilne / rolnicze", "ind": "Maszyny stacjonarne / przemysłowe", "closed": "Układ zamknięty",
     "btn_tank": "Oblicz pojemność", "rec": "Rekomendowana pojemność:", "liters": "litrów",
+    "about_title": "HCalculator v1.0.1", "about_desc": "Profesjonalny Kalkulator Hydrauliczny",
+    "about_text": "Ten program tworzę hobbystycznie. Jest w 100% darmowy, nie wyświetla reklam i szanuje Twoją prywatność działając offline. Jeśli HCalculator zaoszczędził Twój czas w warsztacie lub przy projekcie, możesz wesprzeć jego dalszy rozwój, stawiając mi symboliczną kawę. Dziękuję!",
+    "btn_coffee": "Postaw mi kawę",
     "ph_180": "np. 180", "ph_80": "np. 80", "ph_40": "np. 40", "ph_500": "np. 500", "ph_14": "np. 14", "ph_custom": "Wpisz obroty...",
     "err_empty": "Proszę poprawnie wypełnić wszystkie pola!",
     "err_bore": "Średnica tłoka musi być większa niż tłoczyska!"
   },
   "en": {
-    "tab_force": "Force", "tab_speed": "Speed", "tab_power": "Power", "tab_flow": "Flow Rate", "tab_tank": "Tank",
+    "about": "ℹ️ About", "tab_force": "Force", "tab_speed": "Speed", "tab_power": "Power", "tab_flow": "Flow Rate", "tab_tank": "Tank",
     "force_title": "Cylinder Force", "force_desc": "Calculate push and pull force.",
     "pressure": "Operating pressure (bar):", "bore": "Inner bore diameter (mm):", "rod": "Rod diameter (mm):",
     "btn_force": "Calculate force", "push": "Push force:", "pull": "Pull force:",
@@ -401,12 +488,15 @@ const langDict = {
     "tank_title": "Tank Capacity", "tank_desc": "Ensure proper oil cooling.",
     "sys_type": "System type:", "mob": "Mobile / agricultural machinery", "ind": "Stationary / industrial machinery", "closed": "Closed loop system",
     "btn_tank": "Calculate capacity", "rec": "Recommended capacity:", "liters": "liters",
+    "about_title": "HCalculator v1.0.1", "about_desc": "Professional Hydraulic Calculator",
+    "about_text": "This program is a passion project. It is 100% free, has no ads, and respects your privacy by working completely offline. If HCalculator has saved you time in the workshop or on a project, you can support its future development by buying me a virtual coffee. Thank you!",
+    "btn_coffee": "Buy me a coffee",
     "ph_180": "e.g. 180", "ph_80": "e.g. 80", "ph_40": "e.g. 40", "ph_500": "e.g. 500", "ph_14": "e.g. 14", "ph_custom": "Enter RPM...",
     "err_empty": "Please fill in all fields correctly!",
     "err_bore": "Bore diameter must be larger than rod diameter!"
   },
   "de": {
-    "tab_force": "Kraft", "tab_speed": "Zykluszeit", "tab_power": "Leistung", "tab_flow": "Fördermenge", "tab_tank": "Tank",
+    "about": "ℹ️ Über", "tab_force": "Kraft", "tab_speed": "Zykluszeit", "tab_power": "Leistung", "tab_flow": "Fördermenge", "tab_tank": "Tank",
     "force_title": "Zylinderkraft", "force_desc": "Druck- und Zugkraft berechnen.",
     "pressure": "Betriebsdruck (bar):", "bore": "Kolbeninnendurchmesser (mm):", "rod": "Stangendurchmesser (mm):",
     "btn_force": "Kraft berechnen", "push": "Druckkraft:", "pull": "Zugkraft:",
@@ -425,12 +515,15 @@ const langDict = {
     "tank_title": "Tankkapazität", "tank_desc": "Richtige Ölkühlung sicherstellen.",
     "sys_type": "Systemtyp:", "mob": "Mobile / Landmaschinen", "ind": "Stationäre / Industriemaschinen", "closed": "Geschlossenes System",
     "btn_tank": "Kapazität berechnen", "rec": "Empfohlene Kapazität:", "liters": "Liter",
+    "about_title": "HCalculator v1.0.1", "about_desc": "Professioneller Hydraulik-Rechner",
+    "about_text": "Dieses Programm ist ein Leidenschaftsprojekt. Es ist zu 100 % kostenlos, werbefrei und respektiert Ihre Privatsphäre, da es komplett offline funktioniert. Wenn HCalculator Ihnen in der Werkstatt oder bei einem Projekt Zeit gespart hat, können Sie die weitere Entwicklung unterstützen, indem Sie mir einen virtuellen Kaffee spendieren. Danke!",
+    "btn_coffee": "Spendieren Sie mir einen Kaffee",
     "ph_180": "z.B. 180", "ph_80": "z.B. 80", "ph_40": "z.B. 40", "ph_500": "z.B. 500", "ph_14": "z.B. 14", "ph_custom": "U/min eingeben...",
     "err_empty": "Bitte füllen Sie alle Felder korrekt aus!",
     "err_bore": "Kolbendurchmesser muss größer als Stangendurchmesser sein!"
   },
   "ro": {
-    "tab_force": "Forță", "tab_speed": "Viteză", "tab_power": "Putere", "tab_flow": "Debit", "tab_tank": "Rezervor",
+    "about": "ℹ️ Despre", "tab_force": "Forță", "tab_speed": "Viteză", "tab_power": "Putere", "tab_flow": "Debit", "tab_tank": "Rezervor",
     "force_title": "Forța Cilindrului", "force_desc": "Calculați forța de împingere și tragere.",
     "pressure": "Presiune de lucru (bar):", "bore": "Diametru interior piston (mm):", "rod": "Diametru tijă (mm):",
     "btn_force": "Calculați forța", "push": "Forță de împingere:", "pull": "Forță de tragere:",
@@ -449,6 +542,9 @@ const langDict = {
     "tank_title": "Capacitatea Rezervorului", "tank_desc": "Asigurați răcirea corectă a uleiului.",
     "sys_type": "Tip sistem:", "mob": "Utilaje mobile / agricole", "ind": "Utilaje staționare / industriale", "closed": "Sistem închis",
     "btn_tank": "Calculați capacitatea", "rec": "Capacitate recomandată:", "liters": "litri",
+    "about_title": "HCalculator v1.0.1", "about_desc": "Calculator Hidraulic Profesional",
+    "about_text": "Acest program este un proiect de pasiune. Este 100% gratuit, nu are reclame și îți respectă confidențialitatea funcționând complet offline. Dacă HCalculator te-a ajutat să economisești timp în atelier sau la un proiect, poți susține dezvoltarea sa viitoare cumpărându-mi o cafea virtuală. Mulțumesc!",
+    "btn_coffee": "Cumpără-mi o cafea",
     "ph_180": "ex. 180", "ph_80": "ex. 80", "ph_40": "ex. 40", "ph_500": "ex. 500", "ph_14": "ex. 14", "ph_custom": "Turație...",
     "err_empty": "Vă rugăm să completați corect toate câmpurile!",
     "err_bore": "Diametrul pistonului trebuie să fie mai mare decât tija!"
@@ -456,8 +552,17 @@ const langDict = {
 };
 
 document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById("currentYear").textContent = new Date().getFullYear();
   
   var langSwitch = document.getElementById('lang-switch');
+  
+  // Otwieranie zakładki "O programie"
+  document.getElementById('show-about-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      document.querySelectorAll('.br-tab-btn').forEach(function(b) { b.classList.remove('active'); });
+      document.querySelectorAll('.br-tab-content').forEach(function(c) { c.classList.remove('active'); });
+      document.getElementById('tab-about').classList.add('active');
+  });
   
   // 1. Logika zmiany i tłumaczenia
   langSwitch.addEventListener('change', function(e) {
@@ -472,7 +577,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // 2. Automatyczne wykrywanie
+  // 2. Automatyczne wykrywanie języka systemu
   var userLang = navigator.language || navigator.userLanguage; 
   var langCode = userLang.split('-')[0].toLowerCase();
   var supportedLangs = ['pl', 'en', 'de', 'ro'];
@@ -592,10 +697,17 @@ document.addEventListener('DOMContentLoaded', function() {
 </html>
 """
 
+class Api:
+    def open_url(self, url):
+        import webbrowser
+        webbrowser.open(url)
+
 if __name__ == '__main__':
+    api = Api()
     webview.create_window(
         title='HCalculator - Hydraulic Calculator', 
         html=html_content, 
+        js_api=api,
         width=580, 
         height=780,
         min_size=(450, 600)
