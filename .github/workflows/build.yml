@@ -30,7 +30,7 @@ jobs:
 
     - name: Build Windows Executable
       run: |
-        pyinstaller --windowed --onefile HCalculator.py
+        pyinstaller --windowed --onefile --hidden-import=clr --hidden-import=webview.platforms.winforms HCalculator.py
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
