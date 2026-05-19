@@ -1,7 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 a = Analysis(
-    ['hcalculator.py'],
+    ['HCalculator.py'],
     pathex=[],
     binaries=[],
     datas=[],
@@ -11,8 +11,8 @@ a = Analysis(
     runtime_hooks=[],
     excludes=[],
     noarchive=False,
+    optimize=0,
 )
-
 pyz = PYZ(a.pure)
 
 exe = EXE(
@@ -30,9 +30,9 @@ exe = EXE(
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
-    entitlements_file=None,
+    entitlements=None,
+    icon=['HCalculator.icns'],
 )
-
 coll = COLLECT(
     exe,
     a.binaries,
@@ -42,17 +42,19 @@ coll = COLLECT(
     upx_exclude=[],
     name='HCalculator',
 )
-
 app = BUNDLE(
     coll,
     name='HCalculator.app',
     icon='HCalculator.icns',
-    bundle_identifier='pl.com.danielkaliski.hcalculator',
+    bundle_identifier='com.danielkaliski.hcalculator',
     info_plist={
         'CFBundleName': 'HCalculator',
         'CFBundleDisplayName': 'HCalculator',
-        'CFBundleShortVersionString': '1.0.1',
-        'CFBundleVersion': '1.0.1',
-        'NSHumanReadableCopyright': 'Copyright © 2026 Daniel Kaliski'
-    }
+        'CFBundleExecutable': 'HCalculator',
+        'CFBundlePackageType': 'APPL',
+        'CFBundleShortVersionString': '1.0.2',
+        'CFBundleVersion': '1.0.2',
+        'NSHumanReadableCopyright': 'Copyright © 2026 Daniel Kaliski. Wszelkie prawa zastrzeżone.',
+        'NSHighResolutionCapable': True,
+    },
 )
