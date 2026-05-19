@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # Ucisza ostrzeżenie o Node.js 20
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
   build-windows:
@@ -24,15 +24,14 @@ jobs:
     - name: Install Windows GUI Dependencies
       run: |
         python -m pip install --upgrade pip
-        # Instalujemy wheel oraz pythonnet, które pomagają pywebview na maszynach Windows Server
         pip install wheel pythonnet
         pip install pywebview pyinstaller
 
     - name: Build Windows Executable
       run: |
-        pyinstaller --windowed --onefile --hidden-import=clr --hidden-import=webview.platforms.winforms HCalculator.py
+        pyinstaller --windowed --onefile --icon=icon.ico --hidden-import=clr --hidden-import=webview.platforms.winforms HCalculator.py
 
-   - name: Upload Artifact
+    - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
         name: HCalculator-Windows-x64
