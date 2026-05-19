@@ -31,7 +31,7 @@ html_content = """
   .br-form-group input:focus, .br-form-group select:focus { border-color: #0055a5; outline: none; box-shadow: 0 0 0 2px rgba(0, 85, 165, 0.2); }
   .br-calc-btn { width: 100%; background-color: #0055a5; color: white; padding: 14px; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 15px; }
   .br-calc-btn:hover { background-color: #004080; }
-  .br-coffee-btn { display: flex; justify-content: center; align-items: center; width: 100%; background-color: #ffaa00; color: #003366; padding: 14px; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 25px; text-decoration: none; box-shadow: 0 4px 10px rgba(255, 170, 0, 0.3); }
+  .br-coffee-btn { display: flex; justify-content: center; align-items: center; width: 100%; box-sizing: border-box; background-color: #ffaa00; color: #003366; padding: 14px; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 25px; text-decoration: none; box-shadow: 0 4px 10px rgba(255, 170, 0, 0.3); }
   .br-coffee-btn:hover { background-color: #ffb732; transform: translateY(-2px); }
   .br-coffee-btn svg { margin-right: 10px; width: 20px; height: 20px; }
   .br-results { margin-top: 25px; padding: 20px; background-color: #ffffff; border: 2px solid #0055a5; border-radius: 6px; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
