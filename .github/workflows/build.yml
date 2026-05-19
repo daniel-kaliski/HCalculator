@@ -29,10 +29,10 @@ jobs:
 
     - name: Build Windows Executable
       run: |
-        pyinstaller --windowed --onefile --icon=.github/workflows/icon.ico --hidden-import=clr --hidden-import=webview.platforms.winforms HCalculator.py
+        pyinstaller --windowed --onefile --icon=icon.ico --hidden-import=clr --hidden-import=webview.platforms.winforms HCalculator.py
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: HCalculator-Windows-x64
+        name: HCalculator-Windows-v1.0.2-x64
         path: dist/*.exe
