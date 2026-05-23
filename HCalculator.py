@@ -9,7 +9,7 @@ html_content = r"""
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HCalculator - Hydraulic Calculator</title>
+<title>HCalculator - Hydraulic Calculator 1.0.3</title>
 <style>
   /* 1. RESET TŁA: Ustawiamy tło okna na jednolity, jasny kolor bez marginesów */
   html, body { 
@@ -764,7 +764,7 @@ class Api:
 if __name__ == '__main__':
     api = Api()
     webview.create_window(
-        title='HCalculator - Hydraulic Calculator', 
+        title='HCalculator - Hydraulic Calculator v1.0.3', 
         html=html_content, 
         js_api=api,
         width=580, 
