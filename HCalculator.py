@@ -27,7 +27,6 @@ class Api:
             print("Błąd odczytu historii:", e)
         return "[]"
 
-
 html_content = r"""
 <!DOCTYPE html>
 <html lang="pl">
@@ -477,12 +476,11 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function saveToHistory(typeKey, paramsText, resultsText) {
-      let currentLang = langSwitch.value;
-      let typeTranslated = langDict[currentLang][typeKey] || typeKey;
-      
+      // Zamiast tłumaczyć od razu, zapisujemy po prostu klucz (np. 'force_title')
+      // Starsze wpisy, które mają już tu przetłumaczoną wartość, też będą obsługiwane
       const newEntry = {
           date: new Date().toLocaleString(),
-          type: typeTranslated,
+          type: typeKey, // <--- TUTAJ JEST POPRAWKA
           params: paramsText,
           results: resultsText
       };
@@ -505,9 +503,12 @@ document.addEventListener('DOMContentLoaded', function() {
       
       let html = '';
       window.appHistory.forEach(item => {
+          // Dynamiczne tłumaczenie klucza (jeśli klucza nie ma w słowniku, używamy starej wartości)
+          let displayType = langDict[currentLang][item.type] || item.type;
+
           html += `<div style="background: #f8fafc; padding: 15px; border-radius: 6px; border-left: 4px solid #0055a5; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
               <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                  <strong style="color: #002244;">${item.type}</strong>
+                  <strong style="color: #002244;">${displayType}</strong>
                   <span style="font-size: 12px; color: #777;">${item.date}</span>
               </div>
               <div style="font-size: 13px; color: #555; margin-bottom: 8px;"><strong>${langDict[currentLang]['hist_input']}</strong><br>${item.params.replace(/\n/g, '<br>')}</div>
@@ -654,6 +655,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let pTxt = `${langDict[lang]['pressure']} ${p}\n${langDict[lang]['bore']} ${boreMm}\n${langDict[lang]['rod']} ${rodMm}`;
     let rTxt = `${langDict[lang]['push']} ${pushForce} kg\n${langDict[lang]['pull']} ${pullForce} kg`;
+    // Przekazujemy 'force_title' jako klucz
     createActionButtons('calc-results', 'copy-force', 'pdf-force', pTxt, rTxt, 'force_title', `HCalculator | ${langDict[lang]['force_title']}`);
   });
 
@@ -771,31 +773,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </body>
 </html>
 """
-
-class Api:
-    def __init__(self):
-        # Historia będzie zapisywana w bezpiecznym pliku w katalogu domowym użytkownika
-        self.history_file = os.path.join(os.path.expanduser('~'), '.hcalc_history.json')
-
-    def open_url(self, url):
-        import webbrowser
-        webbrowser.open(url)
-        
-    def save_history(self, history_json):
-        try:
-            with open(self.history_file, 'w', encoding='utf-8') as f:
-                f.write(history_json)
-        except Exception as e:
-            print("Błąd zapisu historii:", e)
-
-    def load_history(self):
-        try:
-            if os.path.exists(self.history_file):
-                with open(self.history_file, 'r', encoding='utf-8') as f:
-                    return f.read()
-        except Exception as e:
-            print("Błąd odczytu historii:", e)
-        return "[]"
 
 if __name__ == '__main__':
     api = Api()
