@@ -109,7 +109,7 @@ html_content = r"""
         <h3 style="margin-top:0; color:#d9534f;">Wyniki Obliczeń:</h3>
         <pre id="print-results" style="font-family: 'Segoe UI', sans-serif; font-size: 16px; font-weight: bold; color: #002244; white-space: pre-wrap; margin:0;"></pre>
     </div>
-    <p style="font-size: 12px; color: #999; text-align: center; margin-top: 40px;">Wygenerowano w programie HCalculator v1.0.2</p>
+    <p style="font-size: 12px; color: #999; text-align: center; margin-top: 40px;">Wygenerowano w programie HCalculator v1.0.3</p>
 </div>
 
 <div class="no-print br-app-container">
@@ -272,7 +272,7 @@ html_content = r"""
     </div>
     
     <div class="br-tab-content" id="tab-about">
-      <h3 data-i18n="about_title">HCalculator v1.0.2</h3>
+      <h3 data-i18n="about_title">HCalculator v1.0.3</h3>
       <p class="desc" data-i18n="about_desc">Profesjonalny Kalkulator Hydrauliczny</p>
       <div style="background-color: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; line-height: 1.6;">
           <p data-i18n="about_text" style="color: #444; font-size: 15px; margin-top: 0;">
@@ -328,7 +328,7 @@ const langDict = {
     "btn_tank": "Oblicz pojemność", "rec": "Rekomendowana pojemność:", "liters": "litrów",
     "history_title": "Historia Obliczeń", "history_desc": "Twoje 10 ostatnich wyników (Trwale zapisane).", "clear_history": "Wyczyść historię", "empty_history": "Brak zapisanej historii.",
     "btn_pdf": "📄 Generuj PDF (Zapisz)", "copy_btn": "📋 Kopiuj wynik",
-    "about_title": "HCalculator v1.0.2", "about_desc": "Profesjonalny Kalkulator Hydrauliczny",
+    "about_title": "HCalculator v1.0.3", "about_desc": "Profesjonalny Kalkulator Hydrauliczny",
     "about_text": "Ten program tworzę hobbystycznie. Jest w 100% darmowy, nie wyświetla reklam i szanuje Twoją prywatność działając offline. Jeśli HCalculator zaoszczędził Twój czas w warsztacie lub przy projekcie, możesz wesprzeć jego dalszy rozwój, stawiając mi symboliczną kawę. Dziękuję!",
     "btn_coffee": "Postaw mi kawę",
     "ph_180": "np. 180", "ph_80": "np. 80", "ph_40": "np. 40", "ph_500": "np. 500", "ph_14": "np. 14", "ph_custom": "Wpisz obroty...",
@@ -357,7 +357,7 @@ const langDict = {
     "btn_tank": "Calculate capacity", "rec": "Recommended capacity:", "liters": "liters",
     "history_title": "Calculation History", "history_desc": "Your last 10 results (Saved persistently).", "clear_history": "Clear History", "empty_history": "No history saved yet.",
     "btn_pdf": "📄 Generate PDF (Save)", "copy_btn": "📋 Copy result",
-    "about_title": "HCalculator v1.0.2", "about_desc": "Professional Hydraulic Calculator",
+    "about_title": "HCalculator v1.0.3", "about_desc": "Professional Hydraulic Calculator",
     "about_text": "This program is a passion project. It is 100% free, has no ads, and respects your privacy by working completely offline. If HCalculator has saved you time in the workshop or on a project, you can support its future development by buying me a virtual coffee. Thank you!",
     "btn_coffee": "Buy me a coffee",
     "ph_180": "e.g. 180", "ph_80": "e.g. 80", "ph_40": "e.g. 40", "ph_500": "e.g. 500", "ph_14": "e.g. 14", "ph_custom": "Enter RPM...",
@@ -386,7 +386,7 @@ const langDict = {
     "btn_tank": "Kapazität berechnen", "rec": "Empfohlene Kapazität:", "liters": "Liter",
     "history_title": "Berechnungsverlauf", "history_desc": "Ihre letzten 10 Ergebnisse (Lokal).", "clear_history": "Verlauf löschen", "empty_history": "Noch kein Verlauf gespeichert.",
     "btn_pdf": "📄 PDF erstellen", "copy_btn": "📋 Ergebnis kopieren",
-    "about_title": "HCalculator v1.0.2", "about_desc": "Professioneller Hydraulik-Rechner",
+    "about_title": "HCalculator v1.0.3", "about_desc": "Professioneller Hydraulik-Rechner",
     "about_text": "Dieses Programm ist ein Leidenschaftsprojekt. Es ist zu 100 % kostenlos, werbefrei und respektiert Ihre Privatsphäre, da es komplett offline funktioniert. Wenn HCalculator Ihnen in der Werkstatt oder bei einem Projekt Zeit gespart hat, können Sie die weitere Entwicklung unterstützen, indem Sie mir einen virtuellen Kaffee spendieren. Danke!",
     "btn_coffee": "Spendieren Sie mir einen Kaffee",
     "ph_180": "z.B. 180", "ph_80": "z.B. 80", "ph_40": "z.B. 40", "ph_500": "z.B. 500", "ph_14": "z.B. 14", "ph_custom": "U/min eingeben...",
@@ -415,7 +415,7 @@ const langDict = {
     "btn_tank": "Calculați capacitatea", "rec": "Capacitate recomandată:", "liters": "litri",
     "history_title": "Istoricul Calculelor", "history_desc": "Ultimele 10 rezultate (Local).", "clear_history": "Șterge Istoricul", "empty_history": "Nu există istoric salvat.",
     "btn_pdf": "📄 Generare PDF", "copy_btn": "📋 Copiați rezultatul",
-    "about_title": "HCalculator v1.0.2", "about_desc": "Calculator Hidraulic Profesional",
+    "about_title": "HCalculator v1.0.3", "about_desc": "Calculator Hidraulic Profesional",
     "about_text": "Acest program este un proiect de pasiune. Este 100% gratuit, nu are reclame și îți respectă confidențialitatea funcționând complet offline. Dacă HCalculator te-a ajutat să economisești timp în atelier sau la un proiect, poți susține dezvoltarea sa viitoare cumpărându-mi o cafea virtuală. Mulțumesc!",
     "btn_coffee": "Cumpără-mi o cafea",
     "ph_180": "ex. 180", "ph_80": "ex. 80", "ph_40": "ex. 40", "ph_500": "ex. 500", "ph_14": "ex. 14", "ph_custom": "Turație...",
