@@ -2,14 +2,39 @@ import webview
 import sys
 import os
 
-# Bezpieczne ładowanie HTML dzięki 'r'
+class Api:
+    def __init__(self):
+        # Historia będzie zapisywana w bezpiecznym pliku w katalogu domowym użytkownika
+        self.history_file = os.path.join(os.path.expanduser('~'), '.hcalc_history.json')
+
+    def open_url(self, url):
+        import webbrowser
+        webbrowser.open(url)
+        
+    def save_history(self, history_json):
+        try:
+            with open(self.history_file, 'w', encoding='utf-8') as f:
+                f.write(history_json)
+        except Exception as e:
+            print("Błąd zapisu historii:", e)
+
+    def load_history(self):
+        try:
+            if os.path.exists(self.history_file):
+                with open(self.history_file, 'r', encoding='utf-8') as f:
+                    return f.read()
+        except Exception as e:
+            print("Błąd odczytu historii:", e)
+        return "[]"
+
+
 html_content = r"""
 <!DOCTYPE html>
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HCalculator - Hydraulic Calculator 1.0.3</title>
+<title>HCalculator - Hydraulic Calculator v1.0.3</title>
 <style>
   /* 1. RESET TŁA: Ustawiamy tło okna na jednolity, jasny kolor bez marginesów */
   html, body { 
@@ -99,17 +124,17 @@ html_content = r"""
 <div id="toast">Wystąpił błąd!</div>
 
 <div id="print-area">
-    <h2 id="print-title">HCalculator - Raport Obliczeń</h2>
+    <h2 id="print-title" data-i18n="print_report">HCalculator - Raport Obliczeń</h2>
     <p id="print-date" style="color: #666; font-size: 14px;"></p>
     <div class="print-block">
-        <h3 style="margin-top:0; color:#0055a5;">Parametry Wejściowe:</h3>
+        <h3 style="margin-top:0; color:#0055a5;" data-i18n="print_params">Parametry Wejściowe:</h3>
         <pre id="print-params" style="font-family: 'Segoe UI', sans-serif; font-size: 14px; white-space: pre-wrap; margin:0;"></pre>
     </div>
     <div class="print-block" style="background: #e6f0fa; border-color: #0055a5;">
-        <h3 style="margin-top:0; color:#d9534f;">Wyniki Obliczeń:</h3>
+        <h3 style="margin-top:0; color:#d9534f;" data-i18n="print_results">Wyniki Obliczeń:</h3>
         <pre id="print-results" style="font-family: 'Segoe UI', sans-serif; font-size: 16px; font-weight: bold; color: #002244; white-space: pre-wrap; margin:0;"></pre>
     </div>
-    <p style="font-size: 12px; color: #999; text-align: center; margin-top: 40px;">Wygenerowano w programie HCalculator v1.0.3</p>
+    <p style="font-size: 12px; color: #999; text-align: center; margin-top: 40px;" data-i18n="print_footer">Wygenerowano w programie HCalculator v1.0.3</p>
 </div>
 
 <div class="no-print br-app-container">
@@ -326,14 +351,15 @@ const langDict = {
     "tank_title": "Pojemność Zbiornika", "tank_desc": "Zadbaj o właściwe chłodzenie oleju.",
     "sys_type": "Typ układu:", "mob": "Maszyny mobilne / rolnicze", "ind": "Maszyny stacjonarne / przemysłowe", "closed": "Układ zamknięty",
     "btn_tank": "Oblicz pojemność", "rec": "Rekomendowana pojemność:", "liters": "litrów",
-    "history_title": "Historia Obliczeń", "history_desc": "Twoje 10 ostatnich wyników (Trwale zapisane).", "clear_history": "Wyczyść historię", "empty_history": "Brak zapisanej historii.",
+    "history_title": "Historia Obliczeń", "history_desc": "Twoje 10 ostatnich wyników (Trwale zapisane).", "clear_history": "Wyczyść historię", "empty_history": "Brak zapisanej historii.", "hist_input": "Wejście:", "hist_result": "Wynik:",
     "btn_pdf": "📄 Generuj PDF (Zapisz)", "copy_btn": "📋 Kopiuj wynik",
     "about_title": "HCalculator v1.0.3", "about_desc": "Profesjonalny Kalkulator Hydrauliczny",
     "about_text": "Ten program tworzę hobbystycznie. Jest w 100% darmowy, nie wyświetla reklam i szanuje Twoją prywatność działając offline. Jeśli HCalculator zaoszczędził Twój czas w warsztacie lub przy projekcie, możesz wesprzeć jego dalszy rozwój, stawiając mi symboliczną kawę. Dziękuję!",
     "btn_coffee": "Postaw mi kawę",
     "ph_180": "np. 180", "ph_80": "np. 80", "ph_40": "np. 40", "ph_500": "np. 500", "ph_14": "np. 14", "ph_custom": "Wpisz obroty...",
     "err_empty": "Proszę poprawnie wypełnić wszystkie pola!",
-    "err_bore": "Średnica tłoka musi być większa niż tłoczyska!"
+    "err_bore": "Średnica tłoka musi być większa niż tłoczyska!",
+    "print_report": "Raport Obliczeń", "print_params": "Parametry Wejściowe:", "print_results": "Wyniki Obliczeń:", "print_footer": "Wygenerowano w programie HCalculator v1.0.3", "print_date": "Data:"
   },
   "en": {
     "about": "ℹ️ About", "tab_force": "Force", "tab_speed": "Speed", "tab_power": "Power", "tab_flow": "Flow Rate", "tab_tank": "Tank", "tab_history": "History",
@@ -355,14 +381,15 @@ const langDict = {
     "tank_title": "Tank Capacity", "tank_desc": "Ensure proper oil cooling.",
     "sys_type": "System type:", "mob": "Mobile / agricultural machinery", "ind": "Stationary / industrial machinery", "closed": "Closed loop system",
     "btn_tank": "Calculate capacity", "rec": "Recommended capacity:", "liters": "liters",
-    "history_title": "Calculation History", "history_desc": "Your last 10 results (Saved persistently).", "clear_history": "Clear History", "empty_history": "No history saved yet.",
+    "history_title": "Calculation History", "history_desc": "Your last 10 results (Saved persistently).", "clear_history": "Clear History", "empty_history": "No history saved yet.", "hist_input": "Input:", "hist_result": "Result:",
     "btn_pdf": "📄 Generate PDF (Save)", "copy_btn": "📋 Copy result",
     "about_title": "HCalculator v1.0.3", "about_desc": "Professional Hydraulic Calculator",
     "about_text": "This program is a passion project. It is 100% free, has no ads, and respects your privacy by working completely offline. If HCalculator has saved you time in the workshop or on a project, you can support its future development by buying me a virtual coffee. Thank you!",
     "btn_coffee": "Buy me a coffee",
     "ph_180": "e.g. 180", "ph_80": "e.g. 80", "ph_40": "e.g. 40", "ph_500": "e.g. 500", "ph_14": "e.g. 14", "ph_custom": "Enter RPM...",
     "err_empty": "Please fill in all fields correctly!",
-    "err_bore": "Bore diameter must be larger than rod diameter!"
+    "err_bore": "Bore diameter must be larger than rod diameter!",
+    "print_report": "Calculation Report", "print_params": "Input Parameters:", "print_results": "Calculation Results:", "print_footer": "Generated in HCalculator v1.0.3", "print_date": "Date:"
   },
   "de": {
     "about": "ℹ️ Über", "tab_force": "Kraft", "tab_speed": "Zykluszeit", "tab_power": "Leistung", "tab_flow": "Fördermenge", "tab_tank": "Tank", "tab_history": "Verlauf",
@@ -384,14 +411,15 @@ const langDict = {
     "tank_title": "Tankkapazität", "tank_desc": "Richtige Ölkühlung sicherstellen.",
     "sys_type": "Systemtyp:", "mob": "Mobile / Landmaschinen", "ind": "Stationäre / Industriemaschinen", "closed": "Geschlossenes System",
     "btn_tank": "Kapazität berechnen", "rec": "Empfohlene Kapazität:", "liters": "Liter",
-    "history_title": "Berechnungsverlauf", "history_desc": "Ihre letzten 10 Ergebnisse (Lokal).", "clear_history": "Verlauf löschen", "empty_history": "Noch kein Verlauf gespeichert.",
+    "history_title": "Berechnungsverlauf", "history_desc": "Ihre letzten 10 Ergebnisse (Lokal).", "clear_history": "Verlauf löschen", "empty_history": "Noch kein Verlauf gespeichert.", "hist_input": "Eingabe:", "hist_result": "Ergebnis:",
     "btn_pdf": "📄 PDF erstellen", "copy_btn": "📋 Ergebnis kopieren",
     "about_title": "HCalculator v1.0.3", "about_desc": "Professioneller Hydraulik-Rechner",
     "about_text": "Dieses Programm ist ein Leidenschaftsprojekt. Es ist zu 100 % kostenlos, werbefrei und respektiert Ihre Privatsphäre, da es komplett offline funktioniert. Wenn HCalculator Ihnen in der Werkstatt oder bei einem Projekt Zeit gespart hat, können Sie die weitere Entwicklung unterstützen, indem Sie mir einen virtuellen Kaffee spendieren. Danke!",
     "btn_coffee": "Spendieren Sie mir einen Kaffee",
     "ph_180": "z.B. 180", "ph_80": "z.B. 80", "ph_40": "z.B. 40", "ph_500": "z.B. 500", "ph_14": "z.B. 14", "ph_custom": "U/min eingeben...",
     "err_empty": "Bitte füllen Sie alle Felder korrekt aus!",
-    "err_bore": "Kolbendurchmesser muss größer als Stangendurchmesser sein!"
+    "err_bore": "Kolbendurchmesser muss größer als Stangendurchmesser sein!",
+    "print_report": "Berechnungsbericht", "print_params": "Eingabeparameter:", "print_results": "Berechnungsergebnisse:", "print_footer": "Erstellt in HCalculator v1.0.3", "print_date": "Datum:"
   },
   "ro": {
     "about": "ℹ️ Despre", "tab_force": "Forță", "tab_speed": "Viteză", "tab_power": "Putere", "tab_flow": "Debit", "tab_tank": "Rezervor", "tab_history": "Istoric",
@@ -413,14 +441,15 @@ const langDict = {
     "tank_title": "Capacitatea Rezervorului", "tank_desc": "Asigurați răcirea corectă a uleiului.",
     "sys_type": "Tip sistem:", "mob": "Utilaje mobile / agricole", "ind": "Utilaje staționare / industriale", "closed": "Sistem închis",
     "btn_tank": "Calculați capacitatea", "rec": "Capacitate recomandată:", "liters": "litri",
-    "history_title": "Istoricul Calculelor", "history_desc": "Ultimele 10 rezultate (Local).", "clear_history": "Șterge Istoricul", "empty_history": "Nu există istoric salvat.",
+    "history_title": "Istoricul Calculelor", "history_desc": "Ultimele 10 rezultate (Local).", "clear_history": "Șterge Istoricul", "empty_history": "Nu există istoric salvat.", "hist_input": "Intrare:", "hist_result": "Rezultat:",
     "btn_pdf": "📄 Generare PDF", "copy_btn": "📋 Copiați rezultatul",
     "about_title": "HCalculator v1.0.3", "about_desc": "Calculator Hidraulic Profesional",
     "about_text": "Acest program este un proiect de pasiune. Este 100% gratuit, nu are reclame și îți respectă confidențialitatea funcționând complet offline. Dacă HCalculator te-a ajutat să economisești timp în atelier sau la un proiect, poți susține dezvoltarea sa viitoare cumpărându-mi o cafea virtuală. Mulțumesc!",
     "btn_coffee": "Cumpără-mi o cafea",
     "ph_180": "ex. 180", "ph_80": "ex. 80", "ph_40": "ex. 40", "ph_500": "ex. 500", "ph_14": "ex. 14", "ph_custom": "Turație...",
     "err_empty": "Vă rugăm să completați corect toate câmpurile!",
-    "err_bore": "Diametrul pistonului trebuie să fie mai mare decât tija!"
+    "err_bore": "Diametrul pistonului trebuie să fie mai mare decât tija!",
+    "print_report": "Raport de Calcul", "print_params": "Parametri de Intrare:", "print_results": "Rezultate Calcul:", "print_footer": "Generat în HCalculator v1.0.3", "print_date": "Data:"
   }
 };
 
@@ -428,10 +457,11 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById("currentYear").textContent = new Date().getFullYear();
   var langSwitch = document.getElementById('lang-switch');
   
-  // Funkcja generująca PDF
+  // Funkcja generująca PDF w aktualnym języku
   window.generatePDF = function(title, params, results) {
+      let lang = langSwitch.value;
       document.getElementById('print-title').innerText = title;
-      document.getElementById('print-date').innerText = "Data: " + new Date().toLocaleString();
+      document.getElementById('print-date').innerText = langDict[lang]['print_date'] + " " + new Date().toLocaleString();
       document.getElementById('print-params').innerText = params;
       document.getElementById('print-results').innerText = results;
       window.print();
@@ -480,8 +510,8 @@ document.addEventListener('DOMContentLoaded', function() {
                   <strong style="color: #002244;">${item.type}</strong>
                   <span style="font-size: 12px; color: #777;">${item.date}</span>
               </div>
-              <div style="font-size: 13px; color: #555; margin-bottom: 8px;"><strong>Wejście:</strong><br>${item.params.replace(/\n/g, '<br>')}</div>
-              <div style="font-size: 14px; color: #d9534f; font-weight: bold;"><strong>Wynik:</strong><br>${item.results.replace(/\n/g, '<br>')}</div>
+              <div style="font-size: 13px; color: #555; margin-bottom: 8px;"><strong>${langDict[currentLang]['hist_input']}</strong><br>${item.params.replace(/\n/g, '<br>')}</div>
+              <div style="font-size: 14px; color: #d9534f; font-weight: bold;"><strong>${langDict[currentLang]['hist_result']}</strong><br>${item.results.replace(/\n/g, '<br>')}</div>
           </div>`;
       });
       list.innerHTML = html;
@@ -596,15 +626,16 @@ document.addEventListener('DOMContentLoaded', function() {
       copyBtn.style.display = 'block';
       pdfBtn.style.display = 'block';
       
-      copyBtn.onclick = () => copyToClipboard(`${printTitle}\n--- Parametry ---\n${paramsText}\n--- Wynik ---\n${resultsText}`, copyId);
+      copyBtn.onclick = () => copyToClipboard(`${printTitle}\n--- ${langDict[lang]['print_params']} ---\n${paramsText}\n--- ${langDict[lang]['print_results']} ---\n${resultsText}`, copyId);
       pdfBtn.onclick = () => generatePDF(printTitle, paramsText, resultsText);
       
       saveToHistory(moduleKey, paramsText, resultsText);
   }
 
-  // Obliczenia
+  // Obliczenia z dynamicznym tlumaczeniem w locie
   document.getElementById('run-calc-btn').addEventListener('click', function(e) {
     e.preventDefault(); 
+    let lang = langSwitch.value;
     var p = parseFloat(document.getElementById('calc-pressure').value);
     var boreMm = parseFloat(document.getElementById('calc-bore').value);
     var rodMm = parseFloat(document.getElementById('calc-rod').value);
@@ -621,13 +652,14 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('res-pull').innerText = pullForce.toLocaleString('pl-PL');
     document.getElementById('calc-results').style.display = 'block';
 
-    let pTxt = `Ciśnienie: ${p} bar\nTłok/Tłoczysko: ${boreMm} / ${rodMm} mm`;
-    let rTxt = `Siła pchania: ${pushForce} kg\nSiła ciągnięcia: ${pullForce} kg`;
-    createActionButtons('calc-results', 'copy-force', 'pdf-force', pTxt, rTxt, 'force_title', 'HCalculator | Siła Siłownika');
+    let pTxt = `${langDict[lang]['pressure']} ${p}\n${langDict[lang]['bore']} ${boreMm}\n${langDict[lang]['rod']} ${rodMm}`;
+    let rTxt = `${langDict[lang]['push']} ${pushForce} kg\n${langDict[lang]['pull']} ${pullForce} kg`;
+    createActionButtons('calc-results', 'copy-force', 'pdf-force', pTxt, rTxt, 'force_title', `HCalculator | ${langDict[lang]['force_title']}`);
   });
 
   document.getElementById('calc-spd-btn').addEventListener('click', function(e) {
     e.preventDefault();
+    let lang = langSwitch.value;
     var Q = parseFloat(document.getElementById('spd-flow').value);
     var D = parseFloat(document.getElementById('spd-bore').value);
     var d = parseFloat(document.getElementById('spd-rod').value);
@@ -651,13 +683,14 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('res-t-pull').innerText = tPull;
     document.getElementById('spd-results').style.display = 'block';
 
-    let pTxt = `Przepływ: ${Q} L/min\nTłok/Tłoczysko: ${D} / ${d} mm\nSkok: ${s} mm`;
-    let rTxt = `Wysuw: ${tPush} s (Prędkość: ${vPush} cm/s)\nPowrót: ${tPull} s (Prędkość: ${vPull} cm/s)`;
-    createActionButtons('spd-results', 'copy-speed', 'pdf-speed', pTxt, rTxt, 'speed_title', 'HCalculator | Prędkość i Czas Cyklu');
+    let pTxt = `${langDict[lang]['flow']} ${Q}\n${langDict[lang]['bore']} ${D}\n${langDict[lang]['rod']} ${d}\n${langDict[lang]['stroke']} ${s}`;
+    let rTxt = `${langDict[lang]['t_push']} ${tPush} s (${langDict[lang]['v_push']} ${vPush} cm/s)\n${langDict[lang]['t_pull']} ${tPull} s (${langDict[lang]['v_pull']} ${vPull} cm/s)`;
+    createActionButtons('spd-results', 'copy-speed', 'pdf-speed', pTxt, rTxt, 'speed_title', `HCalculator | ${langDict[lang]['speed_title']}`);
   });
 
   document.getElementById('calc-pmp-btn').addEventListener('click', function(e) {
     e.preventDefault();
+    let lang = langSwitch.value;
     var Q = parseFloat(document.getElementById('pmp-flow').value);
     var p = parseFloat(document.getElementById('pmp-pressure').value);
     var eff = parseFloat(document.getElementById('pmp-eff').value);
@@ -671,9 +704,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('res-km').innerText = km;
     document.getElementById('pmp-results').style.display = 'block';
 
-    let pTxt = `Wydajność pompy: ${Q} L/min\nCiśnienie: ${p} bar`;
-    let rTxt = `Wymagana moc: ${kw} kW (${km} KM/HP)`;
-    createActionButtons('pmp-results', 'copy-power', 'pdf-power', pTxt, rTxt, 'power_title', 'HCalculator | Moc Napędu Pompy');
+    let pTxt = `${langDict[lang]['p_flow']} ${Q}\n${langDict[lang]['p_max']} ${p}`;
+    let rTxt = `${langDict[lang]['kw']} ${kw} kW (${km} ${langDict[lang]['hp_unit']})`;
+    createActionButtons('pmp-results', 'copy-power', 'pdf-power', pTxt, rTxt, 'power_title', `HCalculator | ${langDict[lang]['power_title']}`);
   });
 
   var rSel = document.getElementById('flow-rpm-select');
@@ -682,6 +715,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   document.getElementById('calc-flow-btn').addEventListener('click', function(e) {
     e.preventDefault();
+    let lang = langSwitch.value;
     var V = parseFloat(document.getElementById('flow-disp').value);
     var eff = parseFloat(document.getElementById('flow-eff').value);
     var rpm = (rSel.value === 'custom') ? parseFloat(rCus.value) : parseFloat(rSel.value);
@@ -695,13 +729,14 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('res-flow-actual').innerText = actual;
     document.getElementById('flow-results').style.display = 'block';
 
-    let pTxt = `Chłonność: ${V} cm³/obr\nObroty napędu: ${rpm} obr/min`;
-    let rTxt = `Rzeczywista wydajność: ${actual} L/min\n(Teoretyczna: ${theo} L/min)`;
-    createActionButtons('flow-results', 'copy-flow', 'pdf-flow', pTxt, rTxt, 'flow_title', 'HCalculator | Wydajność Pompy');
+    let pTxt = `${langDict[lang]['disp']} ${V}\n${langDict[lang]['rpm']} ${rpm}`;
+    let rTxt = `${langDict[lang]['actual']} ${actual} L/min\n(${langDict[lang]['theo']} ${theo} L/min)`;
+    createActionButtons('flow-results', 'copy-flow', 'pdf-flow', pTxt, rTxt, 'flow_title', `HCalculator | ${langDict[lang]['flow_title']}`);
   });
 
   document.getElementById('calc-tank-btn').addEventListener('click', function(e) {
     e.preventDefault();
+    let lang = langSwitch.value;
     var Q = parseFloat(document.getElementById('tank-flow').value);
     var type = document.getElementById('tank-type').value;
     
@@ -714,9 +749,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('res-tank-range').innerText = resultRange;
     document.getElementById('tank-results').style.display = 'block';
 
-    let pTxt = `Wydajność pompy: ${Q} L/min\nTyp układu: ${type}`;
-    let rTxt = `Rekomendowana pojemność: ${resultRange} litrów`;
-    createActionButtons('tank-results', 'copy-tank', 'pdf-tank', pTxt, rTxt, 'tank_title', 'HCalculator | Pojemność Zbiornika');
+    let typeText = document.getElementById('tank-type').options[document.getElementById('tank-type').selectedIndex].text;
+    let pTxt = `${langDict[lang]['p_flow']} ${Q}\n${langDict[lang]['sys_type']} ${typeText}`;
+    let rTxt = `${langDict[lang]['rec']} ${resultRange} ${langDict[lang]['liters']}`;
+    createActionButtons('tank-results', 'copy-tank', 'pdf-tank', pTxt, rTxt, 'tank_title', `HCalculator | ${langDict[lang]['tank_title']}`);
   });
 
   // --- INICJALIZACJA I POBRANIE TRWAŁEJ HISTORII Z PYTHONA ---
