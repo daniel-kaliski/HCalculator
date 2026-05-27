@@ -4,7 +4,6 @@ import os
 
 class Api:
     def __init__(self):
-        # Historia będzie zapisywana w bezpiecznym pliku w katalogu domowym użytkownika
         self.history_file = os.path.join(os.path.expanduser('~'), '.hcalc_history.json')
 
     def open_url(self, url):
@@ -33,7 +32,7 @@ html_content = r"""
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HCalculator - Hydraulic Calculator v1.0.4</title>
+<title>HCalculator - Hydraulic Calculator v1.0.5</title>
 <style>
   html, body { 
       margin: 0; 
@@ -70,14 +69,14 @@ html_content = r"""
   .br-tab-content p.desc { font-size: 14px; color: #555; text-align: center; margin-bottom: 25px; }
   
   .br-form-group { margin-bottom: 15px; }
-  .br-form-group label { display: block; font-weight: bold; margin-bottom: 6px; font-size: 12px; color: #333; }
+  .br-form-group label { display: block; font-weight: bold; margin-bottom: 6px; font-size: 14px; color: #333; }
   .br-form-group input, .br-form-group select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; font-family: inherit; }
   .br-form-group input:focus, .br-form-group select:focus { border-color: #0055a5; outline: none; box-shadow: 0 0 0 2px rgba(0, 85, 165, 0.2); }
   
-  .br-calc-btn { width: 100%; background-color: #0055a5; color: white; padding: 14px; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 15px; }
+  .br-calc-btn { width: 70%; display: flex; justify-content: center; margin: 0 auto 20px auto; background-color: #0055a5; color: white; padding: 14px; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 15px; }
   .br-calc-btn:hover { background-color: #004080; }
   
-  .br-coffee-btn { display: flex; justify-content: center; align-items: center; width: 100%; box-sizing: border-box; background-color: #ffaa00; color: #003366; padding: 14px; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 25px; text-decoration: none; box-shadow: 0 4px 10px rgba(255, 170, 0, 0.3); }
+  .br-coffee-btn { display: flex; justify-content: center; align-items: center; width: 70%; margin: 0 auto 20px auto; box-sizing: border-box; background-color: #ffaa00; color: #003366; padding: 14px; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 25px; text-decoration: none; box-shadow: 0 4px 10px rgba(255, 170, 0, 0.3); }
   .br-coffee-btn:hover { background-color: #ffb732; transform: translateY(-2px); }
   .br-coffee-btn svg { margin-right: 10px; width: 20px; height: 20px; }
   
@@ -124,7 +123,7 @@ html_content = r"""
         <h3 style="margin-top:0; color:#d9534f;" data-i18n="print_results">Wyniki Obliczeń:</h3>
         <pre id="print-results" style="font-family: 'Segoe UI', sans-serif; font-size: 16px; font-weight: bold; color: #002244; white-space: pre-wrap; margin:0;"></pre>
     </div>
-    <p style="font-size: 12px; color: #999; text-align: center; margin-top: 40px;" data-i18n="print_footer">Wygenerowano w programie HCalculator v1.0.4</p>
+    <p style="font-size: 12px; color: #999; text-align: center; margin-top: 40px;" data-i18n="print_footer">Wygenerowano w programie HCalculator v1.0.5</p>
 </div>
 
 <!-- Widok główny aplikacji -->
@@ -136,7 +135,6 @@ html_content = r"""
           <option value="pl">🇵🇱 Polski</option>
           <option value="en">🇬🇧 English</option>
           <option value="de">🇩🇪 Deutsch</option>
-          <option value="ro">🇷🇴 Română</option>
         </select>
       </div>
     </div>
@@ -146,8 +144,8 @@ html_content = r"""
       <button class="br-tab-btn" data-tab="tab-predkosc" data-i18n="tab_speed">Prędkość</button>
       <button class="br-tab-btn" data-tab="tab-moc" data-i18n="tab_power">Moc</button>
       <button class="br-tab-btn" data-tab="tab-wydajnosc" data-i18n="tab_flow">Wydajn.</button>
+      <button class="br-tab-btn" data-tab="tab-silnik" data-i18n="tab_motor">Silnik</button>
       <button class="br-tab-btn" data-tab="tab-zbiornik" data-i18n="tab_tank">Zbiornik</button>
-      <!-- Nowe moduły w zakładkach -->
       <button class="br-tab-btn" data-tab="tab-waz-srednica" data-i18n="tab_hose_diam">Wąż (Ø)</button>
       <button class="br-tab-btn" data-tab="tab-waz-spadek" data-i18n="tab_hose_drop">Wąż (Δp)</button>
       <button class="br-tab-btn" data-tab="tab-historia" data-i18n="tab_history">Historia</button>
@@ -264,6 +262,29 @@ html_content = r"""
       </div>
     </div>
 
+    <!-- NOWY MODUŁ: Silnik Hydrauliczny -->
+    <div class="br-tab-content" id="tab-silnik">
+      <h3 data-i18n="motor_title">Parametry Silnika</h3>
+      <p class="desc" data-i18n="motor_desc">Oblicz moment obrotowy i prędkość.</p>
+      <div class="br-form-group">
+        <label data-i18n="flow">Przepływ oleju pompy (L/min):</label>
+        <input type="number" id="mot-flow" data-i18n-ph="ph_40" placeholder="np. 40" min="0">
+      </div>
+      <div class="br-form-group">
+        <label data-i18n="disp">Chłonność (cm³/obr):</label>
+        <input type="number" id="mot-disp" data-i18n-ph="ph_14" placeholder="np. 14" min="0">
+      </div>
+      <div class="br-form-group">
+        <label data-i18n="pressure">Ciśnienie robocze (bar):</label>
+        <input type="number" id="mot-pressure" data-i18n-ph="ph_180" placeholder="np. 180" min="0">
+      </div>
+      <button class="br-calc-btn" id="calc-mot-btn" data-i18n="btn_motor">Oblicz silnik</button>
+      <div class="br-results" id="mot-results">
+        <p><strong data-i18n="speed_rpm">Prędkość obrotowa:</strong> <span id="res-mot-speed" style="color: #d9534f; font-weight: bold;">0</span> obr/min</p>
+        <p><strong data-i18n="torque">Moment obrotowy:</strong> <span id="res-mot-torque" style="color: #0055a5; font-weight: bold;">0</span> Nm</p>
+      </div>
+    </div>
+
     <!-- Pojemność Zbiornika -->
     <div class="br-tab-content" id="tab-zbiornik">
       <h3 data-i18n="tank_title">Pojemność Zbiornika</h3>
@@ -356,9 +377,9 @@ html_content = r"""
     
     <!-- ZAKŁADKA O PROGRAMIE -->
     <div class="br-tab-content" id="tab-about">
-      <h3 data-i18n="about_title">HCalculator v1.0.4</h3>
+      <h3 data-i18n="about_title">HCalculator v1.0.5</h3>
       <p class="desc" data-i18n="about_desc">Profesjonalny Kalkulator Hydrauliczny</p>
-      <p class="desc"><a href="https://hcalculator.com.pl" target="_blank">https://hcalculator.com.pl</a></p>
+      <p class="desc">🌐 <a href="https://hcalculator.com.pl" target="_blank"><strong>HCalculator.com.pl</strong></a></p>
       <div style="background-color: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; line-height: 1.6;">
           <p data-i18n="about_text" style="color: #444; font-size: 15px; margin-top: 0;">
               Ten program tworzę hobbystycznie. Jest w 100% darmowy, nie wyświetla reklam i szanuje Twoją prywatność działając offline. Jeśli HCalculator zaoszczędził Twój czas w warsztacie lub przy projekcie, możesz wesprzeć jego dalszy rozwój, stawiając mi symboliczną kawę. Dziękuję!
@@ -393,7 +414,7 @@ document.getElementById('coffee-link').addEventListener('click', function(e) {
 const langDict = {
   "pl": {
     "about": "ℹ️ O Programie", "tab_force": "Siła", "tab_speed": "Prędkość", "tab_power": "Moc", "tab_flow": "Wydajność", "tab_tank": "Zbiornik", "tab_history": "Historia",
-    "tab_hose_diam": "Wąż (Ø)", "tab_hose_drop": "Wąż (Δp)",
+    "tab_hose_diam": "Wąż (Ø)", "tab_hose_drop": "Wąż (Δp)", "tab_motor": "Silnik",
     "force_title": "Siła Siłownika", "force_desc": "Oblicz siłę pchania i ciągnięcia.",
     "pressure": "Ciśnienie robocze (bar):", "bore": "Wewn. średnica tłoka (mm):", "rod": "Średnica tłoczyska (mm):",
     "btn_force": "Oblicz siłę", "push": "Siła pchania:", "pull": "Siła ciągnięcia:",
@@ -409,6 +430,8 @@ const langDict = {
     "rpm1": "1450 obr/min (Silnik elektr.)", "rpm2": "3000 obr/min (Silnik spalinowy)", "rpm3": "540 obr/min (Wałek WOM)", "rpm_custom": "Inna wartość (wpisz poniżej)",
     "cond": "Stan pompy:", "new_p": "Nowa pompa (~95%)", "old_p": "Używana pompa (~85%)", "btn_flow": "Oblicz wydajność",
     "actual": "Rzeczywista wydajność:", "theo": "Teoretyczna:",
+    "motor_title": "Parametry Silnika", "motor_desc": "Oblicz moment obrotowy i prędkość.",
+    "speed_rpm": "Prędkość obrotowa:", "torque": "Moment obrotowy:", "btn_motor": "Oblicz silnik",
     "tank_title": "Pojemność Zbiornika", "tank_desc": "Zadbaj o właściwe chłodzenie oleju.",
     "sys_type": "Typ układu:", "mob": "Maszyny mobilne / rolnicze", "ind": "Maszyny stacjonarne / przemysłowe", "closed": "Układ zamknięty",
     "btn_tank": "Oblicz pojemność", "rec": "Rekomendowana pojemność:", "liters": "litrów",
@@ -421,17 +444,17 @@ const langDict = {
     "laminar": "Laminarny", "turbulent": "Turbulentny",
     "history_title": "Historia Obliczeń", "history_desc": "Twoje 10 ostatnich wyników (Trwale zapisane).", "clear_history": "Wyczyść historię", "empty_history": "Brak zapisanej historii.", "hist_input": "Wejście:", "hist_result": "Wynik:",
     "btn_pdf": "📄 Generuj PDF (Zapisz)", "copy_btn": "📋 Kopiuj wynik",
-    "about_title": "HCalculator v1.0.4", "about_desc": "Profesjonalny Kalkulator Hydrauliczny",
+    "about_title": "HCalculator v1.0.5", "about_desc": "Profesjonalny Kalkulator Hydrauliczny",
     "about_text": "Ten program tworzę hobbystycznie. Jest w 100% darmowy, nie wyświetla reklam i szanuje Twoją prywatność działając offline. Jeśli HCalculator zaoszczędził Twój czas w warsztacie lub przy projekcie, możesz wesprzeć jego dalszy rozwój, stawiając mi symboliczną kawę. Dziękuję!",
     "btn_coffee": "Postaw mi kawę",
     "ph_180": "np. 180", "ph_80": "np. 80", "ph_40": "np. 40", "ph_500": "np. 500", "ph_14": "np. 14", "ph_custom": "Wpisz...",
     "err_empty": "Proszę poprawnie wypełnić wszystkie pola!",
     "err_bore": "Średnica tłoka musi być większa niż tłoczyska!",
-    "print_report": "Raport Obliczeń", "print_params": "Parametry Wejściowe:", "print_results": "Wyniki Obliczeń:", "print_footer": "Wygenerowano w programie HCalculator v1.0.4", "print_date": "Data:"
+    "print_report": "Raport Obliczeń", "print_params": "Parametry Wejściowe:", "print_results": "Wyniki Obliczeń:", "print_footer": "Wygenerowano w programie HCalculator v1.0.5", "print_date": "Data:"
   },
   "en": {
     "about": "ℹ️ About", "tab_force": "Force", "tab_speed": "Speed", "tab_power": "Power", "tab_flow": "Flow Rate", "tab_tank": "Tank", "tab_history": "History",
-    "tab_hose_diam": "Hose (Ø)", "tab_hose_drop": "Hose (Δp)",
+    "tab_hose_diam": "Hose (Ø)", "tab_hose_drop": "Hose (Δp)", "tab_motor": "Motor",
     "force_title": "Cylinder Force", "force_desc": "Calculate push and pull force.",
     "pressure": "Operating pressure (bar):", "bore": "Inner bore diameter (mm):", "rod": "Rod diameter (mm):",
     "btn_force": "Calculate force", "push": "Push force:", "pull": "Pull force:",
@@ -447,6 +470,8 @@ const langDict = {
     "rpm1": "1450 rpm (Electric motor)", "rpm2": "3000 rpm (Combustion engine)", "rpm3": "540 rpm (PTO shaft)", "rpm_custom": "Other value (enter below)",
     "cond": "Pump condition:", "new_p": "New pump (~95%)", "old_p": "Used pump (~85%)", "btn_flow": "Calculate flow",
     "actual": "Actual flow rate:", "theo": "Theoretical:",
+    "motor_title": "Motor Parameters", "motor_desc": "Calculate torque and rotational speed.",
+    "speed_rpm": "Rotational speed:", "torque": "Torque:", "btn_motor": "Calculate motor",
     "tank_title": "Tank Capacity", "tank_desc": "Ensure proper oil cooling.",
     "sys_type": "System type:", "mob": "Mobile / agricultural machinery", "ind": "Stationary / industrial machinery", "closed": "Closed loop system",
     "btn_tank": "Calculate capacity", "rec": "Recommended capacity:", "liters": "liters",
@@ -459,17 +484,17 @@ const langDict = {
     "laminar": "Laminar", "turbulent": "Turbulent",
     "history_title": "Calculation History", "history_desc": "Your last 10 results (Saved persistently).", "clear_history": "Clear History", "empty_history": "No history saved yet.", "hist_input": "Input:", "hist_result": "Result:",
     "btn_pdf": "📄 Generate PDF (Save)", "copy_btn": "📋 Copy result",
-    "about_title": "HCalculator v1.0.4", "about_desc": "Professional Hydraulic Calculator",
+    "about_title": "HCalculator v1.0.5", "about_desc": "Professional Hydraulic Calculator",
     "about_text": "This program is a passion project. It is 100% free, has no ads, and respects your privacy by working completely offline. If HCalculator has saved you time in the workshop or on a project, you can support its future development by buying me a virtual coffee. Thank you!",
     "btn_coffee": "Buy me a coffee",
     "ph_180": "e.g. 180", "ph_80": "e.g. 80", "ph_40": "e.g. 40", "ph_500": "e.g. 500", "ph_14": "e.g. 14", "ph_custom": "Enter...",
     "err_empty": "Please fill in all fields correctly!",
     "err_bore": "Bore diameter must be larger than rod diameter!",
-    "print_report": "Calculation Report", "print_params": "Input Parameters:", "print_results": "Calculation Results:", "print_footer": "Generated in HCalculator v1.0.4", "print_date": "Date:"
+    "print_report": "Calculation Report", "print_params": "Input Parameters:", "print_results": "Calculation Results:", "print_footer": "Generated in HCalculator v1.0.5", "print_date": "Date:"
   },
   "de": {
     "about": "ℹ️ Über", "tab_force": "Kraft", "tab_speed": "Zykluszeit", "tab_power": "Leistung", "tab_flow": "Fördermenge", "tab_tank": "Tank", "tab_history": "Verlauf",
-    "tab_hose_diam": "Schlauch (Ø)", "tab_hose_drop": "Schlauch (Δp)",
+    "tab_hose_diam": "Schlauch (Ø)", "tab_hose_drop": "Schlauch (Δp)", "tab_motor": "Motor",
     "force_title": "Zylinderkraft", "force_desc": "Druck- und Zugkraft berechnen.",
     "pressure": "Betriebsdruck (bar):", "bore": "Kolbeninnendurchmesser (mm):", "rod": "Stangendurchmesser (mm):",
     "btn_force": "Kraft berechnen", "push": "Druckkraft:", "pull": "Zugkraft:",
@@ -485,6 +510,8 @@ const langDict = {
     "rpm1": "1450 U/min (Elektromotor)", "rpm2": "3000 U/min (Verbrennungsmotor)", "rpm3": "540 U/min (Zapfwelle)", "rpm_custom": "Anderer Wert (unten)",
     "cond": "Pumpenzustand:", "new_p": "Neue Pumpe (~95%)", "old_p": "Gebrauchte Pumpe (~85%)", "btn_flow": "Menge berechnen",
     "actual": "Tatsächliche Fördermenge:", "theo": "Theoretisch:",
+    "motor_title": "Motorparameter", "motor_desc": "Drehmoment und Drehzahl berechnen.",
+    "speed_rpm": "Drehzahl:", "torque": "Drehmoment:", "btn_motor": "Motor berechnen",
     "tank_title": "Tankkapazität", "tank_desc": "Richtige Ölkühlung sicherstellen.",
     "sys_type": "Systemtyp:", "mob": "Mobile / Landmaschinen", "ind": "Stationäre / Industriemaschinen", "closed": "Geschlossenes System",
     "btn_tank": "Kapazität berechnen", "rec": "Empfohlene Kapazität:", "liters": "Liter",
@@ -497,51 +524,13 @@ const langDict = {
     "laminar": "Laminar", "turbulent": "Turbulent",
     "history_title": "Berechnungsverlauf", "history_desc": "Ihre letzten 10 Ergebnisse (Lokal).", "clear_history": "Verlauf löschen", "empty_history": "Noch kein Verlauf gespeichert.", "hist_input": "Eingabe:", "hist_result": "Ergebnis:",
     "btn_pdf": "📄 PDF erstellen", "copy_btn": "📋 Ergebnis kopieren",
-    "about_title": "HCalculator v1.0.4", "about_desc": "Professioneller Hydraulik-Rechner",
+    "about_title": "HCalculator v1.0.5", "about_desc": "Professioneller Hydraulik-Rechner",
     "about_text": "Dieses Programm ist ein Leidenschaftsprojekt. Es ist zu 100 % kostenlos, werbefrei und respektiert Ihre Privatsphäre, da es komplett offline funktioniert. Wenn HCalculator Ihnen in der Werkstatt oder bei einem Projekt Zeit gespart hat, können Sie die weitere Entwicklung unterstützen, indem Sie mir einen virtuellen Kaffee spendieren. Danke!",
     "btn_coffee": "Spendieren Sie mir einen Kaffee",
     "ph_180": "z.B. 180", "ph_80": "z.B. 80", "ph_40": "z.B. 40", "ph_500": "z.B. 500", "ph_14": "z.B. 14", "ph_custom": "Wert...",
     "err_empty": "Bitte füllen Sie alle Felder korrekt aus!",
     "err_bore": "Kolbendurchmesser muss größer als Stangendurchmesser sein!",
-    "print_report": "Berechnungsbericht", "print_params": "Eingabeparameter:", "print_results": "Berechnungsergebnisse:", "print_footer": "Erstellt in HCalculator v1.0.4", "print_date": "Datum:"
-  },
-  "ro": {
-    "about": "ℹ️ Despre", "tab_force": "Forță", "tab_speed": "Viteză", "tab_power": "Putere", "tab_flow": "Debit", "tab_tank": "Rezervor", "tab_history": "Istoric",
-    "tab_hose_diam": "Furtun (Ø)", "tab_hose_drop": "Furtun (Δp)",
-    "force_title": "Forța Cilindrului", "force_desc": "Calculați forța de împingere și tragere.",
-    "pressure": "Presiune de lucru (bar):", "bore": "Diametru interior piston (mm):", "rod": "Diametru tijă (mm):",
-    "btn_force": "Calculați forța", "push": "Forță de împingere:", "pull": "Forță de tragere:",
-    "speed_title": "Viteza și Timpul de Ciclu", "speed_desc": "Calculați timpul de extindere și retragere.",
-    "flow": "Debit pompă (L/min):", "stroke": "Cursă cilindru (mm):", "btn_speed": "Calculați viteza",
-    "v_push": "Viteză de extindere:", "t_push": "Timp de extindere:", "v_pull": "Viteză de retragere:", "t_pull": "Timp de retragere:",
-    "power_title": "Putere Antrenare Pompă", "power_desc": "Alegeți motorul electric/termic.",
-    "p_flow": "Debit pompă (L/min):", "p_max": "Presiune maximă (bar):", "p_type": "Tip pompă:",
-    "gear": "Pompă roți dințate (~85%)", "piston": "Pompă cu pistoane (~90%)", "btn_power": "Calculați puterea",
-    "kw": "Putere necesară motor:", "hp": "Echivalent:", "hp_unit": "CP",
-    "flow_title": "Debitul Pompei", "flow_desc": "Calculați L/min din capacitatea cilindrică.",
-    "disp": "Capacitate cilindrică (cm³/rot):", "rpm": "Turație antrenare (rot/min):",
-    "rpm1": "1450 rot/min (Motor electric)", "rpm2": "3000 rot/min (Motor termic)", "rpm3": "540 rot/min (Priză putere)", "rpm_custom": "Altă valoare (mai jos)",
-    "cond": "Stare pompă:", "new_p": "Pompă nouă (~95%)", "old_p": "Pompă uzată (~85%)", "btn_flow": "Calculați debitul",
-    "actual": "Debit real:", "theo": "Teoretic:",
-    "tank_title": "Capacitatea Rezervorului", "tank_desc": "Asigurați răcirea corectă a uleiului.",
-    "sys_type": "Tip sistem:", "mob": "Utilaje mobile / agricole", "ind": "Utilaje staționare / industriale", "closed": "Sistem închis",
-    "btn_tank": "Calculați capacitatea", "rec": "Capacitate recomandată:", "liters": "litri",
-    "hose_diam_title": "Diametru Furtun", "hose_diam_desc": "Calculați diametrul interior optim.",
-    "line_type": "Viteza fluidului recomandată:", "line_suction": "Linie aspirație (~1.0 m/s)", "line_return": "Linie retur (~2.0 m/s)", "line_pressure_low": "Linie presiune < 100 bar (~4.0 m/s)", "line_pressure_mid": "Linie presiune 100-200 bar (~5.0 m/s)", "line_pressure_high": "Linie presiune > 200 bar (~6.0 m/s)",
-    "btn_hose_diam": "Calculați diametrul", "min_diam": "Diametru interior minim:",
-    "hose_drop_title": "Cădere presiune furtun", "hose_drop_desc": "Estimați pierderile de presiune în furtun.",
-    "hose_bore": "Diametru interior furtun (mm):", "hose_len": "Lungime furtun (m):", "viscosity": "Vâscozitate cinematică (cSt):", "density": "Densitate ulei (kg/m³):",
-    "btn_hose_drop": "Calculați căderea Δp", "pressure_drop": "Cădere de presiune (Δp):", "fluid_velocity": "Viteza reală a fluidului:", "flow_type": "Tip curgere:",
-    "laminar": "Laminar", "turbulent": "Turbulent",
-    "history_title": "Istoricul Calculelor", "history_desc": "Ultimele 10 rezultate (Local).", "clear_history": "Șterge Istoricul", "empty_history": "Nu există istoric salvat.", "hist_input": "Intrare:", "hist_result": "Rezultat:",
-    "btn_pdf": "📄 Generare PDF", "copy_btn": "📋 Copiați rezultatul",
-    "about_title": "HCalculator v1.0.4", "about_desc": "Calculator Hidraulic Profesional",
-    "about_text": "Acest program este un proiect de pasiune. Este 100% gratuit, nu are reclame și îți respectă confidențialitatea funcționând complet offline. Dacă HCalculator te-a ajutat să economisești timp în atelier sau la un proiect, poți susține dezvoltarea sa viitoare cumpărându-mi o cafea virtuală. Mulțumesc!",
-    "btn_coffee": "Cumpără-mi o cafea",
-    "ph_180": "ex. 180", "ph_80": "ex. 80", "ph_40": "ex. 40", "ph_500": "ex. 500", "ph_14": "ex. 14", "ph_custom": "Valoare...",
-    "err_empty": "Vă rugăm să completați corect toate câmpurile!",
-    "err_bore": "Diametrul pistonului trebuie să fie mai mare decât tija!",
-    "print_report": "Raport de Calcul", "print_params": "Parametri de Intrare:", "print_results": "Rezultate Calcul:", "print_footer": "Generat în HCalculator v1.0.4", "print_date": "Data:"
+    "print_report": "Berechnungsbericht", "print_params": "Eingabeparameter:", "print_results": "Berechnungsergebnisse:", "print_footer": "Erstellt in HCalculator v1.0.5", "print_date": "Datum:"
   }
 };
 
@@ -629,7 +618,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if(langDict[lang] && langDict[lang][key]) { el.placeholder = langDict[lang][key]; }
     });
     
-    // Obsługa dynamicznych tłumaczeń, np. w wynikach spadku ciśnienia
+    // Obsługa dynamicznych tłumaczeń
     document.querySelectorAll('[data-dynamic-i18n]').forEach(function(el) {
       var key = el.getAttribute('data-dynamic-i18n');
       if(langDict[lang] && langDict[lang][key]) { el.innerText = langDict[lang][key]; }
@@ -726,7 +715,7 @@ document.addEventListener('DOMContentLoaded', function() {
       saveToHistory(moduleKey, paramsText, resultsText);
   }
 
-  // Obliczenia
+  // Obliczenia - Siła
   document.getElementById('run-calc-btn').addEventListener('click', function(e) {
     e.preventDefault(); 
     let lang = langSwitch.value;
@@ -751,6 +740,7 @@ document.addEventListener('DOMContentLoaded', function() {
     createActionButtons('calc-results', 'copy-force', 'pdf-force', pTxt, rTxt, 'force_title', `HCalculator | ${langDict[lang]['force_title']}`);
   });
 
+  // Obliczenia - Prędkość
   document.getElementById('calc-spd-btn').addEventListener('click', function(e) {
     e.preventDefault();
     let lang = langSwitch.value;
@@ -782,6 +772,7 @@ document.addEventListener('DOMContentLoaded', function() {
     createActionButtons('spd-results', 'copy-speed', 'pdf-speed', pTxt, rTxt, 'speed_title', `HCalculator | ${langDict[lang]['speed_title']}`);
   });
 
+  // Obliczenia - Moc
   document.getElementById('calc-pmp-btn').addEventListener('click', function(e) {
     e.preventDefault();
     let lang = langSwitch.value;
@@ -803,6 +794,7 @@ document.addEventListener('DOMContentLoaded', function() {
     createActionButtons('pmp-results', 'copy-power', 'pdf-power', pTxt, rTxt, 'power_title', `HCalculator | ${langDict[lang]['power_title']}`);
   });
 
+  // Obliczenia - Wydajność
   var rSel = document.getElementById('flow-rpm-select');
   var rCus = document.getElementById('flow-rpm-custom');
   rSel.addEventListener('change', function() { rCus.style.display = (this.value === 'custom') ? 'block' : 'none'; });
@@ -828,6 +820,32 @@ document.addEventListener('DOMContentLoaded', function() {
     createActionButtons('flow-results', 'copy-flow', 'pdf-flow', pTxt, rTxt, 'flow_title', `HCalculator | ${langDict[lang]['flow_title']}`);
   });
 
+  // NOWY MODUŁ - Silnik Hydrauliczny
+  document.getElementById('calc-mot-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      let lang = langSwitch.value;
+      var Q = parseFloat(document.getElementById('mot-flow').value);
+      var V = parseFloat(document.getElementById('mot-disp').value);
+      var p = parseFloat(document.getElementById('mot-pressure').value);
+      
+      if (isNaN(Q) || isNaN(V) || isNaN(p) || V <= 0) return showError('err_empty');
+
+      var n = (Q * 1000) / V; 
+      var T = (p * V) / (20 * Math.PI); 
+      
+      var n_actual = n * 0.95;
+      var T_actual = T * 0.90;
+      
+      document.getElementById('res-mot-speed').innerText = Math.round(n_actual);
+      document.getElementById('res-mot-torque').innerText = T_actual.toFixed(1);
+      document.getElementById('mot-results').style.display = 'block';
+
+      let pTxt = `${langDict[lang]['flow']} ${Q} L/min\n${langDict[lang]['disp']} ${V} cm³/obr\n${langDict[lang]['pressure']} ${p} bar`;
+      let rTxt = `${langDict[lang]['speed_rpm']} ${Math.round(n_actual)} obr/min\n${langDict[lang]['torque']} ${T_actual.toFixed(1)} Nm`;
+      createActionButtons('mot-results', 'copy-mot', 'pdf-mot', pTxt, rTxt, 'motor_title', `HCalculator | ${langDict[lang]['motor_title']}`);
+  });
+
+  // Obliczenia - Zbiornik
   document.getElementById('calc-tank-btn').addEventListener('click', function(e) {
     e.preventDefault();
     let lang = langSwitch.value;
@@ -849,7 +867,7 @@ document.addEventListener('DOMContentLoaded', function() {
     createActionButtons('tank-results', 'copy-tank', 'pdf-tank', pTxt, rTxt, 'tank_title', `HCalculator | ${langDict[lang]['tank_title']}`);
   });
 
-  // Nowy Moduł: Dobór Średnicy Węża
+  // Dobór Średnicy Węża
   var hdSel = document.getElementById('hd-line-select');
   var hdCus = document.getElementById('hd-vel-custom');
   hdSel.addEventListener('change', function() { hdCus.style.display = (this.value === 'custom') ? 'block' : 'none'; });
@@ -873,7 +891,7 @@ document.addEventListener('DOMContentLoaded', function() {
       createActionButtons('hd-results', 'copy-hd', 'pdf-hd', pTxt, rTxt, 'hose_diam_title', `HCalculator | ${langDict[lang]['hose_diam_title']}`);
   });
 
-  // Nowy Moduł: Spadek Ciśnienia w Wężu
+  // Spadek Ciśnienia w Wężu
   document.getElementById('calc-pd-btn').addEventListener('click', function(e) {
       e.preventDefault();
       let lang = langSwitch.value;
@@ -904,7 +922,7 @@ document.addEventListener('DOMContentLoaded', function() {
       
       let typeEl = document.getElementById('res-pd-type');
       typeEl.innerText = langDict[lang][flowTypeKey];
-      typeEl.setAttribute('data-dynamic-i18n', flowTypeKey); // Dla zmiany języka "w locie"
+      typeEl.setAttribute('data-dynamic-i18n', flowTypeKey); 
       
       document.getElementById('pd-results').style.display = 'block';
 
@@ -933,10 +951,10 @@ document.addEventListener('DOMContentLoaded', function() {
 if __name__ == '__main__':
     api = Api()
     webview.create_window(
-        title='HCalculator - Hydraulic Calculator v1.0.4', 
+        title='HCalculator - Hydraulic Calculator v1.0.5', 
         html=html_content, 
         js_api=api,
-        width=700, 
+        width=750, 
         height=750,
         min_size=(450, 600)
     )

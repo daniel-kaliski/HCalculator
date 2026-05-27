@@ -52,9 +52,9 @@ app = BUNDLE(
         'CFBundleDisplayName': 'HCalculator',
         'CFBundleExecutable': 'HCalculator',
         'CFBundlePackageType': 'APPL',
-        'CFBundleShortVersionString': '1.0.4',
-        'CFBundleVersion': '1.0.4',
-        'NSHumanReadableCopyright': 'Copyright © 2026 Daniel Kaliski. Wszelkie prawa zastrzeżone.',
+        'CFBundleShortVersionString': '1.0.5',
+        'CFBundleVersion': '1.0.5',
+        'NSHumanReadableCopyright': 'Copyright © 2026 Daniel Kaliski. All rights reserved.',
         'NSHighResolutionCapable': True,
     },
 )
