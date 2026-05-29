@@ -5,7 +5,7 @@
 ## Główne funkcje
 * **Obliczenia parametrów siłowników:** Siła pchania/ciągnięcia, prędkość wysuwu.
 * **Obliczenia parametrów pomp:** Wydajność, moc silnika napędowego, moment obrotowy.
-* **Wielojęzyczność:** Pełne wsparcie dla 4 języków (Polski, Angielski, Niemiecki, Rumuński) z automatycznym wykrywaniem języka systemu.
+* **Wielojęzyczność:** Pełne wsparcie dla 4 języków (Polski, Angielski, Niemiecki) z automatycznym wykrywaniem języka systemu.
 * **Praca Offline:** Nie wymaga połączenia z internetem ani instalacji na komputerze docelowym (wersja Portable).
 
 ## Wymagania systemowe (Dla deweloperów)
