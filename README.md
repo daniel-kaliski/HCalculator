@@ -27,7 +27,6 @@ Zalecana struktura katalogów dla prawidłowego działania skryptu i kompilatora
 │   ├── pl.json
 │   ├── en.json
 │   ├── de.json
-│   └── ro.json
 └── /assets               # Katalog z grafikami pomocniczymi (schematy, logotypy)
 ```
 
