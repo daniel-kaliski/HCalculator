@@ -1,3 +1,17 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# ==============================================================================
+# Nazwa pliku: HCalculator.py
+# Opis: Krótki opis działania skryptu.
+# 
+# Copyright (c) 2026 Daniel Kaliski
+# Ten kod jest objęty licencją GNU GENERAL PUBLIC LICENSE GPL-3.0.
+# Pełny tekst licencji znajduje się w pliku LICENSE lub na stronie:
+# https://opensource.org/license/gpl-3.0
+# ==============================================================================
+
+
 import webview
 import sys
 import os
