@@ -71,7 +71,7 @@ html_content = r"""
   .top-bar { 
       background-color: #002244; 
       display: flex; 
-      justify-content: flex-end; 
+      justify-content: space-between; 
       align-items: center; 
       padding-top: calc(env(safe-area-inset-top, 20px) + 12px);
       padding-bottom: 12px;
@@ -84,22 +84,31 @@ html_content = r"""
   }
   
   .lang-switcher { display: flex; gap: 10px; align-items: center; margin-right: 5px; }
-.flag-btn { background: none; border: 2px solid transparent; padding: 0; cursor: pointer; border-radius: 4px; overflow: hidden; width: 32px; height: 22px; transition: 0.2s; opacity: 0.5; box-shadow: 0 2px 4px rgba(0,0,0,0.3); outline: none; display: flex; align-items: center; justify-content: center; }
-.flag-btn:hover { opacity: 0.9; transform: scale(1.1); }
-.flag-btn.active { opacity: 1; border-color: #ffaa00; transform: scale(1.1); }
-.flag-btn svg { width: 100%; height: 100%; display: block; object-fit: cover; }
+  .flag-btn { background: none; border: 2px solid transparent; padding: 0; cursor: pointer; border-radius: 4px; overflow: hidden; width: 32px; height: 22px; transition: 0.2s; opacity: 0.5; box-shadow: 0 2px 4px rgba(0,0,0,0.3); outline: none; display: flex; align-items: center; justify-content: center; }
+  .flag-btn:hover { opacity: 0.9; transform: scale(1.1); }
+  .flag-btn.active { opacity: 1; border-color: #ffaa00; transform: scale(1.1); }
+  .flag-btn svg { width: 100%; height: 100%; display: block; object-fit: cover; }
+
   .about-btn { background: none; border: none; color: #a0c4e8; font-size: 14px; cursor: pointer; font-weight: bold; text-transform: uppercase; touch-action: manipulation; }
   .about-btn:hover { color: #fff; }
+
+  /* Kontener paska zakładek obsługujący strzałki indykacyjne */
+  .tabs-wrapper {
+      position: relative;
+      background-color: #003366;
+      border-bottom: 2px solid #0055a5;
+      flex-shrink: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+  }
 
   .br-tabs { 
       display: flex; 
       overflow-x: auto; 
       scrollbar-width: none; 
-      background-color: #003366; 
-      border-bottom: 2px solid #0055a5; 
-      flex-shrink: 0; 
-      position: relative;
-      z-index: 40;
+      width: 100%;
+      scroll-behavior: smooth;
   }
   .br-tabs::-webkit-scrollbar { display: none; }
   
@@ -107,6 +116,32 @@ html_content = r"""
   .br-tab-btn:hover { color: #ffffff; background-color: #004080; }
   .br-tab-btn.active { color: #ffffff; background-color: #0055a5; border-bottom: 3px solid #ffaa00; }
   
+  /* Style wizualne strzałek przewijania menu */
+  .scroll-arrow {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 24px;
+      background-color: rgba(0, 34, 68, 0.85);
+      color: #ffaa00;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: bold;
+      z-index: 45;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease-in-out;
+  }
+  .scroll-arrow.visible {
+      opacity: 1;
+      pointer-events: auto;
+  }
+  .scroll-arrow.left-arrow { left: 0; box-shadow: 4px 0 8px rgba(0,0,0,0.3); }
+  .scroll-arrow.right-arrow { right: 0; box-shadow: -4px 0 8px rgba(0,0,0,0.3); }
+
   .br-tab-content { 
       display: none; 
       padding: 25px; 
@@ -148,9 +183,8 @@ html_content = r"""
 
   #print-area { display: none; }
   
-  /* === POPRAWIONE STYLE WYDRUKU (PDF) === */
   @media print {
-      @page { margin: 10mm; } /* Zapewnia fizyczny margines kartki */
+      @page { margin: 10mm; } 
       body * { visibility: hidden; }
       body { background-color: #fff; margin: 0; padding: 0; }
       
@@ -162,7 +196,7 @@ html_content = r"""
           top: 0; 
           width: 100%; 
           padding: 0; 
-          box-sizing: border-box; /* To naprawia uciekanie ramek poza obrys */
+          box-sizing: border-box; 
       }
       
       #print-area h2 { color: #003366; border-bottom: 2px solid #ffaa00; padding-bottom: 10px; margin-top: 0; }
@@ -170,18 +204,17 @@ html_content = r"""
       #print-area .print-block { 
           margin-bottom: 20px; 
           padding: 15px; 
-          background: #f4f7f9 !important; /* Wymusza szare tło bloku w druku */
+          background: #f4f7f9 !important; 
           border-radius: 8px; 
           border: 1px solid #ccc; 
           width: 100%; 
-          box-sizing: border-box; /* To naprawia ramkę bloku */
-          page-break-inside: avoid; /* Zapobiega łamaniu ramki w połowie strony */
+          box-sizing: border-box; 
+          page-break-inside: avoid; 
       }
       
       #print-area strong { color: #333; }
       .no-print { display: none !important; }
       
-      /* Wymusza prawidłowe zawijanie długich tekstów */
       pre { 
           white-space: pre-wrap !important; 
           word-wrap: break-word !important; 
@@ -230,16 +263,20 @@ html_content = r"""
       </select>
     </div>
 
-    <div class="br-tabs">
-      <button class="br-tab-btn active" data-tab="tab-sila" data-i18n="tab_force">Siła</button>
-      <button class="br-tab-btn" data-tab="tab-predkosc" data-i18n="tab_speed">Prędkość</button>
-      <button class="br-tab-btn" data-tab="tab-moc" data-i18n="tab_power">Moc</button>
-      <button class="br-tab-btn" data-tab="tab-wydajnosc" data-i18n="tab_flow">Wydajn.</button>
-      <button class="br-tab-btn" data-tab="tab-silnik" data-i18n="tab_motor">Silnik</button>
-      <button class="br-tab-btn" data-tab="tab-zbiornik" data-i18n="tab_tank">Zbiornik</button>
-      <button class="br-tab-btn" data-tab="tab-waz-srednica" data-i18n="tab_hose_diam">Wąż (Ø)</button>
-      <button class="br-tab-btn" data-tab="tab-waz-spadek" data-i18n="tab_hose_drop">Wąż (Δp)</button>
-      <button class="br-tab-btn" data-tab="tab-historia" data-i18n="tab_history">Historia</button>
+    <div class="tabs-wrapper">
+      <div class="scroll-arrow left-arrow" id="left-scroll-arrow">&lsaquo;</div>
+      <div class="br-tabs" id="main-tabs-container">
+        <button class="br-tab-btn active" data-tab="tab-sila" data-i18n="tab_force">Siła</button>
+        <button class="br-tab-btn" data-tab="tab-predkosc" data-i18n="tab_speed">Prędkość</button>
+        <button class="br-tab-btn" data-tab="tab-moc" data-i18n="tab_power">Moc</button>
+        <button class="br-tab-btn" data-tab="tab-wydajnosc" data-i18n="tab_flow">Wydajn.</button>
+        <button class="br-tab-btn" data-tab="tab-silnik" data-i18n="tab_motor">Silnik</button>
+        <button class="br-tab-btn" data-tab="tab-zbiornik" data-i18n="tab_tank">Zbiornik</button>
+        <button class="br-tab-btn" data-tab="tab-waz-srednica" data-i18n="tab_hose_diam">Wąż (Ø)</button>
+        <button class="br-tab-btn" data-tab="tab-waz-spadek" data-i18n="tab_hose_drop">Wąż (Δp)</button>
+        <button class="br-tab-btn" data-tab="tab-historia" data-i18n="tab_history">Historia</button>
+      </div>
+      <div class="scroll-arrow right-arrow" id="right-scroll-arrow">&rsaquo;</div>
     </div>
 
     <div class="br-tab-content active" id="tab-sila">
@@ -484,7 +521,6 @@ html_content = r"""
 </div>
 
 <script>
-// --- ZMIENNA PRZECHOWUJĄCA HISTORIĘ ---
 window.appHistory = [];
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -525,7 +561,7 @@ document.addEventListener('DOMContentLoaded', function() {
       "btn_hose_drop": "Oblicz spadek Δp", "pressure_drop": "Spadek ciśnienia (Δp):", "fluid_velocity": "Rzeczywista prędkość cieczy:", "flow_type": "Charakter przepływu:",
       "laminar": "Laminarny", "turbulent": "Turbulentny",
       "history_title": "Historia Obliczeń", "history_desc": "Twoje 10 ostatnich wyników (Trwale zapisane).", "clear_history": "Wyczyść historię", "empty_history": "Brak zapisanej historii.", "hist_input": "Wejście:", "hist_result": "Wynik:",
-      "btn_pdf": "📄 Generuj PDF (Udostępnij)", "copy_btn": "📋 Kopiuj wynik",
+      "btn_pdf": "📄 Generuj PDF", "copy_btn": "📋 Kopiuj wynik",
       "about_title": "HCalculator v1.0.6", "about_desc": "Profesjonalny Kalkulator Hydrauliczny",
       "about_text": "Ten program tworzę hobbystycznie. Jest w 100% darmowy, nie wyświetla reklam i szanuje Twoją prywatność działając offline. Jeśli HCalculator zaoszczędził Twój czas w warsztacie lub przy projekcie, możesz wesprzeć jego dalszy rozwój, stawiając mi symboliczną kawę. Dziękuję!",
       "btn_coffee": "Postaw mi kawę",
@@ -565,7 +601,7 @@ document.addEventListener('DOMContentLoaded', function() {
       "btn_hose_drop": "Calculate drop Δp", "pressure_drop": "Pressure drop (Δp):", "fluid_velocity": "Actual fluid velocity:", "flow_type": "Flow type:",
       "laminar": "Laminar", "turbulent": "Turbulent",
       "history_title": "Calculation History", "history_desc": "Your last 10 results (Saved persistently).", "clear_history": "Clear History", "empty_history": "No history saved yet.", "hist_input": "Input:", "hist_result": "Result:",
-      "btn_pdf": "📄 Generate PDF (Share)", "copy_btn": "📋 Copy result",
+      "btn_pdf": "📄 Generate PDF", "copy_btn": "📋 Copy result",
       "about_title": "HCalculator v1.0.6", "about_desc": "Professional Hydraulic Calculator",
       "about_text": "This program is a passion project. It is 100% free, has no ads, and respects your privacy by working completely offline. If HCalculator has saved you time in the workshop or on a project, you can support its future development by buying me a virtual coffee. Thank you!",
       "btn_coffee": "Buy me a coffee",
@@ -687,20 +723,42 @@ document.addEventListener('DOMContentLoaded', function() {
       document.querySelectorAll('.br-tab-content').forEach(function(c) { c.classList.remove('active'); });
       document.getElementById('tab-about').classList.add('active');
   });
-  
-  document.querySelectorAll('.flag-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-          let lang = this.getAttribute('data-lang');
-          document.getElementById('lang-switch').value = lang;
-          document.getElementById('lang-switch').dispatchEvent(new Event('change'));
-      });
+
+  // --- LOGIKA DYNAMICZNYCH STRZAŁEK NAWIGACYJNYCH ---
+  const tabsContainer = document.getElementById('main-tabs-container');
+  const leftArrow = document.getElementById('left-scroll-arrow');
+  const rightArrow = document.getElementById('right-scroll-arrow');
+
+  function updateScrollArrows() {
+      const scrollLeft = tabsContainer.scrollLeft;
+      const maxScroll = tabsContainer.scrollWidth - tabsContainer.clientWidth;
+      
+      if (scrollLeft > 5) {
+          leftArrow.classList.add('visible');
+      } else {
+          leftArrow.classList.remove('visible');
+      }
+      
+      if (scrollLeft < maxScroll - 5 && tabsContainer.scrollWidth > tabsContainer.clientWidth) {
+          rightArrow.classList.add('visible');
+      } else {
+          rightArrow.classList.remove('visible');
+      }
+  }
+
+  tabsContainer.addEventListener('scroll', updateScrollArrows);
+  window.addEventListener('resize', updateScrollArrows);
+
+  leftArrow.addEventListener('click', () => {
+      tabsContainer.scrollLeft -= 150;
+  });
+
+  rightArrow.addEventListener('click', () => {
+      tabsContainer.scrollLeft += 150;
   });
   
   langSwitch.addEventListener('change', function(e) {
     var lang = e.target.value;
-    document.querySelectorAll('.flag-btn').forEach(b => b.classList.remove('active'));
-    let activeBtn = document.getElementById('flag-' + lang);
-    if(activeBtn) activeBtn.classList.add('active');
     document.querySelectorAll('[data-i18n]').forEach(function(el) {
       var key = el.getAttribute('data-i18n');
       if(langDict[lang] && langDict[lang][key]) { el.innerText = langDict[lang][key]; }
@@ -709,8 +767,6 @@ document.addEventListener('DOMContentLoaded', function() {
       var key = el.getAttribute('data-i18n-ph');
       if(langDict[lang] && langDict[lang][key]) { el.placeholder = langDict[lang][key]; }
     });
-    
-    // Obsługa dynamicznych tłumaczeń
     document.querySelectorAll('[data-dynamic-i18n]').forEach(function(el) {
       var key = el.getAttribute('data-dynamic-i18n');
       if(langDict[lang] && langDict[lang][key]) { el.innerText = langDict[lang][key]; }
@@ -719,6 +775,16 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.btn-pdf-gen').forEach(btn => btn.innerText = langDict[lang]['btn_pdf']);
     document.querySelectorAll('.br-copy-btn[data-copy]').forEach(btn => btn.innerText = langDict[lang]['copy_btn']);
     renderHistory();
+    setTimeout(updateScrollArrows, 50); // Odświeżenie strzałek po zmianie tłumaczeń tekstów przycisków
+  });
+
+  // Obsługa klikania w zbudowane flagi SVG
+  document.querySelectorAll('.flag-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+          let lang = this.getAttribute('data-lang');
+          document.getElementById('lang-switch').value = lang;
+          document.getElementById('lang-switch').dispatchEvent(new Event('change'));
+      });
   });
 
   var userLang = navigator.language || navigator.userLanguage; 
@@ -781,6 +847,9 @@ document.addEventListener('DOMContentLoaded', function() {
       this.classList.add('active');
       document.getElementById(this.getAttribute('data-tab')).classList.add('active');
       if(this.getAttribute('data-tab') === 'tab-historia') { renderHistory(); }
+      
+      // Auto-centrowanie klikniętego przycisku w przewijanym pasku nawigacji
+      this.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     });
   });
 
@@ -887,10 +956,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Obliczenia - Wydajność
-  var rSel = document.getElementById('flow-rpm-select');
-  var rCus = document.getElementById('flow-rpm-custom');
-  rSel.addEventListener('change', function() { rCus.style.display = (this.value === 'custom') ? 'block' : 'none'; });
-
   document.getElementById('calc-flow-btn').addEventListener('click', function(e) {
     e.preventDefault();
     let lang = langSwitch.value;
@@ -912,7 +977,7 @@ document.addEventListener('DOMContentLoaded', function() {
     createActionButtons('flow-results', 'copy-flow', 'pdf-flow', pTxt, rTxt, 'flow_title', `HCalculator | ${langDict[lang]['flow_title']}`);
   });
 
-  // NOWY MODUŁ - Silnik Hydrauliczny
+  // Silnik Hydrauliczny
   document.getElementById('calc-mot-btn').addEventListener('click', function(e) {
       e.preventDefault();
       let lang = langSwitch.value;
@@ -960,10 +1025,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Dobór Średnicy Węża
-  var hdSel = document.getElementById('hd-line-select');
-  var hdCus = document.getElementById('hd-vel-custom');
-  hdSel.addEventListener('change', function() { hdCus.style.display = (this.value === 'custom') ? 'block' : 'none'; });
-
   document.getElementById('calc-hd-btn').addEventListener('click', function(e) {
       e.preventDefault();
       let lang = langSwitch.value;
@@ -1032,6 +1093,7 @@ document.addEventListener('DOMContentLoaded', function() {
           window.appHistory = JSON.parse(localStorage.getItem('hcalc_history') || "[]");
       }
       renderHistory();
+      setTimeout(updateScrollArrows, 200); // Wyliczenie pozycji początkowej strzałek
   });
   
 });
