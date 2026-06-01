@@ -1,6 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
 # ==============================================================================
-# Nazwa pliku: HCalculator.spec
+# Nazwa pliku: HCalculator.specs
 # 
 # Copyright (c) 2026 Daniel Kaliski
 # Ten kod jest objęty licencją GNU GENERAL PUBLIC LICENSE GPL-3.0.
@@ -60,9 +60,9 @@ app = BUNDLE(
         'CFBundleDisplayName': 'HCalculator',
         'CFBundleExecutable': 'HCalculator',
         'CFBundlePackageType': 'APPL',
-        'CFBundleShortVersionString': '1.0.4',
-        'CFBundleVersion': '1.0.4',
-        'NSHumanReadableCopyright': 'Copyright © 2026 Daniel Kaliski. Wszelkie prawa zastrzeżone.',
+        'CFBundleShortVersionString': '1.0.6',
+        'CFBundleVersion': '1.0.6',
+        'NSHumanReadableCopyright': 'Copyright © 2026 Daniel Kaliski. All rights reserved.',
         'NSHighResolutionCapable': True,
     },
 )
