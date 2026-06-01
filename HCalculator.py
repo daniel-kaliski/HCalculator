@@ -210,13 +210,24 @@ html_content = r"""
 <div class="no-print br-app-container">
     <div class="top-bar">
       <button class="about-btn" id="show-about-btn" data-i18n="about">ℹ️ O Programie</button>
-      <div class="lang-selector">
-        <select id="lang-switch">
-          <option value="pl">🇵🇱 Polski</option>
-          <option value="en">🇬🇧 English</option>
-          <option value="de">🇩🇪 Deutsch</option>
-        </select>
+      
+      <div class="lang-switcher">
+        <button class="flag-btn active" id="flag-pl" data-lang="pl" title="Polski">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 10"><rect width="16" height="10" fill="#fff"/><rect width="16" height="5" y="5" fill="#dc143c"/></svg>
+        </button>
+        <button class="flag-btn" id="flag-en" data-lang="en" title="English">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30"><clipPath id="s"><path d="M0,0 v30 h60 v-30 z"/></clipPath><clipPath id="t"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath><g clip-path="url(#s)"><path d="M0,0 v30 h60 v-30 z" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#t)" stroke="#C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></g></svg>
+        </button>
+        <button class="flag-btn" id="flag-de" data-lang="de" title="Deutsch">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 12"><rect width="16" height="12" fill="#ffce00"/><rect width="16" height="4" fill="#000"/><rect width="16" height="4" y="4" fill="#d00"/></svg>
+        </button>
       </div>
+
+      <select id="lang-switch" style="display: none;">
+        <option value="pl">PL</option>
+        <option value="en">EN</option>
+        <option value="de">DE</option>
+      </select>
     </div>
 
     <div class="br-tabs">
@@ -677,8 +688,19 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('tab-about').classList.add('active');
   });
   
+  document.querySelectorAll('.flag-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+          let lang = this.getAttribute('data-lang');
+          document.getElementById('lang-switch').value = lang;
+          document.getElementById('lang-switch').dispatchEvent(new Event('change'));
+      });
+  });
+  
   langSwitch.addEventListener('change', function(e) {
     var lang = e.target.value;
+    document.querySelectorAll('.flag-btn').forEach(b => b.classList.remove('active'));
+    let activeBtn = document.getElementById('flag-' + lang);
+    if(activeBtn) activeBtn.classList.add('active');
     document.querySelectorAll('[data-i18n]').forEach(function(el) {
       var key = el.getAttribute('data-i18n');
       if(langDict[lang] && langDict[lang][key]) { el.innerText = langDict[lang][key]; }
