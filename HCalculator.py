@@ -601,7 +601,7 @@ document.addEventListener('DOMContentLoaded', function() {
       "btn_hose_drop": "Calculate drop Δp", "pressure_drop": "Pressure drop (Δp):", "fluid_velocity": "Actual fluid velocity:", "flow_type": "Flow type:",
       "laminar": "Laminar", "turbulent": "Turbulent",
       "history_title": "Calculation History", "history_desc": "Your last 10 results (Saved persistently).", "clear_history": "Clear History", "empty_history": "No history saved yet.", "hist_input": "Input:", "hist_result": "Result:",
-      "btn_pdf": "📄 Generate PDF", "copy_btn": "📋 Copy result",
+      "btn_pdf": "📄 Generate PDF (Share)", "copy_btn": "📋 Copy result",
       "about_title": "HCalculator v1.0.6", "about_desc": "Professional Hydraulic Calculator",
       "about_text": "This program is a passion project. It is 100% free, has no ads, and respects your privacy by working completely offline. If HCalculator has saved you time in the workshop or on a project, you can support its future development by buying me a virtual coffee. Thank you!",
       "btn_coffee": "Buy me a coffee",
@@ -641,7 +641,7 @@ document.addEventListener('DOMContentLoaded', function() {
       "btn_hose_drop": "Druckabfall berechnen", "pressure_drop": "Druckabfall (Δp):", "fluid_velocity": "Tatsächliche Fließgeschwindigkeit:", "flow_type": "Strömungsart:",
       "laminar": "Laminar", "turbulent": "Turbulent",
       "history_title": "Berechnungsverlauf", "history_desc": "Ihre letzten 10 Ergebnisse (Lokal).", "clear_history": "Verlauf löschen", "empty_history": "Noch kein Verlauf gespeichert.", "hist_input": "Eingabe:", "hist_result": "Ergebnis:",
-      "btn_pdf": "📄 PDF erstellen", "copy_btn": "📋 Ergebnis kopieren",
+      "btn_pdf": "📄 PDF erstellen (Teilen)", "copy_btn": "📋 Ergebnis kopieren",
       "about_title": "HCalculator v1.0.6", "about_desc": "Professioneller Hydraulik-Rechner",
       "about_text": "Dieses Programm ist ein Leidenschaftsprojekt. Es ist zu 100 % kostenlos, werbefrei und respektiert Ihre Privatsphäre, da es komplett offline funktioniert. Wenn HCalculator Ihnen in der Werkstatt oder bei einem Projekt Zeit gespart hat, können Sie die weitere Entwicklung unterstützen, indem Sie mir einen virtuellen Kaffee spendieren. Danke!",
       "btn_coffee": "Spendieren Sie mir einen Kaffee",
@@ -657,32 +657,38 @@ document.addEventListener('DOMContentLoaded', function() {
   
   window.generatePDF = function(title, params, results) {
       let lang = langSwitch.value;
-      document.getElementById('print-title').innerText = title;
-      document.getElementById('print-date').innerText = langDict[lang]['print_date'] + " " + new Date().toLocaleString();
-      document.getElementById('print-params').innerText = params;
-      document.getElementById('print-results').innerText = results;
-      window.print();
-  }
+      let dateStr = langDict[lang]['print_date'] + " " + new Date().toLocaleString();
+      
+      let htmlData = "<html><head><meta charset=\"utf-8\"><style>body { font-family: 'Segoe UI', Tahoma, sans-serif; color: #333; padding: 20px; } h2 { color: #003366; border-bottom: 2px solid #ffaa00; padding-bottom: 10px; margin-top: 0; } .print-block { margin-bottom: 20px; padding: 15px; background: #f4f7f9; border-radius: 8px; border: 1px solid #ccc; } h3 { margin-top:0; color: #0055a5; } pre { font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 14px; white-space: pre-wrap; margin:0; color: #333; } .footer { font-size: 12px; color: #999; text-align: center; margin-top: 40px; }</style></head><body><h2>" + title + "</h2><p style=\"color: #666; font-size: 14px;\">" + dateStr + "</p><div class=\"print-block\"><h3>" + langDict[lang]['print_params'] + "</h3><pre>" + params + "</pre></div><div class=\"print-block\" style=\"background: #e6f0fa; border-color: #0055a5;\"><h3 style=\"color:#d9534f;\">" + langDict[lang]['print_results'] + "</h3><pre style=\"font-size: 16px; font-weight: bold; color: #002244;\">" + results + "</pre></div><p class=\"footer\">" + langDict[lang]['print_footer'] + "</p></body></html>";
+      
+      if (window.cordova && window.cordova.plugins && window.cordova.plugins.printer) {
+          window.cordova.plugins.printer.print(htmlData, { name: 'Raport_HCalculator' });
+      } else {
+          document.getElementById('print-title').innerText = title;
+          document.getElementById('print-date').innerText = dateStr;
+          document.getElementById('print-params').innerText = params;
+          document.getElementById('print-results').innerText = results;
+          window.print();
+      }
+  };
 
   function persistHistory() {
-      if(window.pywebview && window.pywebview.api) {
-          window.pywebview.api.save_history(JSON.stringify(window.appHistory));
-      } else {
-          localStorage.setItem('hcalc_history', JSON.stringify(window.appHistory));
-      }
+      localStorage.setItem('hcalc_history', JSON.stringify(window.appHistory));
   }
 
+  try {
+      let savedHistory = localStorage.getItem('hcalc_history');
+      window.appHistory = JSON.parse(savedHistory || "[]");
+  } catch (e) {
+      console.warn("Błąd odczytu historii:", e);
+      window.appHistory = [];
+  }
+  renderHistory();
+
   function saveToHistory(typeKey, paramsText, resultsText) {
-      const newEntry = {
-          date: new Date().toLocaleString(),
-          type: typeKey,
-          params: paramsText,
-          results: resultsText
-      };
-      
+      const newEntry = { date: new Date().toLocaleString(), type: typeKey, params: paramsText, results: resultsText };
       window.appHistory.unshift(newEntry);
       if (window.appHistory.length > 10) { window.appHistory = window.appHistory.slice(0, 10); }
-      
       persistHistory();
       renderHistory();
   }
@@ -704,8 +710,8 @@ document.addEventListener('DOMContentLoaded', function() {
                   <strong style="color: #002244;">${displayType}</strong>
                   <span style="font-size: 12px; color: #777;">${item.date}</span>
               </div>
-              <div style="font-size: 13px; color: #555; margin-bottom: 8px;"><strong>${langDict[currentLang]['hist_input']}</strong><br>${item.params.replace(/\n/g, '<br>')}</div>
-              <div style="font-size: 14px; color: #d9534f; font-weight: bold;"><strong>${langDict[currentLang]['hist_result']}</strong><br>${item.results.replace(/\n/g, '<br>')}</div>
+              <div style="font-size: 13px; color: #555; margin-bottom: 8px;"><strong>${langDict[currentLang]['hist_input']}</strong><br>${item.params.replace(/\\n/g, '<br>')}</div>
+              <div style="font-size: 14px; color: #d9534f; font-weight: bold;"><strong>${langDict[currentLang]['hist_result']}</strong><br>${item.results.replace(/\\n/g, '<br>')}</div>
           </div>`;
       });
       list.innerHTML = html;
@@ -730,6 +736,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const rightArrow = document.getElementById('right-scroll-arrow');
 
   function updateScrollArrows() {
+      if (!tabsContainer || !leftArrow || !rightArrow) return;
       const scrollLeft = tabsContainer.scrollLeft;
       const maxScroll = tabsContainer.scrollWidth - tabsContainer.clientWidth;
       
@@ -759,6 +766,12 @@ document.addEventListener('DOMContentLoaded', function() {
   
   langSwitch.addEventListener('change', function(e) {
     var lang = e.target.value;
+    
+    // --> DODANY KOD: AUTOMATYCZNE PODŚWIETLANIE AKTYWNEJ FLAGI <--
+    document.querySelectorAll('.flag-btn').forEach(b => b.classList.remove('active'));
+    let activeBtn = document.getElementById('flag-' + lang);
+    if(activeBtn) activeBtn.classList.add('active');
+    
     document.querySelectorAll('[data-i18n]').forEach(function(el) {
       var key = el.getAttribute('data-i18n');
       if(langDict[lang] && langDict[lang][key]) { el.innerText = langDict[lang][key]; }
@@ -775,7 +788,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.btn-pdf-gen').forEach(btn => btn.innerText = langDict[lang]['btn_pdf']);
     document.querySelectorAll('.br-copy-btn[data-copy]').forEach(btn => btn.innerText = langDict[lang]['copy_btn']);
     renderHistory();
-    setTimeout(updateScrollArrows, 50); // Odświeżenie strzałek po zmianie tłumaczeń tekstów przycisków
+    setTimeout(updateScrollArrows, 50); // Odświeżenie strzałek po zmianie długości tekstów
   });
 
   // Obsługa klikania w zbudowane flagi SVG
@@ -866,17 +879,13 @@ document.addEventListener('DOMContentLoaded', function() {
           copyBtn = document.getElementById(copyId);
           pdfBtn = document.getElementById(pdfId);
       }
-      
       copyBtn.style.display = 'block';
       pdfBtn.style.display = 'block';
-      
       copyBtn.onclick = () => copyToClipboard(`${printTitle}\n--- ${langDict[lang]['print_params']} ---\n${paramsText}\n--- ${langDict[lang]['print_results']} ---\n${resultsText}`, copyId);
       pdfBtn.onclick = () => generatePDF(printTitle, paramsText, resultsText);
-      
       saveToHistory(moduleKey, paramsText, resultsText);
   }
 
-  // Obliczenia - Siła
   document.getElementById('run-calc-btn').addEventListener('click', function(e) {
     e.preventDefault(); 
     let lang = langSwitch.value;
@@ -901,7 +910,6 @@ document.addEventListener('DOMContentLoaded', function() {
     createActionButtons('calc-results', 'copy-force', 'pdf-force', pTxt, rTxt, 'force_title', `HCalculator | ${langDict[lang]['force_title']}`);
   });
 
-  // Obliczenia - Prędkość
   document.getElementById('calc-spd-btn').addEventListener('click', function(e) {
     e.preventDefault();
     let lang = langSwitch.value;
@@ -933,7 +941,6 @@ document.addEventListener('DOMContentLoaded', function() {
     createActionButtons('spd-results', 'copy-speed', 'pdf-speed', pTxt, rTxt, 'speed_title', `HCalculator | ${langDict[lang]['speed_title']}`);
   });
 
-  // Obliczenia - Moc
   document.getElementById('calc-pmp-btn').addEventListener('click', function(e) {
     e.preventDefault();
     let lang = langSwitch.value;
@@ -955,7 +962,10 @@ document.addEventListener('DOMContentLoaded', function() {
     createActionButtons('pmp-results', 'copy-power', 'pdf-power', pTxt, rTxt, 'power_title', `HCalculator | ${langDict[lang]['power_title']}`);
   });
 
-  // Obliczenia - Wydajność
+  var rSel = document.getElementById('flow-rpm-select');
+  var rCus = document.getElementById('flow-rpm-custom');
+  rSel.addEventListener('change', function() { rCus.style.display = (this.value === 'custom') ? 'block' : 'none'; });
+
   document.getElementById('calc-flow-btn').addEventListener('click', function(e) {
     e.preventDefault();
     let lang = langSwitch.value;
@@ -1025,6 +1035,10 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Dobór Średnicy Węża
+  var hdSel = document.getElementById('hd-line-select');
+  var hdCus = document.getElementById('hd-vel-custom');
+  hdSel.addEventListener('change', function() { hdCus.style.display = (this.value === 'custom') ? 'block' : 'none'; });
+
   document.getElementById('calc-hd-btn').addEventListener('click', function(e) {
       e.preventDefault();
       let lang = langSwitch.value;
