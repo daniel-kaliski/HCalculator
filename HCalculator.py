@@ -83,7 +83,11 @@ html_content = r"""
       z-index: 50;
   }
   
-  .lang-selector select { background-color: #003366; color: white; border: 1px solid #0055a5; padding: 6px 12px; border-radius: 4px; font-size: 14px; cursor: pointer; outline: none; touch-action: manipulation; }
+  .lang-switcher { display: flex; gap: 10px; align-items: center; margin-right: 5px; }
+.flag-btn { background: none; border: 2px solid transparent; padding: 0; cursor: pointer; border-radius: 4px; overflow: hidden; width: 32px; height: 22px; transition: 0.2s; opacity: 0.5; box-shadow: 0 2px 4px rgba(0,0,0,0.3); outline: none; display: flex; align-items: center; justify-content: center; }
+.flag-btn:hover { opacity: 0.9; transform: scale(1.1); }
+.flag-btn.active { opacity: 1; border-color: #ffaa00; transform: scale(1.1); }
+.flag-btn svg { width: 100%; height: 100%; display: block; object-fit: cover; }
   .about-btn { background: none; border: none; color: #a0c4e8; font-size: 14px; cursor: pointer; font-weight: bold; text-transform: uppercase; touch-action: manipulation; }
   .about-btn:hover { color: #fff; }
 
