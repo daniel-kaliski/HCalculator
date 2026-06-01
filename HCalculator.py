@@ -1108,7 +1108,7 @@ if __name__ == '__main__':
         title='HCalculator - Hydraulic Calculator v1.0.6', 
         html=html_content, 
         js_api=api,
-        width=750, 
+        width=450, 
         height=750,
         min_size=(450, 600)
     )
