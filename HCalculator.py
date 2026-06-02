@@ -19,6 +19,7 @@ import os
 class Api:
     def __init__(self):
         self.history_file = os.path.join(os.path.expanduser('~'), '.hcalc_history.json')
+        self.theme_file = os.path.join(os.path.expanduser('~'), '.hcalc_theme.txt')
 
     def open_url(self, url):
         import webbrowser
@@ -40,13 +41,29 @@ class Api:
             print("Błąd odczytu historii:", e)
         return "[]"
 
+    def save_theme(self, theme):
+        try:
+            with open(self.theme_file, 'w', encoding='utf-8') as f:
+                f.write(theme)
+        except Exception as e:
+            print("Błąd zapisu motywu:", e)
+
+    def load_theme(self):
+        try:
+            if os.path.exists(self.theme_file):
+                with open(self.theme_file, 'r', encoding='utf-8') as f:
+                    return f.read().strip()
+        except Exception as e:
+            print("Błąd odczytu motywu:", e)
+        return "light"
+
 html_content = r"""
 <!DOCTYPE html>
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-<title>HCalculator - Hydraulic Calculator v1.0.6</title>
+<title>HCalculator - Hydraulic Calculator v1.0.7</title>
 <style>
   html, body { 
       margin: 0; 
@@ -220,6 +237,72 @@ html_content = r"""
           word-wrap: break-word !important; 
       }
   }
+
+  /* --- CIEMNY MOTYW --- */
+  body.dark-mode {
+      background-color: #121212;
+      color: #e0e0e0;
+  }
+  body.dark-mode .br-tab-content h3 {
+      color: #a0c4e8;
+  }
+  body.dark-mode .br-tab-content p.desc {
+      color: #aaa;
+  }
+  body.dark-mode .br-form-group label {
+      color: #ccc;
+  }
+  body.dark-mode .br-form-group input, 
+  body.dark-mode .br-form-group select {
+      background-color: #2a2a2a;
+      color: #fff;
+      border-color: #444;
+  }
+  body.dark-mode .br-form-group input:focus, 
+  body.dark-mode .br-form-group select:focus {
+      border-color: #ffaa00;
+      box-shadow: 0 0 0 2px rgba(255, 170, 0, 0.2);
+  }
+  body.dark-mode .br-results {
+      background-color: #1e1e1e;
+      border-color: #4a90e2;
+  }
+  body.dark-mode .br-results p strong {
+      color: #ccc;
+  }
+  body.dark-mode .br-footer {
+      background-color: #1a1a1a;
+      color: #888;
+      border-top-color: #333;
+  }
+  body.dark-mode #history-list div {
+      background: #1e1e1e !important;
+      border-left-color: #4a90e2 !important;
+      box-shadow: 0 2px 5px rgba(255,255,255,0.05) !important;
+  }
+  body.dark-mode #history-list div strong {
+      color: #a0c4e8 !important;
+  }
+  body.dark-mode #tab-about div[style*="background-color: #fff"] {
+      background-color: #1e1e1e !important;
+      border-color: #444 !important;
+  }
+  body.dark-mode #tab-about div p {
+      color: #ccc !important;
+  }
+  
+  .theme-toggle-btn {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 0;
+      margin-right: 10px;
+      transition: transform 0.2s;
+  }
+  .theme-toggle-btn:hover {
+      transform: scale(1.1);
+  }
 </style>
 </head>
 <body>
@@ -237,23 +320,27 @@ html_content = r"""
         <h3 style="margin-top:0; color:#d9534f;" data-i18n="print_results">Wyniki Obliczeń:</h3>
         <pre id="print-results" style="font-family: 'Segoe UI', sans-serif; font-size: 16px; font-weight: bold; color: #002244; white-space: pre-wrap; margin:0;"></pre>
     </div>
-    <p style="font-size: 12px; color: #999; text-align: center; margin-top: 40px;" data-i18n="print_footer">Wygenerowano w programie HCalculator v1.0.6</p>
+    <p style="font-size: 12px; color: #999; text-align: center; margin-top: 40px;" data-i18n="print_footer">Wygenerowano w programie HCalculator v1.0.7</p>
 </div>
 
 <div class="no-print br-app-container">
     <div class="top-bar">
       <button class="about-btn" id="show-about-btn" data-i18n="about">ℹ️ O Programie</button>
       
-      <div class="lang-switcher">
-        <button class="flag-btn active" id="flag-pl" data-lang="pl" title="Polski">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 10"><rect width="16" height="10" fill="#fff"/><rect width="16" height="5" y="5" fill="#dc143c"/></svg>
-        </button>
-        <button class="flag-btn" id="flag-en" data-lang="en" title="English">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30"><clipPath id="s"><path d="M0,0 v30 h60 v-30 z"/></clipPath><clipPath id="t"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath><g clip-path="url(#s)"><path d="M0,0 v30 h60 v-30 z" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#t)" stroke="#C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></g></svg>
-        </button>
-        <button class="flag-btn" id="flag-de" data-lang="de" title="Deutsch">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 12"><rect width="16" height="12" fill="#ffce00"/><rect width="16" height="4" fill="#000"/><rect width="16" height="4" y="4" fill="#d00"/></svg>
-        </button>
+      <div style="display: flex; align-items: center;">
+        <button id="theme-toggle" class="theme-toggle-btn" title="Przełącz motyw">🌙</button>
+        
+        <div class="lang-switcher">
+          <button class="flag-btn active" id="flag-pl" data-lang="pl" title="Polski">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 10"><rect width="16" height="10" fill="#fff"/><rect width="16" height="5" y="5" fill="#dc143c"/></svg>
+          </button>
+          <button class="flag-btn" id="flag-en" data-lang="en" title="English">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30"><clipPath id="s"><path d="M0,0 v30 h60 v-30 z"/></clipPath><clipPath id="t"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath><g clip-path="url(#s)"><path d="M0,0 v30 h60 v-30 z" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#t)" stroke="#C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></g></svg>
+          </button>
+          <button class="flag-btn" id="flag-de" data-lang="de" title="Deutsch">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 12"><rect width="16" height="12" fill="#ffce00"/><rect width="16" height="4" fill="#000"/><rect width="16" height="4" y="4" fill="#d00"/></svg>
+          </button>
+        </div>
       </div>
 
       <select id="lang-switch" style="display: none;">
@@ -495,7 +582,7 @@ html_content = r"""
     </div>
     
     <div class="br-tab-content" id="tab-about">
-      <h3 data-i18n="about_title">HCalculator v1.0.6</h3>
+      <h3 data-i18n="about_title">HCalculator v1.0.7</h3>
       <p class="desc" data-i18n="about_desc">Profesjonalny Kalkulator Hydrauliczny</p>
       <p class="desc">🌐 <a href="https://hcalculator.com.pl" target="_blank"><strong>HCalculator.com.pl</strong></a></p>
       <div style="background-color: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; line-height: 1.6;">
@@ -524,6 +611,33 @@ html_content = r"""
 window.appHistory = [];
 
 document.addEventListener('DOMContentLoaded', function() {
+  
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  
+  // Próba odczytu z localStorage w pierwszej kolejności (dla płynności jeśli zadziała)
+  try {
+      if (localStorage.getItem('hcalc_theme') === 'dark') {
+          document.body.classList.add('dark-mode');
+          if (themeToggleBtn) themeToggleBtn.innerText = '☀️';
+      }
+  } catch(e) {}
+
+  if (themeToggleBtn) {
+      themeToggleBtn.addEventListener('click', function() {
+          document.body.classList.toggle('dark-mode');
+          let newTheme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+          
+          if (newTheme === 'dark') {
+              themeToggleBtn.innerText = '☀️';
+          } else {
+              themeToggleBtn.innerText = '🌙';
+          }
+          
+          try { localStorage.setItem('hcalc_theme', newTheme); } catch(e) {}
+          if (window.pywebview && window.pywebview.api) { window.pywebview.api.save_theme(newTheme); }
+      });
+  }
+
   document.getElementById('coffee-link').addEventListener('click', function(e) {
       e.preventDefault();
       if(window.pywebview && window.pywebview.api) { window.pywebview.api.open_url(this.href); } else { window.open(this.href, '_blank'); }
@@ -562,13 +676,13 @@ document.addEventListener('DOMContentLoaded', function() {
       "laminar": "Laminarny", "turbulent": "Turbulentny",
       "history_title": "Historia Obliczeń", "history_desc": "Twoje 10 ostatnich wyników (Trwale zapisane).", "clear_history": "Wyczyść historię", "empty_history": "Brak zapisanej historii.", "hist_input": "Wejście:", "hist_result": "Wynik:",
       "btn_pdf": "📄 Generuj PDF", "copy_btn": "📋 Kopiuj wynik",
-      "about_title": "HCalculator v1.0.6", "about_desc": "Profesjonalny Kalkulator Hydrauliczny",
+      "about_title": "HCalculator v1.0.7", "about_desc": "Profesjonalny Kalkulator Hydrauliczny",
       "about_text": "Ten program tworzę hobbystycznie. Jest w 100% darmowy, nie wyświetla reklam i szanuje Twoją prywatność działając offline. Jeśli HCalculator zaoszczędził Twój czas w warsztacie lub przy projekcie, możesz wesprzeć jego dalszy rozwój, stawiając mi symboliczną kawę. Dziękuję!",
       "btn_coffee": "Postaw mi kawę",
       "ph_180": "np. 180", "ph_80": "np. 80", "ph_40": "np. 40", "ph_500": "np. 500", "ph_14": "np. 14", "ph_custom": "Wpisz...",
       "err_empty": "Proszę poprawnie wypełnić wszystkie pola!",
       "err_bore": "Średnica tłoka musi być większa niż tłoczyska!",
-      "print_report": "Raport Obliczeń", "print_params": "Parametry Wejściowe:", "print_results": "Wyniki Obliczeń:", "print_footer": "Wygenerowano w programie HCalculator v1.0.6", "print_date": "Data:"
+      "print_report": "Raport Obliczeń", "print_params": "Parametry Wejściowe:", "print_results": "Wyniki Obliczeń:", "print_footer": "Wygenerowano w programie HCalculator v1.0.7", "print_date": "Data:"
     },
     "en": {
       "about": "ℹ️ About", "tab_force": "Force", "tab_speed": "Speed", "tab_power": "Power", "tab_flow": "Flow Rate", "tab_tank": "Tank", "tab_history": "History",
@@ -601,14 +715,14 @@ document.addEventListener('DOMContentLoaded', function() {
       "btn_hose_drop": "Calculate drop Δp", "pressure_drop": "Pressure drop (Δp):", "fluid_velocity": "Actual fluid velocity:", "flow_type": "Flow type:",
       "laminar": "Laminar", "turbulent": "Turbulent",
       "history_title": "Calculation History", "history_desc": "Your last 10 results (Saved persistently).", "clear_history": "Clear History", "empty_history": "No history saved yet.", "hist_input": "Input:", "hist_result": "Result:",
-      "btn_pdf": "📄 Generate PDF (Share)", "copy_btn": "📋 Copy result",
-      "about_title": "HCalculator v1.0.6", "about_desc": "Professional Hydraulic Calculator",
+      "btn_pdf": "📄 Generate PDF", "copy_btn": "📋 Copy result",
+      "about_title": "HCalculator v1.0.7", "about_desc": "Professional Hydraulic Calculator",
       "about_text": "This program is a passion project. It is 100% free, has no ads, and respects your privacy by working completely offline. If HCalculator has saved you time in the workshop or on a project, you can support its future development by buying me a virtual coffee. Thank you!",
       "btn_coffee": "Buy me a coffee",
       "ph_180": "e.g. 180", "ph_80": "e.g. 80", "ph_40": "e.g. 40", "ph_500": "e.g. 500", "ph_14": "e.g. 14", "ph_custom": "Enter...",
       "err_empty": "Please fill in all fields correctly!",
       "err_bore": "Bore diameter must be larger than rod diameter!",
-      "print_report": "Calculation Report", "print_params": "Input Parameters:", "print_results": "Calculation Results:", "print_footer": "Generated in HCalculator v1.0.6", "print_date": "Date:"
+      "print_report": "Calculation Report", "print_params": "Input Parameters:", "print_results": "Calculation Results:", "print_footer": "Generated in HCalculator v1.0.7", "print_date": "Date:"
     },
     "de": {
       "about": "ℹ️ Über", "tab_force": "Kraft", "tab_speed": "Zykluszeit", "tab_power": "Leistung", "tab_flow": "Fördermenge", "tab_tank": "Tank", "tab_history": "Verlauf",
@@ -641,14 +755,14 @@ document.addEventListener('DOMContentLoaded', function() {
       "btn_hose_drop": "Druckabfall berechnen", "pressure_drop": "Druckabfall (Δp):", "fluid_velocity": "Tatsächliche Fließgeschwindigkeit:", "flow_type": "Strömungsart:",
       "laminar": "Laminar", "turbulent": "Turbulent",
       "history_title": "Berechnungsverlauf", "history_desc": "Ihre letzten 10 Ergebnisse (Lokal).", "clear_history": "Verlauf löschen", "empty_history": "Noch kein Verlauf gespeichert.", "hist_input": "Eingabe:", "hist_result": "Ergebnis:",
-      "btn_pdf": "📄 PDF erstellen (Teilen)", "copy_btn": "📋 Ergebnis kopieren",
-      "about_title": "HCalculator v1.0.6", "about_desc": "Professioneller Hydraulik-Rechner",
+      "btn_pdf": "📄 PDF erstellen", "copy_btn": "📋 Ergebnis kopieren",
+      "about_title": "HCalculator v1.0.7", "about_desc": "Professioneller Hydraulik-Rechner",
       "about_text": "Dieses Programm ist ein Leidenschaftsprojekt. Es ist zu 100 % kostenlos, werbefrei und respektiert Ihre Privatsphäre, da es komplett offline funktioniert. Wenn HCalculator Ihnen in der Werkstatt oder bei einem Projekt Zeit gespart hat, können Sie die weitere Entwicklung unterstützen, indem Sie mir einen virtuellen Kaffee spendieren. Danke!",
       "btn_coffee": "Spendieren Sie mir einen Kaffee",
       "ph_180": "z.B. 180", "ph_80": "z.B. 80", "ph_40": "z.B. 40", "ph_500": "z.B. 500", "ph_14": "z.B. 14", "ph_custom": "Wert...",
       "err_empty": "Bitte füllen Sie alle Felder korrekt aus!",
       "err_bore": "Kolbendurchmesser muss größer als Stangendurchmesser sein!",
-      "print_report": "Berechnungsbericht", "print_params": "Eingabeparameter:", "print_results": "Berechnungsergebnisse:", "print_footer": "Erstellt in HCalculator v1.0.6", "print_date": "Datum:"
+      "print_report": "Berechnungsbericht", "print_params": "Eingabeparameter:", "print_results": "Berechnungsergebnisse:", "print_footer": "Erstellt in HCalculator v1.0.7", "print_date": "Datum:"
     }
   };
 
@@ -657,38 +771,34 @@ document.addEventListener('DOMContentLoaded', function() {
   
   window.generatePDF = function(title, params, results) {
       let lang = langSwitch.value;
-      let dateStr = langDict[lang]['print_date'] + " " + new Date().toLocaleString();
-      
-      let htmlData = "<html><head><meta charset=\"utf-8\"><style>body { font-family: 'Segoe UI', Tahoma, sans-serif; color: #333; padding: 20px; } h2 { color: #003366; border-bottom: 2px solid #ffaa00; padding-bottom: 10px; margin-top: 0; } .print-block { margin-bottom: 20px; padding: 15px; background: #f4f7f9; border-radius: 8px; border: 1px solid #ccc; } h3 { margin-top:0; color: #0055a5; } pre { font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 14px; white-space: pre-wrap; margin:0; color: #333; } .footer { font-size: 12px; color: #999; text-align: center; margin-top: 40px; }</style></head><body><h2>" + title + "</h2><p style=\"color: #666; font-size: 14px;\">" + dateStr + "</p><div class=\"print-block\"><h3>" + langDict[lang]['print_params'] + "</h3><pre>" + params + "</pre></div><div class=\"print-block\" style=\"background: #e6f0fa; border-color: #0055a5;\"><h3 style=\"color:#d9534f;\">" + langDict[lang]['print_results'] + "</h3><pre style=\"font-size: 16px; font-weight: bold; color: #002244;\">" + results + "</pre></div><p class=\"footer\">" + langDict[lang]['print_footer'] + "</p></body></html>";
-      
-      if (window.cordova && window.cordova.plugins && window.cordova.plugins.printer) {
-          window.cordova.plugins.printer.print(htmlData, { name: 'Raport_HCalculator' });
-      } else {
-          document.getElementById('print-title').innerText = title;
-          document.getElementById('print-date').innerText = dateStr;
-          document.getElementById('print-params').innerText = params;
-          document.getElementById('print-results').innerText = results;
-          window.print();
-      }
-  };
+      document.getElementById('print-title').innerText = title;
+      document.getElementById('print-date').innerText = langDict[lang]['print_date'] + " " + new Date().toLocaleString();
+      document.getElementById('print-params').innerText = params;
+      document.getElementById('print-results').innerText = results;
+      window.print();
+  }
 
   function persistHistory() {
-      localStorage.setItem('hcalc_history', JSON.stringify(window.appHistory));
+      if(window.pywebview && window.pywebview.api) {
+          window.pywebview.api.save_history(JSON.stringify(window.appHistory));
+      } else {
+          try {
+              localStorage.setItem('hcalc_history', JSON.stringify(window.appHistory));
+          } catch(e) {}
+      }
   }
-
-  try {
-      let savedHistory = localStorage.getItem('hcalc_history');
-      window.appHistory = JSON.parse(savedHistory || "[]");
-  } catch (e) {
-      console.warn("Błąd odczytu historii:", e);
-      window.appHistory = [];
-  }
-  renderHistory();
 
   function saveToHistory(typeKey, paramsText, resultsText) {
-      const newEntry = { date: new Date().toLocaleString(), type: typeKey, params: paramsText, results: resultsText };
+      const newEntry = {
+          date: new Date().toLocaleString(),
+          type: typeKey,
+          params: paramsText,
+          results: resultsText
+      };
+      
       window.appHistory.unshift(newEntry);
       if (window.appHistory.length > 10) { window.appHistory = window.appHistory.slice(0, 10); }
+      
       persistHistory();
       renderHistory();
   }
@@ -710,8 +820,8 @@ document.addEventListener('DOMContentLoaded', function() {
                   <strong style="color: #002244;">${displayType}</strong>
                   <span style="font-size: 12px; color: #777;">${item.date}</span>
               </div>
-              <div style="font-size: 13px; color: #555; margin-bottom: 8px;"><strong>${langDict[currentLang]['hist_input']}</strong><br>${item.params.replace(/\\n/g, '<br>')}</div>
-              <div style="font-size: 14px; color: #d9534f; font-weight: bold;"><strong>${langDict[currentLang]['hist_result']}</strong><br>${item.results.replace(/\\n/g, '<br>')}</div>
+              <div style="font-size: 13px; color: #555; margin-bottom: 8px;"><strong>${langDict[currentLang]['hist_input']}</strong><br>${item.params.replace(/\n/g, '<br>')}</div>
+              <div style="font-size: 14px; color: #d9534f; font-weight: bold;"><strong>${langDict[currentLang]['hist_result']}</strong><br>${item.results.replace(/\n/g, '<br>')}</div>
           </div>`;
       });
       list.innerHTML = html;
@@ -736,7 +846,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const rightArrow = document.getElementById('right-scroll-arrow');
 
   function updateScrollArrows() {
-      if (!tabsContainer || !leftArrow || !rightArrow) return;
       const scrollLeft = tabsContainer.scrollLeft;
       const maxScroll = tabsContainer.scrollWidth - tabsContainer.clientWidth;
       
@@ -767,7 +876,6 @@ document.addEventListener('DOMContentLoaded', function() {
   langSwitch.addEventListener('change', function(e) {
     var lang = e.target.value;
     
-    // --> DODANY KOD: AUTOMATYCZNE PODŚWIETLANIE AKTYWNEJ FLAGI <--
     document.querySelectorAll('.flag-btn').forEach(b => b.classList.remove('active'));
     let activeBtn = document.getElementById('flag-' + lang);
     if(activeBtn) activeBtn.classList.add('active');
@@ -780,6 +888,7 @@ document.addEventListener('DOMContentLoaded', function() {
       var key = el.getAttribute('data-i18n-ph');
       if(langDict[lang] && langDict[lang][key]) { el.placeholder = langDict[lang][key]; }
     });
+    
     document.querySelectorAll('[data-dynamic-i18n]').forEach(function(el) {
       var key = el.getAttribute('data-dynamic-i18n');
       if(langDict[lang] && langDict[lang][key]) { el.innerText = langDict[lang][key]; }
@@ -788,10 +897,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.btn-pdf-gen').forEach(btn => btn.innerText = langDict[lang]['btn_pdf']);
     document.querySelectorAll('.br-copy-btn[data-copy]').forEach(btn => btn.innerText = langDict[lang]['copy_btn']);
     renderHistory();
-    setTimeout(updateScrollArrows, 50); // Odświeżenie strzałek po zmianie długości tekstów
+    setTimeout(updateScrollArrows, 50);
   });
 
-  // Obsługa klikania w zbudowane flagi SVG
   document.querySelectorAll('.flag-btn').forEach(btn => {
       btn.addEventListener('click', function() {
           let lang = this.getAttribute('data-lang');
@@ -861,7 +969,6 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById(this.getAttribute('data-tab')).classList.add('active');
       if(this.getAttribute('data-tab') === 'tab-historia') { renderHistory(); }
       
-      // Auto-centrowanie klikniętego przycisku w przewijanym pasku nawigacji
       this.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     });
   });
@@ -879,13 +986,17 @@ document.addEventListener('DOMContentLoaded', function() {
           copyBtn = document.getElementById(copyId);
           pdfBtn = document.getElementById(pdfId);
       }
+      
       copyBtn.style.display = 'block';
       pdfBtn.style.display = 'block';
+      
       copyBtn.onclick = () => copyToClipboard(`${printTitle}\n--- ${langDict[lang]['print_params']} ---\n${paramsText}\n--- ${langDict[lang]['print_results']} ---\n${resultsText}`, copyId);
       pdfBtn.onclick = () => generatePDF(printTitle, paramsText, resultsText);
+      
       saveToHistory(moduleKey, paramsText, resultsText);
   }
 
+  // Obliczenia - Siła
   document.getElementById('run-calc-btn').addEventListener('click', function(e) {
     e.preventDefault(); 
     let lang = langSwitch.value;
@@ -910,6 +1021,7 @@ document.addEventListener('DOMContentLoaded', function() {
     createActionButtons('calc-results', 'copy-force', 'pdf-force', pTxt, rTxt, 'force_title', `HCalculator | ${langDict[lang]['force_title']}`);
   });
 
+  // Obliczenia - Prędkość
   document.getElementById('calc-spd-btn').addEventListener('click', function(e) {
     e.preventDefault();
     let lang = langSwitch.value;
@@ -941,6 +1053,7 @@ document.addEventListener('DOMContentLoaded', function() {
     createActionButtons('spd-results', 'copy-speed', 'pdf-speed', pTxt, rTxt, 'speed_title', `HCalculator | ${langDict[lang]['speed_title']}`);
   });
 
+  // Obliczenia - Moc
   document.getElementById('calc-pmp-btn').addEventListener('click', function(e) {
     e.preventDefault();
     let lang = langSwitch.value;
@@ -962,9 +1075,12 @@ document.addEventListener('DOMContentLoaded', function() {
     createActionButtons('pmp-results', 'copy-power', 'pdf-power', pTxt, rTxt, 'power_title', `HCalculator | ${langDict[lang]['power_title']}`);
   });
 
+  // Obliczenia - Wydajność
   var rSel = document.getElementById('flow-rpm-select');
   var rCus = document.getElementById('flow-rpm-custom');
-  rSel.addEventListener('change', function() { rCus.style.display = (this.value === 'custom') ? 'block' : 'none'; });
+  if (rSel) {
+      rSel.addEventListener('change', function() { rCus.style.display = (this.value === 'custom') ? 'block' : 'none'; });
+  }
 
   document.getElementById('calc-flow-btn').addEventListener('click', function(e) {
     e.preventDefault();
@@ -987,7 +1103,7 @@ document.addEventListener('DOMContentLoaded', function() {
     createActionButtons('flow-results', 'copy-flow', 'pdf-flow', pTxt, rTxt, 'flow_title', `HCalculator | ${langDict[lang]['flow_title']}`);
   });
 
-  // Silnik Hydrauliczny
+  // NOWY MODUŁ - Silnik Hydrauliczny
   document.getElementById('calc-mot-btn').addEventListener('click', function(e) {
       e.preventDefault();
       let lang = langSwitch.value;
@@ -1037,7 +1153,9 @@ document.addEventListener('DOMContentLoaded', function() {
   // Dobór Średnicy Węża
   var hdSel = document.getElementById('hd-line-select');
   var hdCus = document.getElementById('hd-vel-custom');
-  hdSel.addEventListener('change', function() { hdCus.style.display = (this.value === 'custom') ? 'block' : 'none'; });
+  if (hdSel) {
+      hdSel.addEventListener('change', function() { hdCus.style.display = (this.value === 'custom') ? 'block' : 'none'; });
+  }
 
   document.getElementById('calc-hd-btn').addEventListener('click', function(e) {
       e.preventDefault();
@@ -1098,16 +1216,36 @@ document.addEventListener('DOMContentLoaded', function() {
       createActionButtons('pd-results', 'copy-pd', 'pdf-pd', pTxt, rTxt, 'hose_drop_title', `HCalculator | ${langDict[lang]['hose_drop_title']}`);
   });
 
-  // --- INICJALIZACJA I POBRANIE TRWAŁEJ HISTORII Z PYTHONA ---
+  // --- INICJALIZACJA I POBRANIE DANYCH Z PYTHONA ---
   window.addEventListener('pywebviewready', async function() {
+      // 1. Wczytanie motywu
+      try {
+          let savedTheme = await window.pywebview.api.load_theme();
+          const toggleBtn = document.getElementById('theme-toggle');
+          if (savedTheme === 'dark') {
+              document.body.classList.add('dark-mode');
+              if (toggleBtn) toggleBtn.innerText = '☀️';
+          } else if (savedTheme === 'light') {
+              document.body.classList.remove('dark-mode');
+              if (toggleBtn) toggleBtn.innerText = '🌙';
+          }
+      } catch (e) {
+          console.warn("Błąd wczytywania motywu z API");
+      }
+
+      // 2. Wczytanie historii
       try {
           let h = await window.pywebview.api.load_history();
           window.appHistory = JSON.parse(h || "[]");
       } catch (e) {
-          window.appHistory = JSON.parse(localStorage.getItem('hcalc_history') || "[]");
+          try {
+              window.appHistory = JSON.parse(localStorage.getItem('hcalc_history') || "[]");
+          } catch(err) {
+              window.appHistory = [];
+          }
       }
       renderHistory();
-      setTimeout(updateScrollArrows, 200); // Wyliczenie pozycji początkowej strzałek
+      setTimeout(updateScrollArrows, 200); 
   });
   
 });
@@ -1119,7 +1257,7 @@ document.addEventListener('DOMContentLoaded', function() {
 if __name__ == '__main__':
     api = Api()
     webview.create_window(
-        title='HCalculator - Hydraulic Calculator v1.0.6', 
+        title='HCalculator - Hydraulic Calculator v1.0.7', 
         html=html_content, 
         js_api=api,
         width=450, 
