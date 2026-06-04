@@ -12,6 +12,8 @@
 # ==============================================================================
 
 
+import urllib.request
+import json
 import webview
 import sys
 import os
@@ -56,6 +58,36 @@ class Api:
         except Exception as e:
             print("Błąd odczytu motywu:", e)
         return "light"
+    
+    def check_update(self, current_version):
+        # Wpisz tutaj swojego GitHuba i nazwę repozytorium
+        repo = "daniel-kaliski/HCalculator" 
+        url = f"https://api.github.com/repos/{repo}/releases/latest"
+        
+        try:
+            # Ustawiamy User-Agent, bo GitHub API tego wymaga
+            req = urllib.request.Request(url, headers={'User-Agent': 'HCalculator-App'})
+            with urllib.request.urlopen(req, timeout=3) as response:
+                data = json.loads(response.read().decode())
+                
+                # Pobieramy nazwę tagu (np. "v1.0.7") i usuwamy "v"
+                latest_version = data.get('tag_name', '').lstrip('v')
+                current_version_clean = current_version.lstrip('v')
+                
+                # Proste porównanie wersji (zakłada format x.y.z)
+                l_parts = [int(x) for x in latest_version.split('.')]
+                c_parts = [int(x) for x in current_version_clean.split('.')]
+                
+                if l_parts > c_parts:
+                    return {
+                        "update_available": True,
+                        "latest_version": latest_version,
+                        "url": data.get('html_url')
+                    }
+        except Exception as e:
+            print("Błąd sprawdzania aktualizacji:", e)
+            
+        return {"update_available": False}  
 
 html_content = r"""
 <!DOCTYPE html>
@@ -306,6 +338,13 @@ html_content = r"""
 </style>
 </head>
 <body>
+<body>
+
+<div id="update-banner" style="display: none; background-color: #ffaa00; color: #002244; text-align: center; padding: 12px; font-weight: bold; font-size: 14px; position: relative; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+    <span data-i18n="update_msg">Dostępna jest nowa wersja programu:</span> <span id="update-version-text"></span>!
+    <button data-i18n="update_btn" id="update-btn" style="margin-left: 15px; padding: 6px 12px; cursor: pointer; background: #002244; color: #fff; border: none; border-radius: 4px; font-weight: bold; transition: 0.2s;">Pobierz</button>
+    <button id="update-close-btn" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 20px; color: #002244;">&times;</button>
+</div>
 
 <div id="toast">Wystąpił błąd!</div>
 
@@ -584,7 +623,7 @@ html_content = r"""
     <div class="br-tab-content" id="tab-about">
       <h3 data-i18n="about_title">HCalculator v1.0.7</h3>
       <p class="desc" data-i18n="about_desc">Profesjonalny Kalkulator Hydrauliczny</p>
-      <p class="desc">🌐 <a href="https://hcalculator.com.pl" target="_blank"><strong>HCalculator.com.pl</strong></a></p>
+      <p class="desc">🌐 <a href="https://hcalculator.app" target="_blank"><strong>HCalculator.app</strong></a></p>
       <div style="background-color: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; line-height: 1.6;">
           <p data-i18n="about_text" style="color: #444; font-size: 15px; margin-top: 0;">
               Ten program tworzę hobbystycznie. Jest w 100% darmowy, nie wyświetla reklam i szanuje Twoją prywatność działając offline. Jeśli HCalculator zaoszczędził Twój czas w warsztacie lub przy projekcie, możesz wesprzeć jego dalszy rozwój, stawiając mi symboliczną kawę. Dziękuję!
@@ -645,6 +684,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   const langDict = {
     "pl": {
+      "update_msg": "Dostępna jest nowa wersja programu:",
+      "update_btn": "Pobierz",
       "about": "ℹ️ O Programie", "tab_force": "Siła", "tab_speed": "Prędkość", "tab_power": "Moc", "tab_flow": "Wydajność", "tab_tank": "Zbiornik", "tab_history": "Historia",
       "tab_hose_diam": "Wąż (Ø)", "tab_hose_drop": "Wąż (Δp)", "tab_motor": "Silnik",
       "force_title": "Siła Siłownika", "force_desc": "Oblicz siłę pchania i ciągnięcia.",
@@ -685,6 +726,8 @@ document.addEventListener('DOMContentLoaded', function() {
       "print_report": "Raport Obliczeń", "print_params": "Parametry Wejściowe:", "print_results": "Wyniki Obliczeń:", "print_footer": "Wygenerowano w programie HCalculator v1.0.7", "print_date": "Data:"
     },
     "en": {
+      "update_msg": "A new version of the program is available:",
+      "update_btn": "Download",
       "about": "ℹ️ About", "tab_force": "Force", "tab_speed": "Speed", "tab_power": "Power", "tab_flow": "Flow Rate", "tab_tank": "Tank", "tab_history": "History",
       "tab_hose_diam": "Hose (Ø)", "tab_hose_drop": "Hose (Δp)", "tab_motor": "Motor",
       "force_title": "Cylinder Force", "force_desc": "Calculate push and pull force.",
@@ -725,6 +768,8 @@ document.addEventListener('DOMContentLoaded', function() {
       "print_report": "Calculation Report", "print_params": "Input Parameters:", "print_results": "Calculation Results:", "print_footer": "Generated in HCalculator v1.0.7", "print_date": "Date:"
     },
     "de": {
+      "update_msg": "Eine neue Version des Programms ist verfügbar:",
+      "update_btn": "Herunterladen",
       "about": "ℹ️ Über", "tab_force": "Kraft", "tab_speed": "Zykluszeit", "tab_power": "Leistung", "tab_flow": "Fördermenge", "tab_tank": "Tank", "tab_history": "Verlauf",
       "tab_hose_diam": "Schlauch (Ø)", "tab_hose_drop": "Schlauch (Δp)", "tab_motor": "Motor",
       "force_title": "Zylinderkraft", "force_desc": "Druck- und Zugkraft berechnen.",
@@ -1244,6 +1289,27 @@ document.addEventListener('DOMContentLoaded', function() {
               window.appHistory = [];
           }
       }
+      
+      // 3. Sprawdzanie aktualizacji na GitHubie
+      const currentAppVersion = "1.0.7"; // Zmień tę wartość przy wydawaniu nowej wersji
+      try {
+          let updateInfo = await window.pywebview.api.check_update(currentAppVersion);
+          if (updateInfo && updateInfo.update_available) {
+              document.getElementById('update-version-text').innerText = "v" + updateInfo.latest_version;
+              document.getElementById('update-banner').style.display = 'block';
+              
+              // Obsługa przycisków
+              document.getElementById('update-btn').onclick = function() {
+                  window.pywebview.api.open_url(updateInfo.url);
+              };
+              document.getElementById('update-close-btn').onclick = function() {
+                  document.getElementById('update-banner').style.display = 'none';
+              };
+          }
+      } catch (e) {
+          console.warn("Nie udało się sprawdzić aktualizacji", e);
+      }
+      
       renderHistory();
       setTimeout(updateScrollArrows, 200); 
   });

@@ -64,5 +64,6 @@ app = BUNDLE(
         'CFBundleVersion': '1.0.7',
         'NSHumanReadableCopyright': 'Copyright © 2026 Daniel Kaliski. All rights reserved.',
         'NSHighResolutionCapable': True,
+        'AppWebsite': 'https://hcalculator.app/',
     },
 )
