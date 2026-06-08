@@ -29,7 +29,7 @@ Zalecana struktura katalogów dla prawidłowego działania skryptu i kompilatora
 ├── /lang                 # Katalog z plikami tłumaczeń (.json)
 │   ├── pl.json
 │   ├── en.json
-│   ├── de.json
+│   └── de.json
 └── /assets               # Katalog z grafikami pomocniczymi (schematy, logotypy)
 ```
 
