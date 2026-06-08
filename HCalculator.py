@@ -11,7 +11,6 @@
 # https://opensource.org/license/gpl-3.0
 # ==============================================================================
 
-
 import urllib.request
 import json
 import webview
@@ -58,26 +57,18 @@ class Api:
         except Exception as e:
             print("Błąd odczytu motywu:", e)
         return "light"
-    
+
     def check_update(self, current_version):
-        # Wpisz tutaj swojego GitHuba i nazwę repozytorium
-        repo = "daniel-kaliski/HCalculator" 
+        repo = "TWOJA_NAZWA_UZYTKOWNIKA/TWOJE_REPOZYTORIUM" # <--- Zmień to na swoje dane z GitHuba
         url = f"https://api.github.com/repos/{repo}/releases/latest"
-        
         try:
-            # Ustawiamy User-Agent, bo GitHub API tego wymaga
             req = urllib.request.Request(url, headers={'User-Agent': 'HCalculator-App'})
             with urllib.request.urlopen(req, timeout=3) as response:
                 data = json.loads(response.read().decode())
-                
-                # Pobieramy nazwę tagu (np. "v1.0.7") i usuwamy "v"
                 latest_version = data.get('tag_name', '').lstrip('v')
                 current_version_clean = current_version.lstrip('v')
-                
-                # Proste porównanie wersji (zakłada format x.y.z)
                 l_parts = [int(x) for x in latest_version.split('.')]
                 c_parts = [int(x) for x in current_version_clean.split('.')]
-                
                 if l_parts > c_parts:
                     return {
                         "update_available": True,
@@ -85,9 +76,9 @@ class Api:
                         "url": data.get('html_url')
                     }
         except Exception as e:
-            print("Błąd sprawdzania aktualizacji:", e)
-            
-        return {"update_available": False}  
+            pass
+        return {"update_available": False}
+
 
 html_content = r"""
 <!DOCTYPE html>
@@ -95,7 +86,7 @@ html_content = r"""
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-<title>HCalculator - Hydraulic Calculator v1.0.7</title>
+<title>HCalculator - Hydraulic Calculator v1.1.0</title>
 <style>
   html, body { 
       margin: 0; 
@@ -338,11 +329,10 @@ html_content = r"""
 </style>
 </head>
 <body>
-<body>
 
 <div id="update-banner" style="display: none; background-color: #ffaa00; color: #002244; text-align: center; padding: 12px; font-weight: bold; font-size: 14px; position: relative; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
     <span data-i18n="update_msg">Dostępna jest nowa wersja programu:</span> <span id="update-version-text"></span>!
-    <button data-i18n="update_btn" id="update-btn" style="margin-left: 15px; padding: 6px 12px; cursor: pointer; background: #002244; color: #fff; border: none; border-radius: 4px; font-weight: bold; transition: 0.2s;">Pobierz</button>
+    <button id="update-btn" style="margin-left: 15px; padding: 6px 12px; cursor: pointer; background: #002244; color: #fff; border: none; border-radius: 4px; font-weight: bold; transition: 0.2s;">Pobierz</button>
     <button id="update-close-btn" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 20px; color: #002244;">&times;</button>
 </div>
 
@@ -359,7 +349,7 @@ html_content = r"""
         <h3 style="margin-top:0; color:#d9534f;" data-i18n="print_results">Wyniki Obliczeń:</h3>
         <pre id="print-results" style="font-family: 'Segoe UI', sans-serif; font-size: 16px; font-weight: bold; color: #002244; white-space: pre-wrap; margin:0;"></pre>
     </div>
-    <p style="font-size: 12px; color: #999; text-align: center; margin-top: 40px;" data-i18n="print_footer">Wygenerowano w programie HCalculator v1.0.7</p>
+    <p style="font-size: 12px; color: #999; text-align: center; margin-top: 40px;" data-i18n="print_footer">Wygenerowano w programie HCalculator v1.1.0</p>
 </div>
 
 <div class="no-print br-app-container">
@@ -398,6 +388,9 @@ html_content = r"""
         <button class="br-tab-btn" data-tab="tab-wydajnosc" data-i18n="tab_flow">Wydajn.</button>
         <button class="br-tab-btn" data-tab="tab-silnik" data-i18n="tab_motor">Silnik</button>
         <button class="br-tab-btn" data-tab="tab-zbiornik" data-i18n="tab_tank">Zbiornik</button>
+        <button class="br-tab-btn" data-tab="tab-akumulator" data-i18n="tab_acc">Akumulator</button>
+        <button class="br-tab-btn" data-tab="tab-chlodnica" data-i18n="tab_cooler">Chłodnica</button>
+        <button class="br-tab-btn" data-tab="tab-kv" data-i18n="tab_kv">Kv/Cv</button>
         <button class="br-tab-btn" data-tab="tab-waz-srednica" data-i18n="tab_hose_diam">Wąż (Ø)</button>
         <button class="br-tab-btn" data-tab="tab-waz-spadek" data-i18n="tab_hose_drop">Wąż (Δp)</button>
         <button class="br-tab-btn" data-tab="tab-historia" data-i18n="tab_history">Historia</button>
@@ -555,6 +548,72 @@ html_content = r"""
       </div>
     </div>
 
+    <div class="br-tab-content" id="tab-akumulator">
+      <h3 data-i18n="acc_title">Dobór Akumulatora</h3>
+      <p class="desc" data-i18n="acc_desc">Oblicz pojemność całkowitą i ciśnienie gazu (izotermicznie).</p>
+      <div class="br-form-group">
+        <label data-i18n="acc_v">Wymagana objętość użyteczna oleju (L):</label>
+        <input type="number" id="acc-v" placeholder="np. 2.5" min="0.1" step="0.1">
+      </div>
+      <div class="br-form-group">
+        <label data-i18n="acc_p1">Maksymalne ciśnienie robocze P1 (bar):</label>
+        <input type="number" id="acc-p1" placeholder="np. 200" min="1">
+      </div>
+      <div class="br-form-group">
+        <label data-i18n="acc_p2">Minimalne ciśnienie robocze P2 (bar):</label>
+        <input type="number" id="acc-p2" placeholder="np. 150" min="1">
+      </div>
+      <button class="br-calc-btn" id="calc-acc-btn" data-i18n="btn_acc">Oblicz akumulator</button>
+      <div class="br-results" id="acc-results">
+        <p><strong data-i18n="acc_v0">Całkowita poj. akumulatora (V0):</strong> <span id="res-acc-v0" style="color: #d9534f; font-weight: bold;">0</span> L</p>
+        <p><strong data-i18n="acc_p0">Ciśnienie wstępne gazu (P0):</strong> <span id="res-acc-p0" style="color: #0055a5; font-weight: bold;">0</span> bar</p>
+      </div>
+    </div>
+
+    <div class="br-tab-content" id="tab-chlodnica">
+      <h3 data-i18n="cool_title">Moc Chłodnicy Oleju</h3>
+      <p class="desc" data-i18n="cool_desc">Dobierz chłodnicę dla swojego układu.</p>
+      <div class="br-form-group">
+        <label data-i18n="cool_kw">Moc zainstalowana układu (kW):</label>
+        <input type="number" id="cool-kw" placeholder="np. 15" min="0.1" step="0.1">
+      </div>
+      <div class="br-form-group">
+        <label data-i18n="cool_toil">Docelowa temp. oleju (°C):</label>
+        <input type="number" id="cool-toil" placeholder="np. 50" value="50">
+      </div>
+      <div class="br-form-group">
+        <label data-i18n="cool_tamb">Temp. otoczenia chłodnicy (°C):</label>
+        <input type="number" id="cool-tamb" placeholder="np. 25" value="25">
+      </div>
+      <button class="br-calc-btn" id="calc-cool-btn" data-i18n="btn_cool">Oblicz chłodnicę</button>
+      <div class="br-results" id="cool-results">
+        <p><strong data-i18n="cool_heat">Moc cieplna do odprowadzenia:</strong> <span id="res-cool-heat" style="color: #d9534f; font-weight: bold;">0</span> kW</p>
+        <p><strong data-i18n="cool_pk">Wymagany wskaźnik chłodzenia:</strong> <span id="res-cool-pk" style="color: #0055a5; font-weight: bold;">0</span> kW/°C</p>
+      </div>
+    </div>
+
+    <div class="br-tab-content" id="tab-kv">
+      <h3 data-i18n="kv_title">Współczynnik Kv / Cv</h3>
+      <p class="desc" data-i18n="kv_desc">Dobierz przepustowość zaworów / rozdzielaczy.</p>
+      <div class="br-form-group">
+        <label data-i18n="kv_flow">Wymagany przepływ (L/min):</label>
+        <input type="number" id="kv-flow" placeholder="np. 60" min="0.1" step="0.1">
+      </div>
+      <div class="br-form-group">
+        <label data-i18n="kv_dp">Dopuszczalny spadek ciśnienia Δp (bar):</label>
+        <input type="number" id="kv-dp" placeholder="np. 3" value="3" min="0.1" step="0.1">
+      </div>
+      <div class="br-form-group">
+        <label data-i18n="kv_sg">Gęstość względna oleju (SG):</label>
+        <input type="number" id="kv-sg" placeholder="np. 0.87" value="0.87" min="0.5" step="0.01">
+      </div>
+      <button class="br-calc-btn" id="calc-kv-btn" data-i18n="btn_kv">Oblicz Kv / Cv</button>
+      <div class="br-results" id="kv-results">
+        <p><strong data-i18n="res_kv">Współczynnik Kv:</strong> <span id="res-kv-val" style="color: #d9534f; font-weight: bold;">0</span> m³/h</p>
+        <p><strong data-i18n="res_cv">Współczynnik Cv:</strong> <span id="res-cv-val" style="color: #0055a5; font-weight: bold;">0</span> US gpm</p>
+      </div>
+    </div>
+
     <div class="br-tab-content" id="tab-waz-srednica">
       <h3 data-i18n="hose_diam_title">Dobór Średnicy Węża</h3>
       <p class="desc" data-i18n="hose_diam_desc">Oblicz optymalną średnicę wewnętrzną przewodu.</p>
@@ -614,14 +673,12 @@ html_content = r"""
     <div class="br-tab-content" id="tab-historia">
       <h3 data-i18n="history_title">Historia Obliczeń</h3>
       <p class="desc" data-i18n="history_desc">Twoje 10 ostatnich wyników. (Lokalnie)</p>
-      
       <div id="history-list"></div>
-      
       <button id="clear-history-btn" class="br-copy-btn" style="display:block; margin-top:20px; background-color:#fce4e4; border-color:#d9534f; color:#d9534f;" data-i18n="clear_history">Wyczyść historię</button>
     </div>
     
     <div class="br-tab-content" id="tab-about">
-      <h3 data-i18n="about_title">HCalculator v1.0.7</h3>
+      <h3 data-i18n="about_title">HCalculator v1.1.0</h3>
       <p class="desc" data-i18n="about_desc">Profesjonalny Kalkulator Hydrauliczny</p>
       <p class="desc">🌐 <a href="https://hcalculator.app" target="_blank"><strong>HCalculator.app</strong></a></p>
       <div style="background-color: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; line-height: 1.6;">
@@ -653,7 +710,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
   const themeToggleBtn = document.getElementById('theme-toggle');
   
-  // Próba odczytu z localStorage w pierwszej kolejności (dla płynności jeśli zadziała)
   try {
       if (localStorage.getItem('hcalc_theme') === 'dark') {
           document.body.classList.add('dark-mode');
@@ -685,9 +741,21 @@ document.addEventListener('DOMContentLoaded', function() {
   const langDict = {
     "pl": {
       "update_msg": "Dostępna jest nowa wersja programu:",
-      "update_btn": "Pobierz",
       "about": "ℹ️ O Programie", "tab_force": "Siła", "tab_speed": "Prędkość", "tab_power": "Moc", "tab_flow": "Wydajność", "tab_tank": "Zbiornik", "tab_history": "Historia",
-      "tab_hose_diam": "Wąż (Ø)", "tab_hose_drop": "Wąż (Δp)", "tab_motor": "Silnik",
+      "tab_hose_diam": "Wąż (Ø)", "tab_hose_drop": "Wąż (Δp)", "tab_motor": "Silnik", "tab_acc": "Akum.", "tab_cooler": "Chłodnica", "tab_kv": "Kv/Cv",
+      
+      "acc_title": "Dobór Akumulatora", "acc_desc": "Oblicz pojemność całkowitą i ciśnienie gazu.", 
+      "acc_v": "Wymagana objętość użyteczna oleju (L):", "acc_p1": "Maksymalne ciśnienie robocze P1 (bar):", "acc_p2": "Minimalne ciśnienie robocze P2 (bar):", 
+      "btn_acc": "Oblicz akumulator", "acc_v0": "Całkowita poj. akumulatora (V0):", "acc_p0": "Ciśnienie wstępne gazu (P0):",
+      
+      "cool_title": "Moc Chłodnicy Oleju", "cool_desc": "Dobierz chłodnicę dla swojego układu.", 
+      "cool_kw": "Moc zainstalowana układu (kW):", "cool_toil": "Docelowa temp. oleju (°C):", "cool_tamb": "Temp. otoczenia chłodnicy (°C):", 
+      "btn_cool": "Oblicz chłodnicę", "cool_heat": "Moc cieplna do odprowadzenia:", "cool_pk": "Wymagany wskaźnik chłodzenia:",
+      
+      "kv_title": "Współczynnik Kv / Cv", "kv_desc": "Dobierz przepustowość zaworów / rozdzielaczy.", 
+      "kv_flow": "Wymagany przepływ (L/min):", "kv_dp": "Dopuszczalny spadek ciśnienia Δp (bar):", "kv_sg": "Gęstość względna oleju (SG):", 
+      "btn_kv": "Oblicz Kv / Cv", "res_kv": "Współczynnik Kv:", "res_cv": "Współczynnik Cv:",
+
       "force_title": "Siła Siłownika", "force_desc": "Oblicz siłę pchania i ciągnięcia.",
       "pressure": "Ciśnienie robocze (bar):", "bore": "Wewn. średnica tłoka (mm):", "rod": "Średnica tłoczyska (mm):",
       "btn_force": "Oblicz siłę", "push": "Siła pchania:", "pull": "Siła ciągnięcia:",
@@ -717,19 +785,32 @@ document.addEventListener('DOMContentLoaded', function() {
       "laminar": "Laminarny", "turbulent": "Turbulentny",
       "history_title": "Historia Obliczeń", "history_desc": "Twoje 10 ostatnich wyników (Trwale zapisane).", "clear_history": "Wyczyść historię", "empty_history": "Brak zapisanej historii.", "hist_input": "Wejście:", "hist_result": "Wynik:",
       "btn_pdf": "📄 Generuj PDF", "copy_btn": "📋 Kopiuj wynik",
-      "about_title": "HCalculator v1.0.7", "about_desc": "Profesjonalny Kalkulator Hydrauliczny",
+      "about_title": "HCalculator v1.1.0", "about_desc": "Profesjonalny Kalkulator Hydrauliczny",
       "about_text": "Ten program tworzę hobbystycznie. Jest w 100% darmowy, nie wyświetla reklam i szanuje Twoją prywatność działając offline. Jeśli HCalculator zaoszczędził Twój czas w warsztacie lub przy projekcie, możesz wesprzeć jego dalszy rozwój, stawiając mi symboliczną kawę. Dziękuję!",
       "btn_coffee": "Postaw mi kawę",
       "ph_180": "np. 180", "ph_80": "np. 80", "ph_40": "np. 40", "ph_500": "np. 500", "ph_14": "np. 14", "ph_custom": "Wpisz...",
       "err_empty": "Proszę poprawnie wypełnić wszystkie pola!",
       "err_bore": "Średnica tłoka musi być większa niż tłoczyska!",
-      "print_report": "Raport Obliczeń", "print_params": "Parametry Wejściowe:", "print_results": "Wyniki Obliczeń:", "print_footer": "Wygenerowano w programie HCalculator v1.0.7", "print_date": "Data:"
+      "err_acc_p": "Max ciśnienie P1 musi być większe niż Min P2!",
+      "print_report": "Raport Obliczeń", "print_params": "Parametry Wejściowe:", "print_results": "Wyniki Obliczeń:", "print_footer": "Wygenerowano w programie HCalculator v1.1.0", "print_date": "Data:"
     },
     "en": {
-      "update_msg": "A new version of the program is available:",
-      "update_btn": "Download",
-      "about": "ℹ️ About", "tab_force": "Force", "tab_speed": "Speed", "tab_power": "Power", "tab_flow": "Flow Rate", "tab_tank": "Tank", "tab_history": "History",
-      "tab_hose_diam": "Hose (Ø)", "tab_hose_drop": "Hose (Δp)", "tab_motor": "Motor",
+      "update_msg": "A new version is available:",
+      "about": "ℹ️ About", "tab_force": "Force", "tab_speed": "Speed", "tab_power": "Power", "tab_flow": "Flow", "tab_tank": "Tank", "tab_history": "History",
+      "tab_hose_diam": "Hose (Ø)", "tab_hose_drop": "Hose (Δp)", "tab_motor": "Motor", "tab_acc": "Accum.", "tab_cooler": "Cooler", "tab_kv": "Kv/Cv",
+      
+      "acc_title": "Accumulator Sizing", "acc_desc": "Calculate total volume and pre-charge pressure.", 
+      "acc_v": "Required useful fluid volume (L):", "acc_p1": "Max working pressure P1 (bar):", "acc_p2": "Min working pressure P2 (bar):", 
+      "btn_acc": "Calculate accumulator", "acc_v0": "Total accumulator volume (V0):", "acc_p0": "Gas pre-charge pressure (P0):",
+      
+      "cool_title": "Oil Cooler Power", "cool_desc": "Size the oil cooler for your system.", 
+      "cool_kw": "System installed power (kW):", "cool_toil": "Target oil temp. (°C):", "cool_tamb": "Ambient cooler temp. (°C):", 
+      "btn_cool": "Calculate cooler", "cool_heat": "Heat power to dissipate:", "cool_pk": "Required specific cooling capacity:",
+      
+      "kv_title": "Flow Coefficient Kv/Cv", "kv_desc": "Select capacity for valves / blocks.", 
+      "kv_flow": "Required flow rate (L/min):", "kv_dp": "Allowed pressure drop Δp (bar):", "kv_sg": "Specific gravity of oil (SG):", 
+      "btn_kv": "Calculate Kv / Cv", "res_kv": "Kv Coefficient:", "res_cv": "Cv Coefficient:",
+
       "force_title": "Cylinder Force", "force_desc": "Calculate push and pull force.",
       "pressure": "Operating pressure (bar):", "bore": "Inner bore diameter (mm):", "rod": "Rod diameter (mm):",
       "btn_force": "Calculate force", "push": "Push force:", "pull": "Pull force:",
@@ -759,19 +840,32 @@ document.addEventListener('DOMContentLoaded', function() {
       "laminar": "Laminar", "turbulent": "Turbulent",
       "history_title": "Calculation History", "history_desc": "Your last 10 results (Saved persistently).", "clear_history": "Clear History", "empty_history": "No history saved yet.", "hist_input": "Input:", "hist_result": "Result:",
       "btn_pdf": "📄 Generate PDF", "copy_btn": "📋 Copy result",
-      "about_title": "HCalculator v1.0.7", "about_desc": "Professional Hydraulic Calculator",
+      "about_title": "HCalculator v1.1.0", "about_desc": "Professional Hydraulic Calculator",
       "about_text": "This program is a passion project. It is 100% free, has no ads, and respects your privacy by working completely offline. If HCalculator has saved you time in the workshop or on a project, you can support its future development by buying me a virtual coffee. Thank you!",
       "btn_coffee": "Buy me a coffee",
       "ph_180": "e.g. 180", "ph_80": "e.g. 80", "ph_40": "e.g. 40", "ph_500": "e.g. 500", "ph_14": "e.g. 14", "ph_custom": "Enter...",
       "err_empty": "Please fill in all fields correctly!",
       "err_bore": "Bore diameter must be larger than rod diameter!",
-      "print_report": "Calculation Report", "print_params": "Input Parameters:", "print_results": "Calculation Results:", "print_footer": "Generated in HCalculator v1.0.7", "print_date": "Date:"
+      "err_acc_p": "Max pressure P1 must be greater than Min P2!",
+      "print_report": "Calculation Report", "print_params": "Input Parameters:", "print_results": "Calculation Results:", "print_footer": "Generated in HCalculator v1.1.0", "print_date": "Date:"
     },
     "de": {
-      "update_msg": "Eine neue Version des Programms ist verfügbar:",
-      "update_btn": "Herunterladen",
-      "about": "ℹ️ Über", "tab_force": "Kraft", "tab_speed": "Zykluszeit", "tab_power": "Leistung", "tab_flow": "Fördermenge", "tab_tank": "Tank", "tab_history": "Verlauf",
-      "tab_hose_diam": "Schlauch (Ø)", "tab_hose_drop": "Schlauch (Δp)", "tab_motor": "Motor",
+      "update_msg": "Eine neue Version ist verfügbar:",
+      "about": "ℹ️ Über", "tab_force": "Kraft", "tab_speed": "Zykluszeit", "tab_power": "Leistung", "tab_flow": "Förder.", "tab_tank": "Tank", "tab_history": "Verlauf",
+      "tab_hose_diam": "Schlauch (Ø)", "tab_hose_drop": "Schlauch (Δp)", "tab_motor": "Motor", "tab_acc": "Speicher", "tab_cooler": "Kühler", "tab_kv": "Kv/Cv",
+      
+      "acc_title": "Speicherauslegung", "acc_desc": "Gesamtvolumen und Vorspanndruck berechnen.", 
+      "acc_v": "Benötigtes Nutzvolumen (L):", "acc_p1": "Max. Betriebsdruck P1 (bar):", "acc_p2": "Min. Betriebsdruck P2 (bar):", 
+      "btn_acc": "Speicher berechnen", "acc_v0": "Speicher Gesamtvolumen (V0):", "acc_p0": "Gas-Vorspanndruck (P0):",
+      
+      "cool_title": "Ölkühler Leistung", "cool_desc": "Auslegung des Ölkühlers für Ihr System.", 
+      "cool_kw": "Installierte Systemleistung (kW):", "cool_toil": "Ziel-Öltemperatur (°C):", "cool_tamb": "Umgebungstemperatur Kühler (°C):", 
+      "btn_cool": "Kühler berechnen", "cool_heat": "Abzuführende Wärmeleistung:", "cool_pk": "Erforderliche spez. Kühlleistung:",
+      
+      "kv_title": "Durchflusskoeffizient Kv/Cv", "kv_desc": "Kapazitätsauswahl für Ventile/Blöcke.", 
+      "kv_flow": "Benötigter Durchfluss (L/min):", "kv_dp": "Erlaubter Druckabfall Δp (bar):", "kv_sg": "Spezifisches Gewicht (SG):", 
+      "btn_kv": "Kv / Cv berechnen", "res_kv": "Kv-Koeffizient:", "res_cv": "Cv-Koeffizient:",
+
       "force_title": "Zylinderkraft", "force_desc": "Druck- und Zugkraft berechnen.",
       "pressure": "Betriebsdruck (bar):", "bore": "Kolbeninnendurchmesser (mm):", "rod": "Stangendurchmesser (mm):",
       "btn_force": "Kraft berechnen", "push": "Druckkraft:", "pull": "Zugkraft:",
@@ -801,13 +895,14 @@ document.addEventListener('DOMContentLoaded', function() {
       "laminar": "Laminar", "turbulent": "Turbulent",
       "history_title": "Berechnungsverlauf", "history_desc": "Ihre letzten 10 Ergebnisse (Lokal).", "clear_history": "Verlauf löschen", "empty_history": "Noch kein Verlauf gespeichert.", "hist_input": "Eingabe:", "hist_result": "Ergebnis:",
       "btn_pdf": "📄 PDF erstellen", "copy_btn": "📋 Ergebnis kopieren",
-      "about_title": "HCalculator v1.0.7", "about_desc": "Professioneller Hydraulik-Rechner",
+      "about_title": "HCalculator v1.1.0", "about_desc": "Professioneller Hydraulik-Rechner",
       "about_text": "Dieses Programm ist ein Leidenschaftsprojekt. Es ist zu 100 % kostenlos, werbefrei und respektiert Ihre Privatsphäre, da es komplett offline funktioniert. Wenn HCalculator Ihnen in der Werkstatt oder bei einem Projekt Zeit gespart hat, können Sie die weitere Entwicklung unterstützen, indem Sie mir einen virtuellen Kaffee spendieren. Danke!",
       "btn_coffee": "Spendieren Sie mir einen Kaffee",
       "ph_180": "z.B. 180", "ph_80": "z.B. 80", "ph_40": "z.B. 40", "ph_500": "z.B. 500", "ph_14": "z.B. 14", "ph_custom": "Wert...",
       "err_empty": "Bitte füllen Sie alle Felder korrekt aus!",
       "err_bore": "Kolbendurchmesser muss größer als Stangendurchmesser sein!",
-      "print_report": "Berechnungsbericht", "print_params": "Eingabeparameter:", "print_results": "Berechnungsergebnisse:", "print_footer": "Erstellt in HCalculator v1.0.7", "print_date": "Datum:"
+      "err_acc_p": "Max. Druck P1 muss größer als Min. P2 sein!",
+      "print_report": "Berechnungsbericht", "print_params": "Eingabeparameter:", "print_results": "Berechnungsergebnisse:", "print_footer": "Erstellt in HCalculator v1.1.0", "print_date": "Datum:"
     }
   };
 
@@ -1148,7 +1243,7 @@ document.addEventListener('DOMContentLoaded', function() {
     createActionButtons('flow-results', 'copy-flow', 'pdf-flow', pTxt, rTxt, 'flow_title', `HCalculator | ${langDict[lang]['flow_title']}`);
   });
 
-  // NOWY MODUŁ - Silnik Hydrauliczny
+  // Silnik Hydrauliczny
   document.getElementById('calc-mot-btn').addEventListener('click', function(e) {
       e.preventDefault();
       let lang = langSwitch.value;
@@ -1193,6 +1288,103 @@ document.addEventListener('DOMContentLoaded', function() {
     let pTxt = `${langDict[lang]['p_flow']} ${Q}\n${langDict[lang]['sys_type']} ${typeText}`;
     let rTxt = `${langDict[lang]['rec']} ${resultRange} ${langDict[lang]['liters']}`;
     createActionButtons('tank-results', 'copy-tank', 'pdf-tank', pTxt, rTxt, 'tank_title', `HCalculator | ${langDict[lang]['tank_title']}`);
+  });
+
+  // ------------------------------------
+  // NOWY MODUŁ: Akumulator
+  // ------------------------------------
+  document.getElementById('calc-acc-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      let lang = langSwitch.value;
+      let dV = parseFloat(document.getElementById('acc-v').value);
+      let p1 = parseFloat(document.getElementById('acc-p1').value);
+      let p2 = parseFloat(document.getElementById('acc-p2').value);
+
+      if (isNaN(dV) || isNaN(p1) || isNaN(p2) || dV <= 0) return showError('err_empty');
+      if (p2 >= p1) return showError('err_acc_p');
+
+      // Ciśnienia absolutne dla dokładności praw gazowych (dodajemy 1 bar atmosf.)
+      let p1a = p1 + 1;
+      let p2a = p2 + 1;
+      
+      // Standardowe ciśnienie wstępne dla magazynowania energii: 90% min ciśnienia roboczego
+      let p0a = (p2a * 0.90);
+      let p0_gauge = p0a - 1; 
+
+      // Obliczenie izotermiczne (najbezpieczniejsze dla standardowych akumulatorów): V0 = (dV * p1a * p2a) / (p0a * (p1a - p2a))
+      let v0 = (dV * p1a * p2a) / (p0a * (p1a - p2a));
+
+      document.getElementById('res-acc-v0').innerText = v0.toFixed(2);
+      document.getElementById('res-acc-p0').innerText = p0_gauge.toFixed(1);
+      document.getElementById('acc-results').style.display = 'block';
+
+      let pTxt = `${langDict[lang]['acc_v']} ${dV} L\n${langDict[lang]['acc_p1']} ${p1} bar\n${langDict[lang]['acc_p2']} ${p2} bar`;
+      let rTxt = `${langDict[lang]['acc_v0']} ${v0.toFixed(2)} L\n${langDict[lang]['acc_p0']} ${p0_gauge.toFixed(1)} bar`;
+      createActionButtons('acc-results', 'copy-acc', 'pdf-acc', pTxt, rTxt, 'acc_title', `HCalculator | ${langDict[lang]['acc_title']}`);
+  });
+
+  // ------------------------------------
+  // NOWY MODUŁ: Chłodnica
+  // ------------------------------------
+  document.getElementById('calc-cool-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      let lang = langSwitch.value;
+      let P_sys = parseFloat(document.getElementById('cool-kw').value);
+      let T_oil = parseFloat(document.getElementById('cool-toil').value);
+      let T_amb = parseFloat(document.getElementById('cool-tamb').value);
+
+      if (isNaN(P_sys) || isNaN(T_oil) || isNaN(T_amb) || P_sys <= 0) return showError('err_empty');
+      
+      let dT = T_oil - T_amb;
+      if (dT <= 0) {
+          // Jeśli otoczenie jest cieplejsze niż docelowy olej, chłodzenie pasywne/powietrzne nie zadziała
+          showError('err_empty');
+          return;
+      }
+
+      // Reguła: ok. 30% zainstalowanej mocy zamienia się w ciepło (szczególnie w standardowych układach zębatych/suwakowych)
+      let P_heat = P_sys * 0.30;
+      
+      // Wymagany wskaźnik mocy chłodniczej w kW/°C (Specyfic cooling capacity)
+      let P_k = P_heat / dT;
+
+      document.getElementById('res-cool-heat').innerText = P_heat.toFixed(2);
+      document.getElementById('res-cool-pk').innerText = P_k.toFixed(3);
+      document.getElementById('cool-results').style.display = 'block';
+
+      let pTxt = `${langDict[lang]['cool_kw']} ${P_sys} kW\n${langDict[lang]['cool_toil']} ${T_oil} °C\n${langDict[lang]['cool_tamb']} ${T_amb} °C`;
+      let rTxt = `${langDict[lang]['cool_heat']} ${P_heat.toFixed(2)} kW\n${langDict[lang]['cool_pk']} ${P_k.toFixed(3)} kW/°C`;
+      createActionButtons('cool-results', 'copy-cool', 'pdf-cool', pTxt, rTxt, 'cool_title', `HCalculator | ${langDict[lang]['cool_title']}`);
+  });
+
+  // ------------------------------------
+  // NOWY MODUŁ: Kv / Cv
+  // ------------------------------------
+  document.getElementById('calc-kv-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      let lang = langSwitch.value;
+      let Q = parseFloat(document.getElementById('kv-flow').value);
+      let dp = parseFloat(document.getElementById('kv-dp').value);
+      let sg = parseFloat(document.getElementById('kv-sg').value);
+
+      if (isNaN(Q) || isNaN(dp) || isNaN(sg) || Q <= 0 || dp <= 0 || sg <= 0) return showError('err_empty');
+
+      // Przeliczenie przepływu L/min na m3/h
+      let Q_m3h = Q / 16.6667;
+      
+      // Obliczenie współczynnika przepływu Kv
+      let kv = Q_m3h * Math.sqrt(sg / dp);
+      
+      // Obliczenie ekwiwalentu amerykańskiego Cv
+      let cv = kv * 1.156;
+
+      document.getElementById('res-kv-val').innerText = kv.toFixed(2);
+      document.getElementById('res-cv-val').innerText = cv.toFixed(2);
+      document.getElementById('kv-results').style.display = 'block';
+
+      let pTxt = `${langDict[lang]['kv_flow']} ${Q} L/min\n${langDict[lang]['kv_dp']} ${dp} bar\n${langDict[lang]['kv_sg']} ${sg}`;
+      let rTxt = `${langDict[lang]['res_kv']} ${kv.toFixed(2)} m³/h\n${langDict[lang]['res_cv']} ${cv.toFixed(2)} US gpm`;
+      createActionButtons('kv-results', 'copy-kv', 'pdf-kv', pTxt, rTxt, 'kv_title', `HCalculator | ${langDict[lang]['kv_title']}`);
   });
 
   // Dobór Średnicy Węża
@@ -1291,14 +1483,13 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       
       // 3. Sprawdzanie aktualizacji na GitHubie
-      const currentAppVersion = "1.0.7"; // Zmień tę wartość przy wydawaniu nowej wersji
+      const currentAppVersion = "1.1.0"; 
       try {
           let updateInfo = await window.pywebview.api.check_update(currentAppVersion);
           if (updateInfo && updateInfo.update_available) {
               document.getElementById('update-version-text').innerText = "v" + updateInfo.latest_version;
               document.getElementById('update-banner').style.display = 'block';
               
-              // Obsługa przycisków
               document.getElementById('update-btn').onclick = function() {
                   window.pywebview.api.open_url(updateInfo.url);
               };
@@ -1323,12 +1514,12 @@ document.addEventListener('DOMContentLoaded', function() {
 if __name__ == '__main__':
     api = Api()
     webview.create_window(
-        title='HCalculator - Hydraulic Calculator v1.0.7', 
+        title='HCalculator - Hydraulic Calculator v1.1.0', 
         html=html_content, 
         js_api=api,
-        width=450, 
-        height=750,
-        min_size=(450, 600)
+        width=600,       # Ustaw docelową szerokość (np. 450 dla układu z obrazka)
+        height=800,      # Ustaw docelową wysokość
+        resizable=False  # <--- Dodaj ten parametr, aby zablokować okno
     )
     webview.start()
     
