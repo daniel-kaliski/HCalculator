@@ -3,7 +3,6 @@
 
 # ==============================================================================
 # Nazwa pliku: HCalculator.py
-# Opis: Krótki opis działania skryptu.
 # 
 # Copyright (c) 2026 Daniel Kaliski
 # Ten kod jest objęty licencją GNU GENERAL PUBLIC LICENSE GPL-3.0.
