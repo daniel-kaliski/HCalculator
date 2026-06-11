@@ -58,6 +58,9 @@ pyinstaller HCalculator.spec
 ## Uwaga dotycząca ścieżek (PyInstaller)
 Jeżeli rozwijasz kod `main.py`, pamiętaj o używaniu funkcji mapującej ścieżki do plików statycznych (`/lang`, `/assets`), aby skompilowana aplikacja potrafiła je odnaleźć w swoim tymczasowym środowisku uruchomieniowym (`sys._MEIPASS`).
 
+## Zrzut ekranu
+<img width="712" height="912" alt="Zrzut ekranu 2026-06-11 o 11 56 29" src="https://github.com/user-attachments/assets/f9206b59-e912-43d3-b059-e136602aeb21" />
+
 ## Autor i Licencja
 **Autor:** Daniel Kaliski
 **Licencja:** Freeware (Darmowa do użytku komercyjnego i prywatnego). Kod udostępniony na potrzeby rozwoju własnego.
