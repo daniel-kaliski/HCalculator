@@ -1,0 +1,41 @@
+name: Build Windows App
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    name: Kompilacja na Windows
+    runs-on: windows-latest
+
+    steps:
+    - name: 📥 Pobranie kodu repozytorium
+      uses: actions/checkout@v4
+
+    - name: 🐍 Konfiguracja środowiska Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11' 
+
+    - name: 📦 Instalacja zależności
+      run: |
+        python -m pip install --upgrade pip
+        pip install pywebview pyinstaller
+
+    - name: ⚙️ Budowanie aplikacji (PyInstaller)
+      # Używamy bezpośredniej komendy z odpowiednimi separatorami (;) dla Windowsa
+      run: |
+        pyinstaller --name "HCalculator" --windowed --noconfirm --add-data "index.html;." --add-data "html2canvas.min.js;." --add-data "flag_pl.svg;." --add-data "flag_en.svg;." --add-data "flag_de.svg;." HCalculator.py
+
+    - name: 🗜️ Pakowanie aplikacji (ZIP)
+      # PyInstaller wygeneruje folder "dist\HCalculator". Pakujemy go, by łatwo go było pobrać.
+      run: |
+        Compress-Archive -Path dist\HCalculator -DestinationPath dist\HCalculator-Windows.zip
+
+    - name: 🚀 Udostępnienie gotowego pliku (Artifact)
+      uses: actions/upload-artifact@v4
+      with:
+        name: HCalculator-Windows
+        path: dist\HCalculator-Windows.zip
