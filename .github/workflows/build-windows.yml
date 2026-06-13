@@ -29,11 +29,6 @@ jobs:
       run: |
         pyinstaller --name "HCalculator" --windowed --icon="icon.ico" --noconfirm --add-data "index.html;." --add-data "html2canvas.min.js;." --add-data "flag_pl.svg;." --add-data "flag_en.svg;." --add-data "flag_de.svg;." HCalculator.py
 
-    - name: Pakowanie aplikacji (ZIP)
-      
-      run: |
-        Compress-Archive -Path dist\HCalculator -DestinationPath dist\HCalculator-Windows.zip
-
     - name: Udostępnienie gotowego pliku (Artifact)
       uses: actions/upload-artifact@v4
       with:
