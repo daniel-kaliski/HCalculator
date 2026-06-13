@@ -1,5 +1,7 @@
 name: Build Windows App
 
+# Skrypt uruchomi się automatycznie po wysłaniu kodu na gałąź "main"
+# oraz pozwoli na ręczne uruchomienie przyciskiem z poziomu GitHuba (workflow_dispatch)
 on:
   push:
     branches: [ "main", "master" ]
@@ -27,7 +29,12 @@ jobs:
     - name: Budowanie aplikacji (PyInstaller)
       
       run: |
-        pyinstaller --name "HCalculator" --windowed --icon="icon.ico" --noconfirm --add-data "index.html;." --add-data "html2canvas.min.js;." --add-data "flag_pl.svg;." --add-data "flag_en.svg;." --add-data "flag_de.svg;." HCalculator.py
+        pyinstaller --name "HCalculator" --windowed --noconfirm --add-data "index.html;." --add-data "html2canvas.min.js;." --add-data "flag_pl.svg;." --add-data "flag_en.svg;." --add-data "flag_de.svg;." HCalculator.py
+
+    - name: Pakowanie aplikacji (ZIP)
+     
+      run: |
+        Compress-Archive -Path dist\HCalculator -DestinationPath dist\HCalculator-Windows.zip
 
     - name: Udostępnienie gotowego pliku (Artifact)
       uses: actions/upload-artifact@v4
