@@ -24,14 +24,14 @@ jobs:
         python -m pip install --upgrade pip
         pip install pywebview pyinstaller
 
-    - name: Budowanie aplikacji (PyInstaller)
-      
+    - name: ⚙️ Budowanie aplikacji (PyInstaller)
+     
       run: |
-        pyinstaller --name "HCalculator" --windowed --icon="icon.ico" --noconfirm --add-data "index.html;." --add-data "html2canvas.min.js;." --add-data "flag_pl.svg;." --add-data "flag_en.svg;." --add-data "flag_de.svg;." HCalculator.py
+        pyinstaller --name "HCalculator" --onefile --windowed --icon="icon.ico" --noconfirm --add-data "index.html;." --add-data "html2canvas.min.js;." --add-data "flag_pl.svg;." --add-data "flag_en.svg;." --add-data "flag_de.svg;." HCalculator.py
 
     - name: Udostępnienie gotowego pliku (Artifact)
       uses: actions/upload-artifact@v4
       with:
         name: HCalculator-Windows
-    
-        path: dist/HCalculator/
+        
+        path: dist/HCalculator.exe
