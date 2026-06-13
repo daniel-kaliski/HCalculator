@@ -27,7 +27,7 @@ jobs:
     - name: ⚙️ Budowanie aplikacji (PyInstaller)
       
       run: |
-        pyinstaller --name "HCalculator" --windowed --noconfirm --add-data "index.html;." --add-data "html2canvas.min.js;." --add-data "flag_pl.svg;." --add-data "flag_en.svg;." --add-data "flag_de.svg;." HCalculator.py
+        pyinstaller --name "HCalculator" --windowed --icon="icon.ico" --noconfirm --add-data "index.html;." --add-data "html2canvas.min.js;." --add-data "flag_pl.svg;." --add-data "flag_en.svg;." --add-data "flag_de.svg;." HCalculator.py
 
     - name: 🗜️ Pakowanie aplikacji (ZIP)
       
