@@ -1,6 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
 # ==============================================================================
-# Nazwa pliku: HCalculator.specs
+# Nazwa pliku: HCalculator.spec
 # 
 # Copyright (c) 2026 Daniel Kaliski
 # Ten kod jest objęty licencją GNU GENERAL PUBLIC LICENSE GPL-3.0.
@@ -12,7 +12,13 @@ a = Analysis(
     ['HCalculator.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[
+        ('index.html', '.'), 
+        ('html2canvas.min.js', '.'),
+        ('flag_pl.svg', '.'),
+        ('flag_en.svg', '.'),
+        ('flag_de.svg', '.')
+    ],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -60,8 +66,8 @@ app = BUNDLE(
         'CFBundleDisplayName': 'HCalculator',
         'CFBundleExecutable': 'HCalculator',
         'CFBundlePackageType': 'APPL',
-        'CFBundleShortVersionString': '1.1.0',
-        'CFBundleVersion': '1.1.0',
+        'CFBundleShortVersionString': '1.1.4',
+        'CFBundleVersion': '1.1.4',
         'NSHumanReadableCopyright': 'Copyright © 2026 Daniel Kaliski. All rights reserved.',
         'NSHighResolutionCapable': True,
         'AppWebsite': 'https://hcalculator.app/',

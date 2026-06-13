@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<title>HCalculator - Hydraulic Calculator v1.1.4</title>
+<script src="html2canvas.min.js"></script>
+<style>
+  html, body { 
+      margin: 0; 
+      padding: 0; 
+      background-color: #f4f7f9; 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      height: 100%; 
+      height: 100dvh; 
+      display: flex; 
+      flex-direction: column; 
+      overflow: hidden; 
+  }
+  
+  .br-app-container { 
+      width: 100%; 
+      height: 100%;
+      display: flex; 
+      flex-direction: column;
+      overflow: hidden;
+  }
+  
+  .top-bar { 
+      background-color: #002244; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      padding-top: calc(env(safe-area-inset-top, 20px) + 12px);
+      padding-bottom: 12px;
+      padding-left: 15px;
+      padding-right: 15px;
+      gap: 10px; 
+      flex-shrink: 0; 
+      position: relative;
+      z-index: 50;
+  }
+  
+  .about-btn { background: none; border: none; color: #a0c4e8; font-size: 14px; cursor: pointer; font-weight: bold; text-transform: uppercase; touch-action: manipulation; white-space: nowrap; padding: 0; }
+  .about-btn:hover { color: #fff; }
+
+  
+  .lang-selector select { 
+      background-color: #004080; 
+      color: #ffffff; 
+      border: 1px solid #0055a5; 
+      padding: 6px 25px 6px 10px; 
+      border-radius: 6px; 
+      font-size: 13px; 
+      font-family: inherit;
+      font-weight: bold;
+      cursor: pointer; 
+      outline: none; 
+      touch-action: manipulation; 
+      transition: background-color 0.3s, border-color 0.3s;
+  }
+  .lang-selector select:hover, 
+  .lang-selector select:focus {
+      background-color: #004080;
+      border-color: #ffaa00; 
+      box-shadow: 0 0 0 2px rgba(255, 170, 0, 0.2);
+  }
+
+  .theme-switch {
+      display: flex;
+      align-items: center;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #001a33; 
+      border-radius: 20px;
+      padding: 2px;
+      width: 120px;
+      height: 30px;
+      box-sizing: border-box;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+      z-index: 100;
+  }
+  .theme-switch input { display: none; }
+  .theme-switch label {
+      flex: 1;
+      text-align: center;
+      font-size: 15px; 
+      cursor: pointer;
+      z-index: 2;
+      color: #a0c4e8;
+      transition: color 0.3s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      margin: 0;
+  }
+  .theme-switch input:checked + label { color: #002244; }
+  body.dark-mode .theme-switch input:checked + label { color: #121212; }
+  
+  .theme-switch-selector {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 38px; 
+      height: 26px;
+      background-color: #ffaa00;
+      border-radius: 18px;
+      transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      z-index: 1;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  #theme-light:checked ~ .theme-switch-selector { transform: translateX(0); }
+  #theme-auto:checked ~ .theme-switch-selector { transform: translateX(39px); }
+  #theme-dark:checked ~ .theme-switch-selector { transform: translateX(78px); }
+
+  .tabs-wrapper {
+      position: relative;
+      background-color: #003366;
+      border-bottom: 2px solid #0055a5;
+      flex-shrink: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+  }
+
+  .br-tabs { 
+      display: flex; 
+      overflow-x: auto; 
+      scrollbar-width: none; 
+      width: 100%;
+      scroll-behavior: smooth;
+  }
+  .br-tabs::-webkit-scrollbar { display: none; }
+  
+  .br-tab-btn { flex: 0 0 auto; background: none; border: none; color: #a0c4e8; padding: 16px 18px; font-size: 15px; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: 0.2s; text-align: center; outline: none; touch-action: manipulation; }
+  .br-tab-btn:hover { color: #ffffff; background-color: #004080; }
+  .br-tab-btn.active { color: #ffffff; background-color: #0055a5; border-bottom: 3px solid #ffaa00; }
+  
+  .lang-switcher { display: flex; gap: 8px; align-items: center; margin-right: 5px; }
+  .flag-btn { 
+      background: none; 
+      border: 1px solid transparent; 
+      padding: 2px; 
+      cursor: pointer; 
+      border-radius: 4px; 
+      transition: 0.2s; 
+      opacity: 0.6; 
+      outline: none; 
+  }
+  .flag-btn:hover { opacity: 1; transform: scale(1.1); }
+  .flag-btn.active { opacity: 1; border-color: #ffaa00; transform: scale(1.1); }
+  .flag-btn img { 
+      width: 24px; 
+      height: 18px; 
+      display: block; 
+      border-radius: 2px; 
+      object-fit: cover;
+  }
+
+  .scroll-arrow {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 24px;
+      background-color: rgba(0, 34, 68, 0.85);
+      color: #ffaa00;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: bold;
+      z-index: 45;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease-in-out;
+  }
+  .scroll-arrow.visible {
+      opacity: 1;
+      pointer-events: auto;
+  }
+  .scroll-arrow.left-arrow { left: 0; box-shadow: 4px 0 8px rgba(0,0,0,0.3); }
+  .scroll-arrow.right-arrow { right: 0; box-shadow: -4px 0 8px rgba(0,0,0,0.3); }
+
+  .br-tab-content { 
+      display: none; 
+      padding: 25px; 
+      flex: 1; 
+      overflow-y: auto; 
+      -webkit-overflow-scrolling: touch; 
+  }
+  .br-tab-content.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+  
+  .br-tab-content h3 { color: #003366; text-align: center; margin-top: 0; margin-bottom: 5px; font-size: 22px; text-transform: uppercase; }
+  .br-tab-content p.desc { font-size: 14px; color: #555; text-align: center; margin-bottom: 25px; }
+  
+  .br-form-group { margin-bottom: 15px; }
+  .br-form-group label { display: block; font-weight: bold; margin-bottom: 6px; font-size: 14px; color: #333; }
+  .br-form-group input, .br-form-group select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; font-family: inherit; }
+  .br-form-group input:focus, .br-form-group select:focus { border-color: #0055a5; outline: none; box-shadow: 0 0 0 2px rgba(0, 85, 165, 0.2); }
+  
+  .br-calc-btn { width: 70%; display: flex; justify-content: center; margin: 0 auto 20px auto; background-color: #0055a5; color: white; padding: 14px; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 15px; touch-action: manipulation; }
+  .br-calc-btn:hover { background-color: #004080; }
+  
+  .br-coffee-btn { display: flex; justify-content: center; align-items: center; box-sizing: border-box; background-color: #ffaa00; color: #003366; border: none; border-radius: 25px; font-weight: bold; cursor: pointer; transition: 0.2s; text-decoration: none; touch-action: manipulation; }
+  .br-coffee-btn:hover { background-color: #ffb732; transform: translateY(-2px); }
+  .br-coffee-btn svg { margin-right: 10px; width: 20px; height: 20px; }
+
+  .br-github-sponsor-btn { display: flex; justify-content: center; align-items: center; box-sizing: border-box; background-color: #f6f8fa; color: #24292e; padding: 14px; border: 1px solid #d1d5da; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.05); touch-action: manipulation; }
+  .br-github-sponsor-btn:hover { background-color: #e1e4e8; transform: translateY(-2px); }
+  .br-github-sponsor-btn svg { margin-right: 10px; width: 20px; height: 20px; fill: #bf3989; }
+  
+  .br-results { margin-top: 25px; padding: 20px; background-color: #ffffff; border: 2px solid #0055a5; border-radius: 6px; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+  .br-results p { margin: 0 0 10px 0; font-size: 16px; }
+  
+  .br-copy-btn { background-color: #e2e8f0; border: 1px solid #ccc; color: #003366; padding: 12px 12px; border-radius: 4px; font-size: 14px; cursor: pointer; margin-top: 15px; width: 100%; transition: 0.2s; font-weight: bold; display: none; touch-action: manipulation; }
+  .br-copy-btn:hover { background-color: #cbd5e1; border-color: #0055a5; }
+  .br-copy-btn.success { background-color: #5cb85c; color: white; border-color: #4cae4c; }
+  
+  .br-footer { text-align: center; padding: 15px 15px calc(15px + env(safe-area-inset-bottom, 0px)) 15px; background-color: #e8ecef; color: #666; font-size: 12px; border-top: 1px solid #dcdcdc; flex-shrink: 0; }
+  
+  #toast { visibility: hidden; min-width: 250px; background-color: #d9534f; color: #fff; text-align: center; border-radius: 6px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 14px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+  #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+  @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+  @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+
+  #print-area { display: none; }
+  
+  .delete-hist-btn { background: none; border: none; color: #d9534f; font-size: 16px; font-weight: bold; cursor: pointer; padding: 0 5px; opacity: 0.6; transition: opacity 0.2s, transform 0.2s; outline: none; }
+  .delete-hist-btn:hover { opacity: 1; transform: scale(1.2); }
+
+  @media print {
+      @page { margin: 10mm; } 
+      body * { visibility: hidden; }
+      body { background-color: #fff; margin: 0; padding: 0; }
+      #print-area, #print-area * { visibility: visible; }
+      #print-area { display: block; position: absolute; left: 0; top: 0; width: 100%; padding: 0; box-sizing: border-box; }
+      #print-area h2 { color: #003366; border-bottom: 2px solid #ffaa00; padding-bottom: 10px; margin-top: 0; }
+      #print-area .print-block { margin-bottom: 20px; padding: 15px; background: #f4f7f9 !important; border-radius: 8px; border: 1px solid #ccc; width: 100%; box-sizing: border-box; page-break-inside: avoid; }
+      #print-area strong { color: #333; }
+      .no-print { display: none !important; }
+      pre { white-space: pre-wrap !important; word-wrap: break-word !important; }
+  }
+
+  
+  body.dark-mode { background-color: #121212; color: #e0e0e0; }
+  body.dark-mode .br-tab-content h3 { color: #a0c4e8; }
+  body.dark-mode .br-tab-content p.desc { color: #aaa; }
+  body.dark-mode .br-form-group label { color: #ccc; }
+  body.dark-mode .br-form-group input, body.dark-mode .br-form-group select { background-color: #2a2a2a; color: #fff; border-color: #444; }
+  body.dark-mode .br-form-group input:focus, body.dark-mode .br-form-group select:focus { border-color: #ffaa00; box-shadow: 0 0 0 2px rgba(255, 170, 0, 0.2); }
+  body.dark-mode .br-results { background-color: #1e1e1e; border-color: #4a90e2; }
+  body.dark-mode .br-results p strong { color: #ccc; }
+  body.dark-mode .br-footer { background-color: #1a1a1a; color: #888; border-top-color: #333; }
+  body.dark-mode #history-list div { background: #1e1e1e !important; border-left-color: #4a90e2 !important; box-shadow: 0 2px 5px rgba(255,255,255,0.05) !important; }
+  body.dark-mode #history-list div strong { color: #a0c4e8 !important; }
+  body.dark-mode #tab-about div[style*="background-color: #fff"] { background-color: #1e1e1e !important; border-color: #444 !important; }
+  body.dark-mode #tab-about div p { color: #ccc !important; }
+  body.dark-mode .lang-selector select { background-color: #004080; border-color: #444; color: #e0e0e0; }
+  body.dark-mode .lang-selector select:hover, body.dark-mode .lang-selector select:focus { background-color: #0055a5; border-color: #ffaa00; }
+  body.dark-mode .br-github-sponsor-btn { background-color: #2c2c2c; color: #e0e0e0; border-color: #555; }
+  body.dark-mode .br-github-sponsor-btn:hover { background-color: #3a3a3a; }
+</style>
+</head>
+<body>
+
+<div id="toast">Wystąpił błąd!</div>
+
+<div id="print-area">
+    <h2 id="print-title" data-i18n="print_report">HCalculator - Raport Obliczeń</h2>
+    <p id="print-date" style="color: #666; font-size: 14px;"></p>
+    <div class="print-block">
+        <h3 style="margin-top:0; color:#0055a5;" data-i18n="print_params">Parametry Wejściowe:</h3>
+        <pre id="print-params" style="font-family: 'Segoe UI', sans-serif; font-size: 14px; white-space: pre-wrap; margin:0;"></pre>
+    </div>
+    <div class="print-block" style="background: #e6f0fa; border-color: #0055a5;">
+        <h3 style="margin-top:0; color:#d9534f;" data-i18n="print_results">Wyniki Obliczeń:</h3>
+        <pre id="print-results" style="font-family: 'Segoe UI', sans-serif; font-size: 16px; font-weight: bold; color: #002244; white-space: pre-wrap; margin:0;"></pre>
+    </div>
+    <p style="font-size: 12px; color: #999; text-align: center; margin-top: 40px;" data-i18n="print_footer">Wygenerowano w programie HCalculator v1.1.4</p>
+</div>
+
+<div class="no-print br-app-container">
+    <div class="top-bar">
+        <button class="about-btn" id="show-about-btn" data-i18n="about">ℹ️ O Programie</button>
+          
+        <div class="theme-switch" data-i18n-title="theme_choose" title="Wybierz motyw">
+            <input type="radio" id="theme-light" name="theme" value="light">
+            <label for="theme-light" data-i18n-title="theme_light" title="Jasny">☀️</label>
+            <input type="radio" id="theme-auto" name="theme" value="auto" checked>
+            <label for="theme-auto" data-i18n-title="theme_auto" title="Auto">🌓</label>
+            <input type="radio" id="theme-dark" name="theme" value="dark">
+            <label for="theme-dark" data-i18n-title="theme_dark" title="Ciemny">🌙</label>
+            <div class="theme-switch-selector"></div>
+        </div>
+        
+        <div style="display: flex; align-items: center;">
+            <div class="lang-switcher">
+                <button class="flag-btn active" id="flag-pl" data-lang="pl" title="Polski">
+                    <img src="flag_pl.svg" alt="PL">
+                </button>
+                <button class="flag-btn" id="flag-en" data-lang="en" title="English">
+                    <img src="flag_en.svg" alt="EN">
+                </button>
+                <button class="flag-btn" id="flag-de" data-lang="de" title="Deutsch">
+                    <img src="flag_de.svg" alt="DE">
+                </button>
+            </div>
+            
+            <select id="lang-switch" style="display: none;">
+                <option value="pl">PL</option>
+                <option value="en">EN</option>
+                <option value="de">DE</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="tabs-wrapper">
+      <div class="scroll-arrow left-arrow" id="left-scroll-arrow">&lsaquo;</div>
+      <div class="br-tabs" id="main-tabs-container">
+        <button class="br-tab-btn active" data-tab="tab-sila" data-i18n="tab_force">Siła</button>
+        <button class="br-tab-btn" data-tab="tab-predkosc" data-i18n="tab_speed">Prędkość</button>
+        <button class="br-tab-btn" data-tab="tab-moc" data-i18n="tab_power">Moc</button>
+        <button class="br-tab-btn" data-tab="tab-wydajnosc" data-i18n="tab_flow">Wydajn.</button>
+        <button class="br-tab-btn" data-tab="tab-silnik" data-i18n="tab_motor">Silnik</button>
+        <button class="br-tab-btn" data-tab="tab-zbiornik" data-i18n="tab_tank">Zbiornik</button>
+        <button class="br-tab-btn" data-tab="tab-akumulator" data-i18n="tab_acc">Akumulator</button>
+        <button class="br-tab-btn" data-tab="tab-chlodnica" data-i18n="tab_cooler">Chłodnica</button>
+        <button class="br-tab-btn" data-tab="tab-kv" data-i18n="tab_kv">Kv/Cv</button>
+        <button class="br-tab-btn" data-tab="tab-waz-srednica" data-i18n="tab_hose_diam">Wąż (Ø)</button>
+        <button class="br-tab-btn" data-tab="tab-waz-spadek" data-i18n="tab_hose_drop">Wąż (Δp)</button>
+        <button class="br-tab-btn" data-tab="tab-historia" data-i18n="tab_history">Historia</button>
+      </div>
+      <div class="scroll-arrow right-arrow" id="right-scroll-arrow">&rsaquo;</div>
+    </div>
+
+    <div class="br-tab-content active" id="tab-sila">
+      <h3 data-i18n="force_title">Siła Siłownika</h3>
+      <p class="desc" data-i18n="force_desc">Oblicz siłę pchania i ciągnięcia.</p>
+      <div class="br-form-group"><label data-i18n="pressure">Ciśnienie robocze (bar):</label><input type="number" id="calc-pressure" data-i18n-ph="ph_180" placeholder="np. 180" min="0"></div>
+      <div class="br-form-group"><label data-i18n="bore">Wewn. średnica tłoka (mm):</label><input type="number" id="calc-bore" data-i18n-ph="ph_80" placeholder="np. 80" min="0"></div>
+      <div class="br-form-group"><label data-i18n="rod">Średnica tłoczyska (mm):</label><input type="number" id="calc-rod" data-i18n-ph="ph_40" placeholder="np. 40" min="0"></div>
+      <button class="br-calc-btn" id="run-calc-btn" data-i18n="btn_force">Oblicz siłę</button>
+      <div class="br-results" id="calc-results">
+        <p><strong data-i18n="push">Siła pchania:</strong> <span id="res-push" style="color: #d9534f; font-weight: bold;">0</span> kg</p>
+        <p><strong data-i18n="pull">Siła ciągnięcia:</strong> <span id="res-pull" style="color: #d9534f; font-weight: bold;">0</span> kg</p>
+      </div>
+    </div>
+
+    <div class="br-tab-content" id="tab-predkosc">
+      <h3 data-i18n="speed_title">Prędkość i Czas Cyklu</h3>
+      <p class="desc" data-i18n="speed_desc">Oblicz czas pełnego wysuwu i powrotu.</p>
+      <div class="br-form-group"><label data-i18n="flow">Przepływ oleju pompy (L/min):</label><input type="number" id="spd-flow" data-i18n-ph="ph_40" placeholder="np. 40" min="0"></div>
+      <div class="br-form-group"><label data-i18n="bore">Wewn. średnica tłoka (mm):</label><input type="number" id="spd-bore" data-i18n-ph="ph_80" placeholder="np. 80" min="0"></div>
+      <div class="br-form-group"><label data-i18n="rod">Średnica tłoczyska (mm):</label><input type="number" id="spd-rod" data-i18n-ph="ph_40" placeholder="np. 40" min="0"></div>
+      <div class="br-form-group"><label data-i18n="stroke">Skok siłownika (mm):</label><input type="number" id="spd-stroke" data-i18n-ph="ph_500" placeholder="np. 500" min="0"></div>
+      <button class="br-calc-btn" id="calc-spd-btn" data-i18n="btn_speed">Oblicz prędkość</button>
+      <div class="br-results" id="spd-results">
+        <p><strong data-i18n="v_push">Prędkość wysuwu:</strong> <span id="res-v-push" style="color: #d9534f; font-weight: bold;">0</span> cm/s</p>
+        <p><strong data-i18n="t_push">Czas wysuwu:</strong> <span id="res-t-push" style="color: #0055a5; font-weight: bold;">0</span> s</p>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+        <p><strong data-i18n="v_pull">Prędkość powrotu:</strong> <span id="res-v-pull" style="color: #d9534f; font-weight: bold;">0</span> cm/s</p>
+        <p><strong data-i18n="t_pull">Czas powrotu:</strong> <span id="res-t-pull" style="color: #0055a5; font-weight: bold;">0</span> s</p>
+      </div>
+    </div>
+
+    <div class="br-tab-content" id="tab-moc">
+      <h3 data-i18n="power_title">Moc Napędu Pompy</h3>
+      <p class="desc" data-i18n="power_desc">Dobierz silnik elektryczny/spalinowy.</p>
+      <div class="br-form-group"><label data-i18n="p_flow">Wydajność pompy (L/min):</label><input type="number" id="pmp-flow" data-i18n-ph="ph_40" placeholder="np. 40" min="0"></div>
+      <div class="br-form-group"><label data-i18n="p_max">Maksymalne ciśnienie (bar):</label><input type="number" id="pmp-pressure" data-i18n-ph="ph_180" placeholder="np. 180" min="0"></div>
+      <div class="br-form-group"><label data-i18n="p_type">Rodzaj pompy:</label>
+        <select id="pmp-eff">
+          <option value="0.85" data-i18n="gear" selected>Pompa zębata (~85%)</option>
+          <option value="0.90" data-i18n="piston">Pompa wielotłoczkowa (~90%)</option>
+        </select>
+      </div>
+      <button class="br-calc-btn" id="calc-pmp-btn" data-i18n="btn_power">Oblicz moc</button>
+      <div class="br-results" id="pmp-results">
+        <p><strong data-i18n="kw">Wymagana moc silnika:</strong> <span id="res-kw" style="color: #d9534f; font-weight: bold;">0</span> kW</p>
+        <p><strong data-i18n="hp">Odpowiednik:</strong> <span id="res-km" style="color: #0055a5; font-weight: bold;">0</span> <span data-i18n="hp_unit">KM / HP</span></p>
+      </div>
+    </div>
+
+    <div class="br-tab-content" id="tab-wydajnosc">
+      <h3 data-i18n="flow_title">Wydajność Pompy</h3>
+      <p class="desc" data-i18n="flow_desc">Oblicz L/min na podstawie chłonności.</p>
+      <div class="br-form-group"><label data-i18n="disp">Chłonność pompy (cm³/obr):</label><input type="number" id="flow-disp" data-i18n-ph="ph_14" placeholder="np. 14" min="0"></div>
+      <div class="br-form-group"><label data-i18n="rpm">Prędkość obrotowa napędu (obr/min):</label>
+        <select id="flow-rpm-select">
+          <option value="1450" data-i18n="rpm1" selected>1450 obr/min (Silnik elektr.)</option>
+          <option value="3000" data-i18n="rpm2">3000 obr/min (Silnik spalinowy)</option>
+          <option value="540" data-i18n="rpm3">540 obr/min (Wałek WOM)</option>
+          <option value="custom" data-i18n="rpm_custom">Inna wartość (wpisz poniżej)</option>
+        </select>
+        <input type="number" id="flow-rpm-custom" data-i18n-ph="ph_custom" placeholder="Wpisz obroty..." style="display: none; margin-top: 10px;" min="0">
+      </div>
+      <div class="br-form-group"><label data-i18n="cond">Stan pompy:</label>
+        <select id="flow-eff">
+          <option value="0.95" data-i18n="new_p" selected>Nowa pompa (~95%)</option>
+          <option value="0.85" data-i18n="old_p">Używana pompa (~85%)</option>
+        </select>
+      </div>
+      <button class="br-calc-btn" id="calc-flow-btn" data-i18n="btn_flow">Oblicz wydajność</button>
+      <div class="br-results" id="flow-results">
+        <p><strong data-i18n="actual">Rzeczywista wydajność:</strong> <span id="res-flow-actual" style="color: #d9534f; font-weight: bold;">0</span> L/min</p>
+        <p style="font-size: 14px;"><span data-i18n="theo">Teoretyczna:</span> <span id="res-flow-theo" style="font-weight: bold;">0</span> L/min</p>
+      </div>
+    </div>
+
+    <div class="br-tab-content" id="tab-silnik">
+      <h3 data-i18n="motor_title">Parametry Silnika</h3>
+      <p class="desc" data-i18n="motor_desc">Oblicz moment obrotowy i prędkość.</p>
+      <div class="br-form-group"><label data-i18n="flow">Przepływ oleju pompy (L/min):</label><input type="number" id="mot-flow" data-i18n-ph="ph_40" placeholder="np. 40" min="0"></div>
+      <div class="br-form-group"><label data-i18n="disp">Chłonność (cm³/obr):</label><input type="number" id="mot-disp" data-i18n-ph="ph_14" placeholder="np. 14" min="0"></div>
+      <div class="br-form-group"><label data-i18n="pressure">Ciśnienie robocze (bar):</label><input type="number" id="mot-pressure" data-i18n-ph="ph_180" placeholder="np. 180" min="0"></div>
+      <button class="br-calc-btn" id="calc-mot-btn" data-i18n="btn_motor">Oblicz silnik</button>
+      <div class="br-results" id="mot-results">
+        <p><strong data-i18n="speed_rpm">Prędkość obrotowa:</strong> <span id="res-mot-speed" style="color: #d9534f; font-weight: bold;">0</span> obr/min</p>
+        <p><strong data-i18n="torque">Moment obrotowy:</strong> <span id="res-mot-torque" style="color: #0055a5; font-weight: bold;">0</span> Nm</p>
+      </div>
+    </div>
+
+    <div class="br-tab-content" id="tab-zbiornik">
+      <h3 data-i18n="tank_title">Pojemność Zbiornika</h3>
+      <p class="desc" data-i18n="tank_desc">Zadbaj o właściwe chłodzenie oleju.</p>
+      <div class="br-form-group"><label data-i18n="p_flow">Wydajność pompy (L/min):</label><input type="number" id="tank-flow" data-i18n-ph="ph_40" placeholder="np. 40" min="0"></div>
+      <div class="br-form-group"><label data-i18n="sys_type">Typ układu:</label>
+        <select id="tank-type">
+          <option value="mobile" data-i18n="mob" selected>Maszyny mobilne / rolnicze</option>
+          <option value="industrial" data-i18n="ind">Maszyny stacjonarne / przemysłowe</option>
+          <option value="closed" data-i18n="closed">Układ zamknięty</option>
+        </select>
+      </div>
+      <button class="br-calc-btn" id="calc-tank-btn" data-i18n="btn_tank">Oblicz pojemność</button>
+      <div class="br-results" id="tank-results">
+        <p><strong data-i18n="rec">Rekomendowana pojemność:</strong> <span id="res-tank-range" style="color: #d9534f; font-weight: bold;">0</span> <span data-i18n="liters">litrów</span></p>
+      </div>
+    </div>
+
+    <div class="br-tab-content" id="tab-akumulator">
+      <h3 data-i18n="acc_title">Dobór Akumulatora</h3>
+      <p class="desc" data-i18n="acc_desc">Oblicz pojemność całkowitą i ciśnienie gazu.</p>
+      <div class="br-form-group"><label data-i18n="acc_v">Wymagana objętość użyteczna oleju (L):</label><input type="number" id="acc-v" placeholder="np. 2.5" min="0.1" step="0.1"></div>
+      <div class="br-form-group"><label data-i18n="acc_p1">Maksymalne ciśnienie robocze P1 (bar):</label><input type="number" id="acc-p1" placeholder="np. 200" min="1"></div>
+      <div class="br-form-group"><label data-i18n="acc_p2">Minimalne ciśnienie robocze P2 (bar):</label><input type="number" id="acc-p2" placeholder="np. 150" min="1"></div>
+      <button class="br-calc-btn" id="calc-acc-btn" data-i18n="btn_acc">Oblicz akumulator</button>
+      <div class="br-results" id="acc-results">
+        <p><strong data-i18n="acc_v0">Całkowita poj. akumulatora (V0):</strong> <span id="res-acc-v0" style="color: #d9534f; font-weight: bold;">0</span> L</p>
+        <p><strong data-i18n="acc_p0">Ciśnienie wstępne gazu (P0):</strong> <span id="res-acc-p0" style="color: #0055a5; font-weight: bold;">0</span> bar</p>
+      </div>
+    </div>
+
+    <div class="br-tab-content" id="tab-chlodnica">
+      <h3 data-i18n="cool_title">Moc Chłodnicy Oleju</h3>
+      <p class="desc" data-i18n="cool_desc">Dobierz chłodnicę dla swojego układu.</p>
+      <div class="br-form-group"><label data-i18n="cool_kw">Moc zainstalowana układu (kW):</label><input type="number" id="cool-kw" placeholder="np. 15" min="0.1" step="0.1"></div>
+      <div class="br-form-group"><label data-i18n="cool_toil">Docelowa temp. oleju (°C):</label><input type="number" id="cool-toil" placeholder="np. 50" value="50"></div>
+      <div class="br-form-group"><label data-i18n="cool_tamb">Temp. otoczenia chłodnicy (°C):</label><input type="number" id="cool-tamb" placeholder="np. 25" value="25"></div>
+      <button class="br-calc-btn" id="calc-cool-btn" data-i18n="btn_cool">Oblicz chłodnicę</button>
+      <div class="br-results" id="cool-results">
+        <p><strong data-i18n="cool_heat">Moc cieplna do odprowadzenia:</strong> <span id="res-cool-heat" style="color: #d9534f; font-weight: bold;">0</span> kW</p>
+        <p><strong data-i18n="cool_pk">Wymagany wskaźnik chłodzenia:</strong> <span id="res-cool-pk" style="color: #0055a5; font-weight: bold;">0</span> kW/°C</p>
+      </div>
+    </div>
+
+    <div class="br-tab-content" id="tab-kv">
+      <h3 data-i18n="kv_title">Współczynnik Kv / Cv</h3>
+      <p class="desc" data-i18n="kv_desc">Dobierz przepustowość zaworów / rozdzielaczy.</p>
+      <div class="br-form-group"><label data-i18n="kv_flow">Wymagany przepływ (L/min):</label><input type="number" id="kv-flow" placeholder="np. 60" min="0.1" step="0.1"></div>
+      <div class="br-form-group"><label data-i18n="kv_dp">Dopuszczalny spadek ciśnienia Δp (bar):</label><input type="number" id="kv-dp" placeholder="np. 3" value="3" min="0.1" step="0.1"></div>
+      <div class="br-form-group"><label data-i18n="kv_sg">Gęstość względna oleju (SG):</label><input type="number" id="kv-sg" placeholder="np. 0.87" value="0.87" min="0.5" step="0.01"></div>
+      <button class="br-calc-btn" id="calc-kv-btn" data-i18n="btn_kv">Oblicz Kv / Cv</button>
+      <div class="br-results" id="kv-results">
+        <p><strong data-i18n="res_kv">Współczynnik Kv:</strong> <span id="res-kv-val" style="color: #d9534f; font-weight: bold;">0</span> m³/h</p>
+        <p><strong data-i18n="res_cv">Współczynnik Cv:</strong> <span id="res-cv-val" style="color: #0055a5; font-weight: bold;">0</span> US gpm</p>
+      </div>
+    </div>
+
+    <div class="br-tab-content" id="tab-waz-srednica">
+      <h3 data-i18n="hose_diam_title">Dobór Średnicy Węża</h3>
+      <p class="desc" data-i18n="hose_diam_desc">Oblicz optymalną średnicę wewnętrzną przewodu.</p>
+      <div class="br-form-group"><label data-i18n="flow">Przepływ oleju pompy (L/min):</label><input type="number" id="hd-flow" data-i18n-ph="ph_40" placeholder="np. 40" min="0"></div>
+      <div class="br-form-group"><label data-i18n="line_type">Zalecana prędkość (Linia):</label>
+        <select id="hd-line-select">
+          <option value="1.0" data-i18n="line_suction">Linia ssawna (~1.0 m/s)</option>
+          <option value="2.0" data-i18n="line_return">Linia powrotna (~2.0 m/s)</option>
+          <option value="4.0" data-i18n="line_pressure_low">Linia ciśn. < 100 bar (~4.0 m/s)</option>
+          <option value="5.0" data-i18n="line_pressure_mid" selected>Linia ciśn. 100-200 bar (~5.0 m/s)</option>
+          <option value="6.0" data-i18n="line_pressure_high">Linia ciśn. > 200 bar (~6.0 m/s)</option>
+          <option value="custom" data-i18n="rpm_custom">Inna wartość (wpisz poniżej)</option>
+        </select>
+        <input type="number" id="hd-vel-custom" style="display: none; margin-top: 10px;" value="5.0" min="0.1" step="0.1">
+      </div>
+      <button class="br-calc-btn" id="calc-hd-btn" data-i18n="btn_hose_diam">Oblicz średnicę</button>
+      <div class="br-results" id="hd-results">
+        <p><strong data-i18n="min_diam">Minimalna średnica wewn.:</strong> <span id="res-hd-diam" style="color: #d9534f; font-weight: bold;">0</span> mm</p>
+      </div>
+    </div>
+
+    <div class="br-tab-content" id="tab-waz-spadek">
+      <h3 data-i18n="hose_drop_title">Spadek Ciśnienia (Wąż)</h3>
+      <p class="desc" data-i18n="hose_drop_desc">Oszacuj straty ciśnienia w przewodzie.</p>
+      <div class="br-form-group"><label data-i18n="flow">Przepływ oleju pompy (L/min):</label><input type="number" id="pd-flow" data-i18n-ph="ph_40" placeholder="np. 40" min="0"></div>
+      <div class="br-form-group"><label data-i18n="hose_bore">Wewn. średnica węża (mm):</label><input type="number" id="pd-bore" data-i18n-ph="ph_14" placeholder="np. 14" min="0"></div>
+      <div class="br-form-group"><label data-i18n="hose_len">Długość węża (m):</label><input type="number" id="pd-len" placeholder="np. 5" value="5" min="0"></div>
+      <div class="br-form-group"><label data-i18n="viscosity">Lepkość kinematyczna oleju (cSt):</label><input type="number" id="pd-visc" placeholder="np. 46" value="46" min="1"></div>
+      <div class="br-form-group"><label data-i18n="density">Gęstość oleju (kg/m³):</label><input type="number" id="pd-dens" placeholder="np. 870" value="870" min="1"></div>
+      <button class="br-calc-btn" id="calc-pd-btn" data-i18n="btn_hose_drop">Oblicz spadek Δp</button>
+      <div class="br-results" id="pd-results">
+        <p><strong data-i18n="pressure_drop">Spadek ciśnienia (Δp):</strong> <span id="res-pd-drop" style="color: #d9534f; font-weight: bold;">0</span> bar</p>
+        <p style="font-size: 14px;"><span data-i18n="fluid_velocity">Rzeczywista prędkość cieczy:</span> <span id="res-pd-vel" style="font-weight: bold;">0</span> m/s</p>
+        <p style="font-size: 14px;"><span data-i18n="flow_type">Charakter przepływu:</span> <strong id="res-pd-type">-</strong></p>
+      </div>
+    </div>
+
+    <div class="br-tab-content" id="tab-historia">
+      <h3 data-i18n="history_title">Historia Obliczeń</h3>
+      <p class="desc" data-i18n="history_desc">Twoje ostatnie 50 wyników (Lokalnie).</p>
+      <div id="history-list"></div>
+      <button id="clear-history-btn" class="br-copy-btn" style="display:block; width: 70%; margin: 20px auto 0 auto; background-color:#d9534f; color:#ffffff; border: none; border-radius: 25px; font-weight: bold; transition: opacity 0.2s; cursor: pointer;" onmouseenter="this.style.opacity='0.8'" onmouseleave="this.style.opacity='1'" data-i18n="clear_history">Wyczyść historię</button>
+    </div>
+    
+    <div class="br-tab-content" id="tab-about">
+      <h3 data-i18n="about_title">HCalculator v1.1.4</h3>
+      <p class="desc" data-i18n="about_desc">Profesjonalny Kalkulator Hydrauliczny</p>
+      <p class="desc">🌐 <a href="https://hcalculator.app" target="_blank"><strong>HCalculator.app</strong></a></p>
+      <div style="background-color: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; line-height: 1.6;">
+          <p data-i18n="about_text" style="color: #444; font-size: 15px; margin-top: 0;">
+              Program rozwijany na urządzenia z systemem Windows, telefony Android oraz w przeglądarce. Jest w 100% darmowy, nie wyświetla reklam i szanuje Twoją prywatność działając offline. Jeśli HCalculator zaoszczędził Twój czas w warsztacie lub przy projekcie, możesz wesprzeć jego dalszy rozwój stawiając mi kawę lub sponsorując na GitHubie!
+          </p>
+          
+          <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 25px;">
+              <a href="https://www.buymeacoffee.com/hcalculator" target="_blank" class="br-coffee-btn" id="coffee-link" style="width: 100%; font-size: 18px; padding: 18px; margin: 0; box-shadow: 0 6px 15px rgba(255, 170, 0, 0.4);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                  <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                  <line x1="6" y1="1" x2="6" y2="4"></line>
+                  <line x1="10" y1="1" x2="10" y2="4"></line>
+                  <line x1="14" y1="1" x2="14" y2="4"></line>
+                </svg>
+                <span data-i18n="btn_coffee">Postaw mi kawę</span>
+              </a>
+              
+              <a href="https://github.com/daniel-kaliski/HCalculator" target="_blank" class="br-github-sponsor-btn" id="sponsor-link" style="width: 100%; margin: 0;">
+                <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                    <path d="m8 14.25.345.666a.75.75 0 0 1-.69 0l-.008-.004-.018-.01a7.152 7.152 0 0 1-.31-.17 22.055 22.055 0 0 1-3.434-2.414C2.045 10.731 0 8.35 0 5.5 0 2.836 2.086 1 4.25 1 5.797 1 7.153 1.802 8 3.02 8.847 1.802 10.203 1 11.75 1 13.914 1 16 2.836 16 5.5c0 2.85-2.045 5.231-3.885 6.818a22.066 22.066 0 0 1-3.744 2.584l-.018.01-.006.003h-.002ZM4.25 2.5c-1.336 0-2.75 1.164-2.75 3 0 2.15 1.58 4.144 3.365 5.682A20.58 20.58 0 0 0 8 13.393a20.58 20.58 0 0 0 3.135-2.211C12.92 9.644 14.5 7.65 14.5 5.5c0-1.836-1.414-3-2.75-3-1.373 0-2.609.986-3.029 2.456a.749.749 0 0 1-1.442 0C6.859 3.486 5.623 2.5 4.25 2.5Z"></path>
+                </svg>
+                <span data-i18n="btn_sponsor">Sponsoruj na GitHub</span>
+              </a>
+          </div>
+      </div>
+    </div>
+</div>
+
+<div class="br-footer">
+    <span id="currentYear"></span> &copy; Daniel Kaliski
+</div>
+<script src="cordova.js"></script>
+<script>
+window.appHistory = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+  
+  
+  const themeRadios = document.querySelectorAll('input[name="theme"]');
+  const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  
+  window.currentTheme = 'auto'; 
+  
+  window.applyTheme = function(theme) {
+      if (theme === 'auto') {
+          if (darkModeMediaQuery.matches) {
+              document.body.classList.add('dark-mode');
+          } else {
+              document.body.classList.remove('dark-mode');
+          }
+          document.getElementById('theme-auto').checked = true;
+      } else if (theme === 'dark') {
+          document.body.classList.add('dark-mode');
+          document.getElementById('theme-dark').checked = true;
+      } else {
+          document.body.classList.remove('dark-mode');
+          document.getElementById('theme-light').checked = true;
+      }
+  };
+
+  themeRadios.forEach(radio => {
+      radio.addEventListener('change', function() {
+          window.currentTheme = this.value;
+          window.applyTheme(window.currentTheme);
+          try { localStorage.setItem('hcalc_theme', window.currentTheme); } catch(e) {}
+          if (window.pywebview && window.pywebview.api) { window.pywebview.api.save_theme(window.currentTheme); }
+      });
+  });
+
+  darkModeMediaQuery.addEventListener('change', (e) => {
+      if (window.currentTheme === 'auto') {
+          window.applyTheme('auto');
+      }
+  });
+
+  try {
+      let savedTheme = localStorage.getItem('hcalc_theme');
+      if (savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'auto') {
+          window.currentTheme = savedTheme;
+      }
+  } catch(e) {}
+
+  window.applyTheme(window.currentTheme);
+
+  
+  const langDict = {
+    "pl": {
+      "update_msg": "Dostępna jest nowa wersja programu:",
+      "theme_choose": "Wybierz motyw", "theme_light": "Jasny", "theme_auto": "Auto", "theme_dark": "Ciemny",
+      "about": "ℹ️ O Programie", "tab_force": "Siła", "tab_speed": "Prędkość", "tab_power": "Moc", "tab_flow": "Wydajność", "tab_tank": "Zbiornik", "tab_history": "Historia",
+      "tab_hose_diam": "Wąż (Ø)", "tab_hose_drop": "Wąż (Δp)", "tab_motor": "Silnik", "tab_acc": "Akum.", "tab_cooler": "Chłodnica", "tab_kv": "Kv/Cv",
+      
+      "acc_title": "Dobór Akumulatora", "acc_desc": "Oblicz pojemność całkowitą i ciśnienie gazu.", 
+      "acc_v": "Wymagana objętość użyteczna oleju (L):", "acc_p1": "Maksymalne ciśnienie robocze P1 (bar):", "acc_p2": "Minimalne ciśnienie robocze P2 (bar):", 
+      "btn_acc": "Oblicz akumulator", "acc_v0": "Całkowita poj. akumulatora (V0):", "acc_p0": "Ciśnienie wstępne gazu (P0):",
+      
+      "cool_title": "Moc Chłodnicy Oleju", "cool_desc": "Dobierz chłodnicę dla swojego układu.", 
+      "cool_kw": "Moc zainstalowana układu (kW):", "cool_toil": "Docelowa temp. oleju (°C):", "cool_tamb": "Temp. otoczenia chłodnicy (°C):", 
+      "btn_cool": "Oblicz chłodnicę", "cool_heat": "Moc cieplna do odprowadzenia:", "cool_pk": "Wymagany wskaźnik chłodzenia:",
+      
+      "kv_title": "Współczynnik Kv / Cv", "kv_desc": "Dobierz przepustowość zaworów / rozdzielaczy.", 
+      "kv_flow": "Wymagany przepływ (L/min):", "kv_dp": "Dopuszczalny spadek ciśnienia Δp (bar):", "kv_sg": "Gęstość względna oleju (SG):", 
+      "btn_kv": "Oblicz Kv / Cv", "res_kv": "Współczynnik Kv:", "res_cv": "Współczynnik Cv:",
+
+      "force_title": "Siła Siłownika", "force_desc": "Oblicz siłę pchania i ciągnięcia.",
+      "pressure": "Ciśnienie robocze (bar):", "bore": "Wewn. średnica tłoka (mm):", "rod": "Średnica tłoczyska (mm):",
+      "btn_force": "Oblicz siłę", "push": "Siła pchania:", "pull": "Siła ciągnięcia:",
+      "speed_title": "Prędkość i Czas Cyklu", "speed_desc": "Oblicz czas pełnego wysuwu i powrotu.",
+      "flow": "Przepływ oleju pompy (L/min):", "stroke": "Skok siłownika (mm):", "btn_speed": "Oblicz prędkość",
+      "v_push": "Prędkość wysuwu:", "t_push": "Czas wysuwu:", "v_pull": "Prędkość powrotu:", "t_pull": "Czas powrotu:",
+      "power_title": "Moc Napędu Pompy", "power_desc": "Dobierz silnik elektryczny/spalinowy.",
+      "p_flow": "Wydajność pompy (L/min):", "p_max": "Maksymalne ciśnienie (bar):", "p_type": "Rodzaj pompy:",
+      "gear": "Pompa zębata (~85%)", "piston": "Pompa wielotłoczkowa (~90%)", "btn_power": "Oblicz moc",
+      "kw": "Wymagana moc silnika:", "hp": "Odpowiednik:", "hp_unit": "KM / HP",
+      "flow_title": "Wydajność Pompy", "flow_desc": "Oblicz L/min na podstawie chłonności.",
+      "disp": "Chłonność pompy (cm³/obr):", "rpm": "Prędkość obrotowa napędu (obr/min):",
+      "rpm1": "1450 obr/min (Silnik elektr.)", "rpm2": "3000 obr/min (Silnik spalinowy)", "rpm3": "540 obr/min (Wałek WOM)", "rpm_custom": "Inna wartość (wpisz poniżej)",
+      "cond": "Stan pompy:", "new_p": "Nowa pompa (~95%)", "old_p": "Używana pompa (~85%)", "btn_flow": "Oblicz wydajność",
+      "actual": "Rzeczywista wydajność:", "theo": "Teoretyczna:",
+      "motor_title": "Parametry Silnika", "motor_desc": "Oblicz moment obrotowy i prędkość.",
+      "speed_rpm": "Prędkość obrotowa:", "torque": "Moment obrotowy:", "btn_motor": "Oblicz silnik",
+      "tank_title": "Pojemność Zbiornika", "tank_desc": "Zadbaj o właściwe chłodzenie oleju.",
+      "sys_type": "Typ układu:", "mob": "Maszyny mobilne / rolnicze", "ind": "Maszyny stacjonarne / przemysłowe", "closed": "Układ zamknięty",
+      "btn_tank": "Oblicz pojemność", "rec": "Rekomendowana pojemność:", "liters": "litrów",
+      "hose_diam_title": "Dobór Średnicy Węża", "hose_diam_desc": "Oblicz optymalną średnicę wewnętrzną.",
+      "line_type": "Zalecana prędkość cieczy:", "line_suction": "Linia ssawna (~1.0 m/s)", "line_return": "Linia powrotna (~2.0 m/s)", "line_pressure_low": "Linia ciśn. < 100 bar (~4.0 m/s)", "line_pressure_mid": "Linia ciśn. 100-200 bar (~5.0 m/s)", "line_pressure_high": "Linia ciśn. > 200 bar (~6.0 m/s)",
+      "btn_hose_diam": "Oblicz średnicę", "min_diam": "Minimalna średnica wewn.:",
+      "hose_drop_title": "Spadek Ciśnienia (Wąż)", "hose_drop_desc": "Oszacuj straty ciśnienia w przewodzie.",
+      "hose_bore": "Wewn. średnica węża (mm):", "hose_len": "Długość węża (m):", "viscosity": "Lepkość kinematyczna oleju (cSt):", "density": "Gęstość oleju (kg/m³):",
+      "btn_hose_drop": "Oblicz spadek Δp", "pressure_drop": "Spadek ciśnienia (Δp):", "fluid_velocity": "Rzeczywista prędkość cieczy:", "flow_type": "Charakter przepływu:",
+      "laminar": "Laminarny", "turbulent": "Turbulentny",
+      "history_title": "Historia Obliczeń", "history_desc": "Twoje ostatnie 50 wyników (Lokalnie).", "clear_history": "Wyczyść historię", "empty_history": "Brak zapisanej historii.", "hist_input": "Wejście:", "hist_result": "Wynik:",
+      "btn_pdf": "📄 Generuj PDF", "copy_btn": "📋 Kopiuj wynik", "btn_png": "Zapisz PNG",
+      "about_title": "HCalculator v1.1.4", "about_desc": "Profesjonalny Kalkulator Hydrauliczny",
+      "about_text": "Program rozwijany na urządzenia z systemem Windows, telefony Android oraz w przeglądarce. Jest w 100% darmowy, nie wyświetla reklam i szanuje Twoją prywatność działając offline. Jeśli HCalculator zaoszczędził Twój czas w warsztacie lub przy projekcie, możesz wesprzeć jego dalszy rozwój stawiając mi kawę lub sponsorując na GitHubie!",
+      "btn_coffee": "Postaw mi kawę", "btn_sponsor": "Sponsoruj na GitHub",
+      "ph_180": "np. 180", "ph_80": "np. 80", "ph_40": "np. 40", "ph_500": "np. 500", "ph_14": "np. 14", "ph_custom": "Wpisz...",
+      "err_empty": "Proszę poprawnie wypełnić wszystkie pola!",
+      "err_bore": "Średnica tłoka musi być większa niż tłoczyska!",
+      "err_acc_p": "Max ciśnienie P1 musi być większe niż Min P2!",
+      "print_report": "Raport Obliczeń", "print_params": "Parametry Wejściowe:", "print_results": "Wyniki Obliczeń:", "print_footer": "Wygenerowano w programie HCalculator v1.1.4", "print_date": "Data:"
+    },
+    "en": {
+      "update_msg": "A new version is available:",
+      "theme_choose": "Choose theme", "theme_light": "Light", "theme_auto": "Auto", "theme_dark": "Dark",
+      "about": "ℹ️ About", "tab_force": "Force", "tab_speed": "Speed", "tab_power": "Power", "tab_flow": "Flow", "tab_tank": "Tank", "tab_history": "History",
+      "tab_hose_diam": "Hose (Ø)", "tab_hose_drop": "Hose (Δp)", "tab_motor": "Motor", "tab_acc": "Accum.", "tab_cooler": "Cooler", "tab_kv": "Kv/Cv",
+      
+      "acc_title": "Accumulator Sizing", "acc_desc": "Calculate total volume and pre-charge pressure.", 
+      "acc_v": "Required useful fluid volume (L):", "acc_p1": "Max working pressure P1 (bar):", "acc_p2": "Min working pressure P2 (bar):", 
+      "btn_acc": "Calculate accumulator", "acc_v0": "Total accumulator volume (V0):", "acc_p0": "Gas pre-charge pressure (P0):",
+      
+      "cool_title": "Oil Cooler Power", "cool_desc": "Size the oil cooler for your system.", 
+      "cool_kw": "System installed power (kW):", "cool_toil": "Target oil temp. (°C):", "cool_tamb": "Ambient cooler temp. (°C):", 
+      "btn_cool": "Calculate cooler", "cool_heat": "Heat power to dissipate:", "cool_pk": "Required specific cooling capacity:",
+      
+      "kv_title": "Flow Coefficient Kv/Cv", "kv_desc": "Select capacity for valves / blocks.", 
+      "kv_flow": "Required flow rate (L/min):", "kv_dp": "Allowed pressure drop Δp (bar):", "kv_sg": "Specific gravity of oil (SG):", 
+      "btn_kv": "Calculate Kv / Cv", "res_kv": "Kv Coefficient:", "res_cv": "Cv Coefficient:",
+
+      "force_title": "Cylinder Force", "force_desc": "Calculate push and pull force.",
+      "pressure": "Operating pressure (bar):", "bore": "Inner bore diameter (mm):", "rod": "Rod diameter (mm):",
+      "btn_force": "Calculate force", "push": "Push force:", "pull": "Pull force:",
+      "speed_title": "Speed & Cycle Time", "speed_desc": "Calculate full extension and retraction time.",
+      "flow": "Pump flow rate (L/min):", "stroke": "Cylinder stroke (mm):", "btn_speed": "Calculate speed",
+      "v_push": "Extension speed:", "t_push": "Extension time:", "v_pull": "Retraction speed:", "t_pull": "Retraction time:",
+      "power_title": "Pump Drive Power", "power_desc": "Select electric or combustion engine.",
+      "p_flow": "Pump flow rate (L/min):", "p_max": "Maximum pressure (bar):", "p_type": "Pump type:",
+      "gear": "Gear pump (~85%)", "piston": "Piston pump (~90%)", "btn_power": "Calculate power",
+      "kw": "Required engine power:", "hp": "Equivalent:", "hp_unit": "HP",
+      "flow_title": "Pump Flow Rate", "flow_desc": "Calculate L/min from displacement.",
+      "disp": "Pump displacement (cm³/rev):", "rpm": "Drive rotation speed (rpm):",
+      "rpm1": "1450 rpm (Electric motor)", "rpm2": "3000 rpm (Combustion engine)", "rpm3": "540 rpm (PTO shaft)", "rpm_custom": "Other value (enter below)",
+      "cond": "Pump condition:", "new_p": "New pump (~95%)", "old_p": "Used pump (~85%)", "btn_flow": "Calculate flow",
+      "actual": "Actual flow rate:", "theo": "Theoretical:",
+      "motor_title": "Motor Parameters", "motor_desc": "Calculate torque and rotational speed.",
+      "speed_rpm": "Rotational speed:", "torque": "Torque:", "btn_motor": "Calculate motor",
+      "tank_title": "Tank Capacity", "tank_desc": "Ensure proper oil cooling.",
+      "sys_type": "System type:", "mob": "Mobile / agricultural machinery", "ind": "Stationary / industrial machinery", "closed": "Closed loop system",
+      "btn_tank": "Calculate capacity", "rec": "Recommended capacity:", "liters": "liters",
+      "hose_diam_title": "Hose Diameter Selection", "hose_diam_desc": "Calculate optimal internal diameter.",
+      "line_type": "Recommended fluid velocity:", "line_suction": "Suction line (~1.0 m/s)", "line_return": "Return line (~2.0 m/s)", "line_pressure_low": "Pressure line < 100 bar (~4.0 m/s)", "line_pressure_mid": "Pressure line 100-200 bar (~5.0 m/s)", "line_pressure_high": "Pressure line > 200 bar (~6.0 m/s)",
+      "btn_hose_diam": "Calculate diameter", "min_diam": "Minimum internal diameter:",
+      "hose_drop_title": "Hose Pressure Drop", "hose_drop_desc": "Estimate pressure losses in the hose.",
+      "hose_bore": "Internal hose diameter (mm):", "hose_len": "Hose length (m):", "viscosity": "Kinematic oil viscosity (cSt):", "density": "Oil density (kg/m³):",
+      "btn_hose_drop": "Calculate drop Δp", "pressure_drop": "Pressure drop (Δp):", "fluid_velocity": "Actual fluid velocity:", "flow_type": "Flow type:",
+      "laminar": "Laminar", "turbulent": "Turbulent",
+      "history_title": "Calculation History", "history_desc": "Your last 50 results (Saved locally).", "clear_history": "Clear History", "empty_history": "No history saved yet.", "hist_input": "Input:", "hist_result": "Result:",
+      "btn_pdf": "📄 Generate PDF", "copy_btn": "📋 Copy result", "btn_png": "Save PNG",
+      "about_title": "HCalculator v1.1.4", "about_desc": "Professional Hydraulic Calculator",
+      "about_text": "Program developed for Windows devices, Android phones, and modern browsers. It is 100% free, has no ads, and respects your privacy by working offline. If HCalculator saved you time, consider supporting its future development by buying me a coffee or sponsoring on GitHub!",
+      "btn_coffee": "Buy me a coffee", "btn_sponsor": "Sponsor on GitHub",
+      "ph_180": "e.g. 180", "ph_80": "e.g. 80", "ph_40": "e.g. 40", "ph_500": "e.g. 500", "ph_14": "e.g. 14", "ph_custom": "Enter...",
+      "err_empty": "Please fill in all fields correctly!",
+      "err_bore": "Bore diameter must be larger than rod diameter!",
+      "err_acc_p": "Max pressure P1 must be greater than Min P2!",
+      "print_report": "Calculation Report", "print_params": "Input Parameters:", "print_results": "Calculation Results:", "print_footer": "Generated in HCalculator v1.1.4", "print_date": "Date:"
+    },
+    "de": {
+      "update_msg": "Eine neue Version ist verfügbar:",
+      "theme_choose": "Design wählen", "theme_light": "Hell", "theme_auto": "Auto", "theme_dark": "Dunkel",
+      "about": "ℹ️ Über", "tab_force": "Kraft", "tab_speed": "Zykluszeit", "tab_power": "Leistung", "tab_flow": "Förder.", "tab_tank": "Tank", "tab_history": "Verlauf",
+      "tab_hose_diam": "Schlauch (Ø)", "tab_hose_drop": "Schlauch (Δp)", "tab_motor": "Motor", "tab_acc": "Speicher", "tab_cooler": "Kühler", "tab_kv": "Kv/Cv",
+      
+      "acc_title": "Speicherauslegung", "acc_desc": "Gesamtvolumen und Vorspanndruck berechnen.", 
+      "acc_v": "Benötigtes Nutzvolumen (L):", "acc_p1": "Max. Betriebsdruck P1 (bar):", "acc_p2": "Min. Betriebsdruck P2 (bar):", 
+      "btn_acc": "Speicher berechnen", "acc_v0": "Speicher Gesamtvolumen (V0):", "acc_p0": "Gas-Vorspanndruck (P0):",
+      
+      "cool_title": "Ölkühler Leistung", "cool_desc": "Auslegung des Ölkühlers für Ihr System.", 
+      "cool_kw": "Installierte Systemleistung (kW):", "cool_toil": "Ziel-Öltemperatur (°C):", "cool_tamb": "Umgebungstemperatur Kühler (°C):", 
+      "btn_cool": "Kühler berechnen", "cool_heat": "Abzuführende Wärmeleistung:", "cool_pk": "Erforderliche spez. Kühlleistung:",
+      
+      "kv_title": "Durchflusskoeffizient Kv/Cv", "kv_desc": "Kapazitätsauswahl für Ventile/Blöcke.", 
+      "kv_flow": "Benötigter Durchfluss (L/min):", "kv_dp": "Erlaubter Druckabfall Δp (bar):", "kv_sg": "Spezifisches Gewicht (SG):", 
+      "btn_kv": "Kv / Cv berechnen", "res_kv": "Kv-Koeffizient:", "res_cv": "Cv-Koeffizient:",
+
+      "force_title": "Zylinderkraft", "force_desc": "Druck- und Zugkraft berechnen.",
+      "pressure": "Betriebsdruck (bar):", "bore": "Kolbeninnendurchmesser (mm):", "rod": "Stangendurchmesser (mm):",
+      "btn_force": "Kraft berechnen", "push": "Druckkraft:", "pull": "Zugkraft:",
+      "speed_title": "Geschwindigkeit & Zykluszeit", "speed_desc": "Aus- und Einfahrzeit berechnen.",
+      "flow": "Pumpenfördermenge (L/min):", "stroke": "Zylinderhub (mm):", "btn_speed": "Zeit berechnen",
+      "v_push": "Ausfahrgeschwindigkeit:", "t_push": "Ausfahrzeit:", "v_pull": "Einfahrgeschwindigkeit:", "t_pull": "Einfahrzeit:",
+      "power_title": "Pumpenantriebsleistung", "power_desc": "Elektro-/Verbrennungsmotor wählen.",
+      "p_flow": "Pumpenfördermenge (L/min):", "p_max": "Maximaler Druck (bar):", "p_type": "Pumpentyp:",
+      "gear": "Zahnradpumpe (~85%)", "piston": "Kolbenpumpe (~90%)", "btn_power": "Leistung berechnen",
+      "kw": "Benötigte Motorleistung:", "hp": "Äquivalent:", "hp_unit": "PS",
+      "flow_title": "Pumpenfördermenge", "flow_desc": "L/min aus Schluckvolumen berechnen.",
+      "disp": "Schluckvolumen (cm³/U):", "rpm": "Antriebsdrehzahl (U/min):",
+      "rpm1": "1450 U/min (Elektromotor)", "rpm2": "3000 U/min (Verbrennungsmotor)", "rpm3": "540 U/min (Zapfwelle)", "rpm_custom": "Anderer Wert (unten)",
+      "cond": "Pumpenzustand:", "new_p": "Neue Pumpe (~95%)", "old_p": "Gebrauchte Pumpe (~85%)", "btn_flow": "Menge berechnen",
+      "actual": "Tatsächliche Fördermenge:", "theo": "Theoretisch:",
+      "motor_title": "Motorparameter", "motor_desc": "Drehmoment und Drehzahl berechnen.",
+      "speed_rpm": "Drehzahl:", "torque": "Drehmoment:", "btn_motor": "Motor berechnen",
+      "tank_title": "Tankkapazität", "tank_desc": "Richtige Ölkühlung sicherstellen.",
+      "sys_type": "Systemtyp:", "mob": "Mobile / Landmaschinen", "ind": "Stationäre / Industriemaschinen", "closed": "Geschlossenes System",
+      "btn_tank": "Kapazität berechnen", "rec": "Empfohlene Kapazität:", "liters": "Liter",
+      "hose_diam_title": "Schlauchdurchmesser", "hose_diam_desc": "Berechnen Sie den optimalen Innendurchmesser.",
+      "line_type": "Empfohlene Fließgeschwindigkeit:", "line_suction": "Saugleitung (~1.0 m/s)", "line_return": "Rücklaufleitung (~2.0 m/s)", "line_pressure_low": "Druckleitung < 100 bar (~4.0 m/s)", "line_pressure_mid": "Druckleitung 100-200 bar (~5.0 m/s)", "line_pressure_high": "Druckleitung > 200 bar (~6.0 m/s)",
+      "btn_hose_diam": "Durchmesser berechnen", "min_diam": "Mindest-Innendurchmesser:",
+      "hose_drop_title": "Druckabfall im Schlauch", "hose_drop_desc": "Schätzen Sie die Druckverluste im Schlauch ab.",
+      "hose_bore": "Schlauch-Innendurchmesser (mm):", "hose_len": "Schlauchlänge (m):", "viscosity": "Kinematische Viskosität (cSt):", "density": "Öldichte (kg/m³):",
+      "btn_hose_drop": "Druckabfall berechnen", "pressure_drop": "Druckabfall (Δp):", "fluid_velocity": "Tatsächliche Fließgeschwindigkeit:", "flow_type": "Strömungsart:",
+      "laminar": "Laminar", "turbulent": "Turbulent",
+      "history_title": "Berechnungsverlauf", "history_desc": "Ihre letzten 50 Ergebnisse (Lokal).", "clear_history": "Verlauf löschen", "empty_history": "Noch kein Verlauf gespeichert.", "hist_input": "Eingabe:", "hist_result": "Ergebnis:",
+      "btn_pdf": "📄 PDF erstellen", "copy_btn": "📋 Ergebnis kopieren", "btn_png": "PNG speichern",
+      "about_title": "HCalculator v1.1.4", "about_desc": "Professioneller Hydraulik-Rechner",
+      "about_text": "Programm für Windows-Geräte, Android-Smartphones und Webbrowser. Es ist zu 100 % kostenlos, werbefrei und respektiert Ihre Privatsphäre, da es offline funktioniert. Wenn HCalculator Ihnen Zeit gespart hat, spendieren Sie mir einen Kaffee oder sponsern Sie mich auf GitHub!",
+      "btn_coffee": "Spendieren Sie mir einen Kaffee", "btn_sponsor": "Sponsor auf GitHub",
+      "ph_180": "z.B. 180", "ph_80": "z.B. 80", "ph_40": "z.B. 40", "ph_500": "z.B. 500", "ph_14": "z.B. 14", "ph_custom": "Wert...",
+      "err_empty": "Bitte füllen Sie alle Felder korrekt aus!",
+      "err_bore": "Kolbendurchmesser muss größer als Stangendurchmesser sein!",
+      "err_acc_p": "Max. Druck P1 muss größer als Min. P2 sein!",
+      "print_report": "Berechnungsbericht", "print_params": "Eingabeparameter:", "print_results": "Berechnungsergebnisse:", "print_footer": "Erstellt in HCalculator v1.1.4", "print_date": "Datum:"
+    }
+  };
+
+  document.getElementById("currentYear").textContent = new Date().getFullYear();
+  var langSwitch = document.getElementById('lang-switch');
+  
+  
+  document.querySelectorAll('.flag-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+          let lang = this.getAttribute('data-lang');
+          langSwitch.value = lang;
+          langSwitch.dispatchEvent(new Event('change'));
+      });
+  });
+  
+  
+  langSwitch.addEventListener('change', function(e) {
+    var lang = e.target.value;
+    
+    
+    document.querySelectorAll('.flag-btn').forEach(b => b.classList.remove('active'));
+    let activeBtn = document.getElementById('flag-' + lang);
+    if(activeBtn) activeBtn.classList.add('active');
+    
+    
+    document.querySelectorAll('[data-i18n]').forEach(function(el) {
+      var key = el.getAttribute('data-i18n');
+      if(langDict[lang] && langDict[lang][key]) { el.innerText = langDict[lang][key]; }
+    });
+    
+    document.querySelectorAll('[data-i18n-ph]').forEach(function(el) {
+      var key = el.getAttribute('data-i18n-ph');
+      if(langDict[lang] && langDict[lang][key]) { el.placeholder = langDict[lang][key]; }
+    });
+    
+    document.querySelectorAll('[data-dynamic-i18n]').forEach(function(el) {
+      var key = el.getAttribute('data-dynamic-i18n');
+      if(langDict[lang] && langDict[lang][key]) { el.innerText = langDict[lang][key]; }
+    });
+    
+    document.querySelectorAll('.btn-pdf-gen').forEach(btn => btn.innerText = langDict[lang]['btn_pdf']);
+    document.querySelectorAll('.btn-png-gen').forEach(btn => btn.innerText = langDict[lang]['btn_png']);
+    document.querySelectorAll('.br-copy-btn[data-copy]').forEach(btn => btn.innerText = langDict[lang]['copy_btn']);
+
+    document.querySelectorAll('[data-i18n-title]').forEach(function(el) {
+      var key = el.getAttribute('data-i18n-title');
+      if(langDict[lang] && langDict[lang][key]) { el.title = langDict[lang][key]; }
+    });
+
+    renderHistory();
+    setTimeout(updateScrollArrows, 50);
+  });
+
+  
+  var userLang = navigator.language || navigator.userLanguage; 
+  var langCode = userLang.split('-')[0].toLowerCase();
+  var supportedLangs = ['pl', 'en', 'de'];
+  if (!supportedLangs.includes(langCode)) { langCode = 'en'; }
+  langSwitch.value = langCode;
+  langSwitch.dispatchEvent(new Event('change'));
+
+  
+  window.generatePDF = async function(title, params, results) {
+      let lang = langSwitch.value;
+      document.getElementById('print-title').innerText = title;
+      document.getElementById('print-date').innerText = langDict[lang]['print_date'] + " " + new Date().toLocaleString();
+      document.getElementById('print-params').innerText = params;
+      document.getElementById('print-results').innerText = results;
+      
+      const htmlData = "<!DOCTYPE html><html><head><style>body { font-family: sans-serif; padding: 20px; } h2 { color: #003366; border-bottom: 2px solid #ffaa00; padding-bottom: 10px; } .print-block { background: #f4f7f9; padding: 15px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px; } h3 { color: #0055a5; margin-top: 0; } pre { white-space: pre-wrap; word-wrap: break-word; font-size: 14px; }</style></head><body>" + document.getElementById('print-area').innerHTML + "</body></html>";
+      
+      if (window.cordova && window.cordova.plugins && window.cordova.plugins.printer) {
+          window.cordova.plugins.printer.print(htmlData, { name: 'Raport_HCalculator' });
+      } else {
+          window.print();
+      }
+  }
+
+  
+  window.generatePNG = async function(containerId, title) {
+      let el = document.getElementById(containerId);
+      if(!el) return;
+      
+      try {
+          let originalBg = el.style.backgroundColor;
+          let isDark = document.body.classList.contains('dark-mode');
+          
+          el.style.backgroundColor = isDark ? '#1e1e1e' : '#ffffff'; 
+          
+          let isMobile = (window.Capacitor && window.Capacitor.isNativePlatform()) || window.cordova;
+          let scaleVal = isMobile ? 1 : 2;
+          
+          const canvas = await html2canvas(el, { scale: scaleVal, useCORS: true });
+          el.style.backgroundColor = originalBg; 
+          
+          const imgData = canvas.toDataURL('image/png');
+          
+          if (isMobile && window.plugins && window.plugins.socialsharing) {
+             
+              window.plugins.socialsharing.share(null, title, imgData, null);
+          } else if (window.pywebview && window.pywebview.api) {
+              
+              window.pywebview.api.save_png(title, imgData);
+          } else {
+              
+              let link = document.createElement('a');
+              link.download = title.replace(/\s+/g, '_') + '.png';
+              link.href = imgData;
+              link.click();
+          }
+      } catch (e) {
+          console.error("Błąd zapisu PNG:", e);
+          showError('err_empty');
+      }
+  };
+
+  
+  function persistHistory() {
+      if (window.pywebview && window.pywebview.api) {
+          window.pywebview.api.save_history(JSON.stringify(window.appHistory));
+      } else {
+          try { localStorage.setItem('hcalc_history', JSON.stringify(window.appHistory)); } catch(e) {}
+      }
+  }
+
+  function saveToHistory(typeKey, paramsText, resultsText) {
+      const newEntry = {
+          date: new Date().toLocaleString(),
+          type: typeKey,
+          params: paramsText,
+          results: resultsText
+      };
+      
+      window.appHistory.unshift(newEntry);
+      if (window.appHistory.length > 50) { window.appHistory = window.appHistory.slice(0, 50); }
+      
+      persistHistory();
+      renderHistory();
+  }
+
+  window.deleteHistoryItem = function(index) {
+      window.appHistory.splice(index, 1);
+      persistHistory();
+      renderHistory();
+  };
+
+  window.translateHistory = function(text, currentLang) {
+      if (!text) return 'Brak danych';
+      return text.replace(/\[\[(.*?)\]\]/g, function(match, key) {
+          return (langDict[currentLang] && langDict[currentLang][key]) ? langDict[currentLang][key] : match;
+      });
+  };
+
+  function createActionButtons(containerId, copyId, pdfId, paramsRaw, resultsRaw, moduleKey) {
+      let copyBtn = document.getElementById(copyId);
+      let pdfBtn = document.getElementById(pdfId);
+      let pngId = pdfId.replace('pdf', 'png');
+      let pngBtn = document.getElementById(pngId);
+      
+      if(!copyBtn) {
+          document.getElementById(containerId).insertAdjacentHTML('beforeend', 
+              `<div style="display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;">
+                  <button id="${copyId}" class="br-copy-btn" data-copy="true"
+                          style="display:block; margin:0; padding: 12px 10px; font-size: 14px; flex: 1; min-width:120px; background-color: #003366; color: #ffffff; border: none; border-radius: 25px; transition: opacity 0.2s; cursor: pointer;"
+                          onmouseenter="this.style.opacity='0.8'" 
+                          onmouseleave="this.style.opacity='1'">
+                  </button>
+                  <button id="${pdfId}" class="br-copy-btn btn-pdf-gen" 
+                          style="display:block; margin:0; padding: 12px 10px; font-size: 14px; flex: 1; min-width:120px; background-color: #0055a5; color: #ffffff; border: none; border-radius: 25px; font-weight: bold; transition: opacity 0.2s; cursor: pointer;"
+                          onmouseenter="this.style.opacity='0.8'" 
+                          onmouseleave="this.style.opacity='1'">
+                  </button>
+                  <button id="${pngId}" class="br-copy-btn btn-png-gen" 
+                          style="display:block; margin:0; padding: 12px 10px; font-size: 14px; flex: 1; min-width:120px; background-color: #2e8b57; color: #ffffff; border: none; border-radius: 25px; font-weight: bold; transition: opacity 0.2s; cursor: pointer;"
+                          onmouseenter="this.style.opacity='0.8'" 
+                          onmouseleave="this.style.opacity='1'">
+                  </button>
+              </div>`
+          );
+          copyBtn = document.getElementById(copyId);
+          pdfBtn = document.getElementById(pdfId);
+          pngBtn = document.getElementById(pngId);
+      }
+      
+      copyBtn.style.display = 'block';
+      pdfBtn.style.display = 'block';
+      pngBtn.style.display = 'block';
+      
+      let lang = langSwitch.value;
+      copyBtn.innerText = langDict[lang]['copy_btn'];
+      pdfBtn.innerText = langDict[lang]['btn_pdf'];
+      pngBtn.innerText = langDict[lang]['btn_png'];
+
+      copyBtn.onclick = () => {
+          let l = langSwitch.value;
+          let t_p = window.translateHistory(paramsRaw, l);
+          let t_r = window.translateHistory(resultsRaw, l);
+          let title = `HCalculator | ${langDict[l][moduleKey]}`;
+          copyToClipboard(`${title}\n--- ${langDict[l]['print_params']} ---\n${t_p}\n--- ${langDict[l]['print_results']} ---\n${t_r}`, copyId);
+      };
+      
+      pdfBtn.onclick = () => {
+          let l = langSwitch.value;
+          let t_p = window.translateHistory(paramsRaw, l);
+          let t_r = window.translateHistory(resultsRaw, l);
+          let title = `HCalculator | ${langDict[l][moduleKey]}`;
+          window.generatePDF(title, t_p, t_r);
+      };
+
+      pngBtn.onclick = () => {
+          let l = langSwitch.value;
+          let title = `HCalculator | ${langDict[l][moduleKey]}`;
+          window.generatePNG(containerId, title);
+      };
+      
+      saveToHistory(moduleKey, paramsRaw, resultsRaw);
+  }
+
+  function renderHistory() {
+      const list = document.getElementById('history-list');
+      let currentLang = langSwitch.value;
+      
+      if (!window.appHistory || window.appHistory.length === 0) {
+          list.innerHTML = `<p style="text-align:center; color:#777; margin: 30px 0;">${langDict[currentLang]['empty_history']}</p>`;
+          return;
+      }
+      
+      let html = '';
+      window.appHistory.forEach((item, index) => {
+          let displayType = langDict[currentLang][item.type] || item.type;
+          
+          let pRaw = item.params ? String(item.params) : '';
+          let rRaw = item.results ? String(item.results) : '';
+          
+          let pText = window.translateHistory(pRaw, currentLang).replace(/\n/g, '<br>');
+          let rText = window.translateHistory(rRaw, currentLang).replace(/\n/g, '<br>');
+          
+          html += `<div id="hist-item-box-${index}" style="background: #f8fafc; padding: 15px; border-radius: 6px; border-left: 4px solid #0055a5; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px; align-items:center;">
+                  <strong style="color: #002244;">${displayType}</strong>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                      <span style="font-size: 12px; color: #777;">${item.date}</span>
+                      <button class="delete-hist-btn" onclick="deleteHistoryItem(${index})" title="Usuń">&#10006;</button>
+                  </div>
+              </div>
+              
+              <div style="font-size: 13px; margin-bottom: 8px; line-height: 1.4;">
+                  <strong>${langDict[currentLang]['hist_input']}</strong><br>${pText}
+              </div>
+              <div style="font-size: 14px; color: #d9534f; font-weight: bold; margin-bottom: 15px; line-height: 1.4;">
+                  <strong>${langDict[currentLang]['hist_result']}</strong><br>${rText}
+              </div>
+              
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                  <button id="hist-copy-${index}" class="br-copy-btn" 
+                          style="display:block; margin-top:0; padding: 8px 10px; font-size: 13px; flex: 1; min-width: 100px; background-color: #003366; color: #ffffff; border: none; border-radius: 25px; transition: opacity 0.2s; cursor: pointer;"
+                          onmouseenter="this.style.opacity='0.8'" 
+                          onmouseleave="this.style.opacity='1'">
+                      ${langDict[currentLang]['copy_btn']}
+                  </button>
+                  <button id="hist-pdf-${index}" class="br-copy-btn btn-pdf-gen" 
+                          style="display:block; margin-top:0; padding: 8px 10px; font-size: 13px; flex: 1; min-width: 100px; background-color: #0055a5; color: #ffffff; border: none; border-radius: 25px; font-weight: bold; transition: opacity 0.2s; cursor: pointer;"
+                          onmouseenter="this.style.opacity='0.8'" 
+                          onmouseleave="this.style.opacity='1'">
+                      ${langDict[currentLang]['btn_pdf']}
+                  </button>
+                  <button id="hist-png-${index}" class="br-copy-btn btn-png-gen" 
+                          style="display:block; margin-top:0; padding: 8px 10px; font-size: 13px; flex: 1; min-width: 100px; background-color: #2e8b57; color: #ffffff; border: none; border-radius: 25px; font-weight: bold; transition: opacity 0.2s; cursor: pointer;"
+                          onmouseenter="this.style.opacity='0.8'" 
+                          onmouseleave="this.style.opacity='1'">
+                      ${langDict[currentLang]['btn_png']}
+                  </button>
+              </div>
+          </div>`;
+      });
+      list.innerHTML = html;
+
+      window.appHistory.forEach((item, index) => {
+          let pRaw = item.params ? String(item.params) : '';
+          let rRaw = item.results ? String(item.results) : '';
+
+          let copyBtn = document.getElementById(`hist-copy-${index}`);
+          if(copyBtn) {
+              copyBtn.onclick = () => {
+                  let l = langSwitch.value;
+                  let t_p = window.translateHistory(pRaw, l);
+                  let t_r = window.translateHistory(rRaw, l);
+                  let title = `HCalculator | ${langDict[l][item.type] || item.type}`;
+                  let text = `${title}\n--- ${langDict[l]['print_params']} ---\n${t_p}\n--- ${langDict[l]['print_results']} ---\n${t_r}`;
+                  copyToClipboard(text, `hist-copy-${index}`);
+              };
+          }
+
+          let pdfBtn = document.getElementById(`hist-pdf-${index}`);
+          if(pdfBtn) {
+              pdfBtn.onclick = () => {
+                  let l = langSwitch.value;
+                  let t_p = window.translateHistory(pRaw, l);
+                  let t_r = window.translateHistory(rRaw, l);
+                  let title = `HCalculator | ${langDict[l][item.type] || item.type}`;
+                  window.generatePDF(title, t_p, t_r);
+              };
+          }
+
+          let pngBtn = document.getElementById(`hist-png-${index}`);
+          if(pngBtn) {
+              pngBtn.onclick = () => {
+                  let l = langSwitch.value;
+                  let title = `HCalculator | ${langDict[l][item.type] || item.type}`;
+                  window.generatePNG(`hist-item-box-${index}`, title);
+              };
+          }
+      });
+  }
+
+  document.getElementById('clear-history-btn').addEventListener('click', function() {
+      window.appHistory = [];
+      persistHistory();
+      renderHistory();
+  });
+
+  document.getElementById('show-about-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      document.querySelectorAll('.br-tab-btn').forEach(function(b) { b.classList.remove('active'); });
+      document.querySelectorAll('.br-tab-content').forEach(function(c) { c.classList.remove('active'); });
+      document.getElementById('tab-about').classList.add('active');
+  });
+
+  const tabsContainer = document.getElementById('main-tabs-container');
+  const leftArrow = document.getElementById('left-scroll-arrow');
+  const rightArrow = document.getElementById('right-scroll-arrow');
+
+  function updateScrollArrows() {
+      const scrollLeft = tabsContainer.scrollLeft;
+      const maxScroll = tabsContainer.scrollWidth - tabsContainer.clientWidth;
+      
+      if (scrollLeft > 5) { leftArrow.classList.add('visible'); } else { leftArrow.classList.remove('visible'); }
+      if (scrollLeft < maxScroll - 5 && tabsContainer.scrollWidth > tabsContainer.clientWidth) { rightArrow.classList.add('visible'); } else { rightArrow.classList.remove('visible'); }
+  }
+
+  tabsContainer.addEventListener('scroll', updateScrollArrows);
+  window.addEventListener('resize', updateScrollArrows);
+  leftArrow.addEventListener('click', () => { tabsContainer.scrollLeft -= 150; });
+  rightArrow.addEventListener('click', () => { tabsContainer.scrollLeft += 150; });
+
+  function showError(msgKey) {
+    var toast = document.getElementById("toast");
+    var currentLang = langSwitch.value;
+    toast.innerText = langDict[currentLang][msgKey] || "Błąd / Error";
+    toast.className = "show";
+    setTimeout(function() { toast.className = toast.className.replace("show", ""); }, 3000);
+  }
+
+  document.querySelectorAll('input[type="number"]').forEach(function(input) {
+    input.addEventListener('input', function() { if (this.value < 0) this.value = Math.abs(this.value); });
+  });
+
+  function copyToClipboard(text, btnId) {
+    var textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.top = "-9999px";
+    textArea.style.left = "-9999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    var successful = false;
+    try { successful = document.execCommand('copy'); } 
+    catch (err) { console.error('Nie udało się skopiować', err); }
+    document.body.removeChild(textArea);
+    
+    if (successful) {
+      var btn = document.getElementById(btnId);
+      var originalText = btn.innerText;
+      btn.innerText = "✓ OK!";
+      btn.classList.add('success');
+      setTimeout(function() {
+        btn.innerText = originalText;
+        btn.classList.remove('success');
+      }, 2000);
+    } else {
+      showError('err_empty');
+    }
+  }
+
+  var tabBtns = document.querySelectorAll('.br-tab-btn');
+  var tabContents = document.querySelectorAll('.br-tab-content');
+  tabBtns.forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      tabBtns.forEach(function(b) { b.classList.remove('active'); });
+      tabContents.forEach(function(c) { c.classList.remove('active'); });
+      this.classList.add('active');
+      document.getElementById(this.getAttribute('data-tab')).classList.add('active');
+      if(this.getAttribute('data-tab') === 'tab-historia') { renderHistory(); }
+      
+      this.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    });
+  });
+
+  
+  // Siła
+  document.getElementById('run-calc-btn').addEventListener('click', function(e) {
+    e.preventDefault(); 
+    var p = parseFloat(document.getElementById('calc-pressure').value);
+    var boreMm = parseFloat(document.getElementById('calc-bore').value);
+    var rodMm = parseFloat(document.getElementById('calc-rod').value);
+    
+    if (isNaN(p) || isNaN(boreMm) || isNaN(rodMm)) return showError('err_empty');
+    if (boreMm <= rodMm) return showError('err_bore');
+
+    var aB = Math.PI * Math.pow((boreMm/10)/2, 2);
+    var aR = Math.PI * Math.pow((rodMm/10)/2, 2);
+    var pushForce = Math.round(p * aB * 1.0197);
+    var pullForce = Math.round(p * (aB - aR) * 1.0197);
+    
+    document.getElementById('res-push').innerText = pushForce.toLocaleString('pl-PL');
+    document.getElementById('res-pull').innerText = pullForce.toLocaleString('pl-PL');
+    document.getElementById('calc-results').style.display = 'block';
+
+    let pTxt = `[[pressure]] ${p}\n[[bore]] ${boreMm}\n[[rod]] ${rodMm}`;
+    let rTxt = `[[push]] ${pushForce} kg\n[[pull]] ${pullForce} kg`;
+    createActionButtons('calc-results', 'copy-force', 'pdf-force', pTxt, rTxt, 'force_title');
+  });
+
+  // Prędkość
+  document.getElementById('calc-spd-btn').addEventListener('click', function(e) {
+    e.preventDefault();
+    var Q = parseFloat(document.getElementById('spd-flow').value);
+    var D = parseFloat(document.getElementById('spd-bore').value);
+    var d = parseFloat(document.getElementById('spd-rod').value);
+    var s = parseFloat(document.getElementById('spd-stroke').value);
+    
+    if (isNaN(Q) || isNaN(D) || isNaN(d) || isNaN(s)) return showError('err_empty');
+    if (D <= d) return showError('err_bore');
+
+    var a1 = Math.PI * Math.pow((D/10)/2, 2); 
+    var a2 = Math.PI * (Math.pow((D/10)/2, 2) - Math.pow((d/10)/2, 2));
+    var Q_s = (Q * 1000) / 60;
+    
+    var vPush = (Q_s / a1).toFixed(2);
+    var tPush = ((s/10) / (Q_s / a1)).toFixed(2);
+    var vPull = (Q_s / a2).toFixed(2);
+    var tPull = ((s/10) / (Q_s / a2)).toFixed(2);
+
+    document.getElementById('res-v-push').innerText = vPush;
+    document.getElementById('res-t-push').innerText = tPush;
+    document.getElementById('res-v-pull').innerText = vPull;
+    document.getElementById('res-t-pull').innerText = tPull;
+    document.getElementById('spd-results').style.display = 'block';
+
+    let pTxt = `[[flow]] ${Q}\n[[bore]] ${D}\n[[rod]] ${d}\n[[stroke]] ${s}`;
+    let rTxt = `[[t_push]] ${tPush} s ([[v_push]] ${vPush} cm/s)\n[[t_pull]] ${tPull} s ([[v_pull]] ${vPull} cm/s)`;
+    createActionButtons('spd-results', 'copy-speed', 'pdf-speed', pTxt, rTxt, 'speed_title');
+  });
+
+  // Moc
+  document.getElementById('calc-pmp-btn').addEventListener('click', function(e) {
+    e.preventDefault();
+    var Q = parseFloat(document.getElementById('pmp-flow').value);
+    var p = parseFloat(document.getElementById('pmp-pressure').value);
+    var eff = parseFloat(document.getElementById('pmp-eff').value);
+    
+    if (isNaN(Q) || isNaN(p)) return showError('err_empty');
+
+    var kw = ((Q * p) / (600 * eff)).toFixed(2);
+    var km = (kw * 1.36).toFixed(2);
+    
+    document.getElementById('res-kw').innerText = kw;
+    document.getElementById('res-km').innerText = km;
+    document.getElementById('pmp-results').style.display = 'block';
+
+    let pTxt = `[[p_flow]] ${Q}\n[[p_max]] ${p}`;
+    let rTxt = `[[kw]] ${kw} kW (${km} [[hp_unit]])`;
+    createActionButtons('pmp-results', 'copy-power', 'pdf-power', pTxt, rTxt, 'power_title');
+  });
+
+  // Wydajność
+  var rSel = document.getElementById('flow-rpm-select');
+  var rCus = document.getElementById('flow-rpm-custom');
+  if (rSel) {
+      rSel.addEventListener('change', function() { rCus.style.display = (this.value === 'custom') ? 'block' : 'none'; });
+  }
+
+  document.getElementById('calc-flow-btn').addEventListener('click', function(e) {
+    e.preventDefault();
+    var V = parseFloat(document.getElementById('flow-disp').value);
+    var eff = parseFloat(document.getElementById('flow-eff').value);
+    var rpm = (rSel.value === 'custom') ? parseFloat(rCus.value) : parseFloat(rSel.value);
+    
+    if (isNaN(V) || isNaN(rpm)) return showError('err_empty');
+
+    var theo = ((V * rpm) / 1000).toFixed(1);
+    var actual = (theo * eff).toFixed(1);
+    
+    document.getElementById('res-flow-theo').innerText = theo;
+    document.getElementById('res-flow-actual').innerText = actual;
+    document.getElementById('flow-results').style.display = 'block';
+
+    let pTxt = `[[disp]] ${V}\n[[rpm]] ${rpm}`;
+    let rTxt = `[[actual]] ${actual} L/min\n([[theo]] ${theo} L/min)`;
+    createActionButtons('flow-results', 'copy-flow', 'pdf-flow', pTxt, rTxt, 'flow_title');
+  });
+
+  // Silnik Hydrauliczny
+  document.getElementById('calc-mot-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      var Q = parseFloat(document.getElementById('mot-flow').value);
+      var V = parseFloat(document.getElementById('mot-disp').value);
+      var p = parseFloat(document.getElementById('mot-pressure').value);
+      
+      if (isNaN(Q) || isNaN(V) || isNaN(p) || V <= 0) return showError('err_empty');
+
+      var n = (Q * 1000) / V; 
+      var T = (p * V) / (20 * Math.PI); 
+      
+      var n_actual = n * 0.95;
+      var T_actual = T * 0.90;
+      
+      document.getElementById('res-mot-speed').innerText = Math.round(n_actual);
+      document.getElementById('res-mot-torque').innerText = T_actual.toFixed(1);
+      document.getElementById('mot-results').style.display = 'block';
+
+      let pTxt = `[[flow]] ${Q} L/min\n[[disp]] ${V} cm³/obr\n[[pressure]] ${p} bar`;
+      let rTxt = `[[speed_rpm]] ${Math.round(n_actual)} obr/min\n[[torque]] ${T_actual.toFixed(1)} Nm`;
+      createActionButtons('mot-results', 'copy-mot', 'pdf-mot', pTxt, rTxt, 'motor_title');
+  });
+
+  // Zbiornik
+  document.getElementById('calc-tank-btn').addEventListener('click', function(e) {
+    e.preventDefault();
+    var Q = parseFloat(document.getElementById('tank-flow').value);
+    var type = document.getElementById('tank-type').value;
+    
+    if (isNaN(Q)) return showError('err_empty');
+
+    var minM = (type === 'mobile') ? 2 : (type === 'industrial' ? 3 : 1);
+    var maxM = (type === 'mobile') ? 3 : (type === 'industrial' ? 5 : 1.5);
+    var resultRange = Math.round(Q * minM) + " - " + Math.round(Q * maxM);
+    
+    document.getElementById('res-tank-range').innerText = resultRange;
+    document.getElementById('tank-results').style.display = 'block';
+
+    let typeKey = document.getElementById('tank-type').options[document.getElementById('tank-type').selectedIndex].getAttribute('data-i18n');
+    let pTxt = `[[p_flow]] ${Q}\n[[sys_type]] [[${typeKey}]]`;
+    let rTxt = `[[rec]] ${resultRange} [[liters]]`;
+    createActionButtons('tank-results', 'copy-tank', 'pdf-tank', pTxt, rTxt, 'tank_title');
+  });
+
+  // Akumulator
+  document.getElementById('calc-acc-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      let dV = parseFloat(document.getElementById('acc-v').value);
+      let p1 = parseFloat(document.getElementById('acc-p1').value);
+      let p2 = parseFloat(document.getElementById('acc-p2').value);
+
+      if (isNaN(dV) || isNaN(p1) || isNaN(p2) || dV <= 0) return showError('err_empty');
+      if (p2 >= p1) return showError('err_acc_p');
+
+      let p1a = p1 + 1;
+      let p2a = p2 + 1;
+      let p0a = (p2a * 0.90);
+      let p0_gauge = p0a - 1; 
+
+      let v0 = (dV * p1a * p2a) / (p0a * (p1a - p2a));
+
+      document.getElementById('res-acc-v0').innerText = v0.toFixed(2);
+      document.getElementById('res-acc-p0').innerText = p0_gauge.toFixed(1);
+      document.getElementById('acc-results').style.display = 'block';
+
+      let pTxt = `[[acc_v]] ${dV} L\n[[acc_p1]] ${p1} bar\n[[acc_p2]] ${p2} bar`;
+      let rTxt = `[[acc_v0]] ${v0.toFixed(2)} L\n[[acc_p0]] ${p0_gauge.toFixed(1)} bar`;
+      createActionButtons('acc-results', 'copy-acc', 'pdf-acc', pTxt, rTxt, 'acc_title');
+  });
+
+  // Chłodnica
+  document.getElementById('calc-cool-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      let P_sys = parseFloat(document.getElementById('cool-kw').value);
+      let T_oil = parseFloat(document.getElementById('cool-toil').value);
+      let T_amb = parseFloat(document.getElementById('cool-tamb').value);
+
+      if (isNaN(P_sys) || isNaN(T_oil) || isNaN(T_amb) || P_sys <= 0) return showError('err_empty');
+      
+      let dT = T_oil - T_amb;
+      if (dT <= 0) {
+          showError('err_empty');
+          return;
+      }
+
+      let P_heat = P_sys * 0.30;
+      let P_k = P_heat / dT;
+
+      document.getElementById('res-cool-heat').innerText = P_heat.toFixed(2);
+      document.getElementById('res-cool-pk').innerText = P_k.toFixed(3);
+      document.getElementById('cool-results').style.display = 'block';
+
+      let pTxt = `[[cool_kw]] ${P_sys} kW\n[[cool_toil]] ${T_oil} °C\n[[cool_tamb]] ${T_amb} °C`;
+      let rTxt = `[[cool_heat]] ${P_heat.toFixed(2)} kW\n[[cool_pk]] ${P_k.toFixed(3)} kW/°C`;
+      createActionButtons('cool-results', 'copy-cool', 'pdf-cool', pTxt, rTxt, 'cool_title');
+  });
+
+  // Kv / Cv
+  document.getElementById('calc-kv-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      let Q = parseFloat(document.getElementById('kv-flow').value);
+      let dp = parseFloat(document.getElementById('kv-dp').value);
+      let sg = parseFloat(document.getElementById('kv-sg').value);
+
+      if (isNaN(Q) || isNaN(dp) || isNaN(sg) || Q <= 0 || dp <= 0 || sg <= 0) return showError('err_empty');
+
+      let Q_m3h = Q / 16.6667;
+      let kv = Q_m3h * Math.sqrt(sg / dp);
+      let cv = kv * 1.156;
+
+      document.getElementById('res-kv-val').innerText = kv.toFixed(2);
+      document.getElementById('res-cv-val').innerText = cv.toFixed(2);
+      document.getElementById('kv-results').style.display = 'block';
+
+      let pTxt = `[[kv_flow]] ${Q} L/min\n[[kv_dp]] ${dp} bar\n[[kv_sg]] ${sg}`;
+      let rTxt = `[[res_kv]] ${kv.toFixed(2)} m³/h\n[[res_cv]] ${cv.toFixed(2)} US gpm`;
+      createActionButtons('kv-results', 'copy-kv', 'pdf-kv', pTxt, rTxt, 'kv_title');
+  });
+
+  // Dobór Średnicy Węża
+  var hdSel = document.getElementById('hd-line-select');
+  var hdCus = document.getElementById('hd-vel-custom');
+  if (hdSel) {
+      hdSel.addEventListener('change', function() { hdCus.style.display = (this.value === 'custom') ? 'block' : 'none'; });
+  }
+
+  document.getElementById('calc-hd-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      var Q = parseFloat(document.getElementById('hd-flow').value);
+      var v = (hdSel.value === 'custom') ? parseFloat(hdCus.value) : parseFloat(hdSel.value);
+      
+      if (isNaN(Q) || isNaN(v) || v <= 0) return showError('err_empty');
+
+      var d = 4.6 * Math.sqrt(Q / v);
+      
+      document.getElementById('res-hd-diam').innerText = d.toFixed(2);
+      document.getElementById('hd-results').style.display = 'block';
+
+      let pTxt = `[[flow]] ${Q} L/min\n[[line_type]] ${v} m/s`;
+      let rTxt = `[[min_diam]] ${d.toFixed(2)} mm`;
+      createActionButtons('hd-results', 'copy-hd', 'pdf-hd', pTxt, rTxt, 'hose_diam_title');
+  });
+
+  // Spadek Ciśnienia w Wężu
+  document.getElementById('calc-pd-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      let lang = langSwitch.value;
+      var Q = parseFloat(document.getElementById('pd-flow').value);
+      var d = parseFloat(document.getElementById('pd-bore').value);
+      var L = parseFloat(document.getElementById('pd-len').value);
+      var visc = parseFloat(document.getElementById('pd-visc').value);
+      var rho = parseFloat(document.getElementById('pd-dens').value);
+      
+      if (isNaN(Q) || isNaN(d) || isNaN(L) || isNaN(visc) || isNaN(rho) || d <= 0) return showError('err_empty');
+
+      var v = (Q * 21.2206) / (d * d);
+      var Re = (v * d * 1000) / visc;
+      
+      var lambda = 0;
+      var flowTypeKey = "laminar";
+      if (Re < 2320) {
+          lambda = 64 / Re;
+      } else {
+          lambda = 0.3164 / Math.pow(Re, 0.25);
+          flowTypeKey = "turbulent";
+      }
+      
+      var dp = lambda * (L / (d / 1000)) * (rho * v * v / 2) / 100000;
+      
+      document.getElementById('res-pd-drop').innerText = dp.toFixed(2);
+      document.getElementById('res-pd-vel').innerText = v.toFixed(2);
+      
+      let typeEl = document.getElementById('res-pd-type');
+      typeEl.innerText = langDict[lang][flowTypeKey];
+      typeEl.setAttribute('data-dynamic-i18n', flowTypeKey); 
+      
+      document.getElementById('pd-results').style.display = 'block';
+
+      let pTxt = `[[flow]] ${Q} L/min\n[[hose_bore]] ${d} mm\n[[hose_len]] ${L} m\n[[viscosity]] ${visc} cSt\n[[density]] ${rho} kg/m³`;
+      let rTxt = `[[pressure_drop]] ${dp.toFixed(2)} bar\n[[fluid_velocity]] ${v.toFixed(2)} m/s ([[${flowTypeKey}]])`;
+      createActionButtons('pd-results', 'copy-pd', 'pdf-pd', pTxt, rTxt, 'hose_drop_title');
+  });
+
+  
+  window.addEventListener('pywebviewready', async function() {
+     
+      try {
+          let savedTheme = await window.pywebview.api.load_theme();
+          if (savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'auto') {
+              window.currentTheme = savedTheme;
+              window.applyTheme(window.currentTheme);
+          }
+      } catch (e) { console.warn("Błąd wczytywania motywu z API"); }
+
+      try {
+          let h = await window.pywebview.api.load_history();
+          window.appHistory = JSON.parse(h || "[]");
+      } catch (e) {
+          try { window.appHistory = JSON.parse(localStorage.getItem('hcalc_history') || "[]"); } catch(err) { window.appHistory = []; }
+      }
+      renderHistory();
+  });
+
+  
+  if (!window.pywebview) {
+      try { window.appHistory = JSON.parse(localStorage.getItem('hcalc_history') || "[]"); } catch(err) { window.appHistory = []; }
+      renderHistory();
+  }
+
+  setTimeout(updateScrollArrows, 200); 
+
+  
+  const repo = "daniel-kaliski/HCalculator"; 
+  const currentAppVersion = "1.1.4"; 
+  
+  fetch(`https://api.github.com/repos/${repo}/releases/latest`)
+      .then(response => {
+          if (!response.ok) throw new Error("Błąd sieci");
+          return response.json();
+      })
+      .then(data => {
+          if (data.tag_name) {
+              let latestVersion = data.tag_name.replace('v', '');
+              let currentVersionClean = currentAppVersion.replace('v', '');
+              
+              let lParts = latestVersion.split('.').map(Number);
+              let cParts = currentVersionClean.split('.').map(Number);
+              
+              let isNewer = false;
+              for (let i = 0; i < Math.max(lParts.length, cParts.length); i++) {
+                  let l = lParts[i] || 0;
+                  let c = cParts[i] || 0;
+                  if (l > c) { isNewer = true; break; }
+                  if (l < c) { break; }
+              }
+
+              if (isNewer) {
+                  document.getElementById('update-version-text').innerText = "v" + latestVersion;
+                  document.getElementById('update-banner').style.display = 'block';
+                  
+                  document.getElementById('update-btn').onclick = function() {
+                      if (window.cordova && cordova.InAppBrowser) {
+                          cordova.InAppBrowser.open(data.html_url, '_system');
+                      } else if (window.pywebview && window.pywebview.api) {
+                          window.pywebview.api.open_url(data.html_url);
+                      } else {
+                          window.open(data.html_url, '_blank');
+                      }
+                  };
+                  document.getElementById('update-close-btn').onclick = function() {
+                      document.getElementById('update-banner').style.display = 'none';
+                  };
+              }
+          }
+      })
+      .catch(error => { console.warn("Sprawdzanie aktualizacji wstrzymane."); });
+
+});
+</script>
+</body>
+</html>
