@@ -1,33 +1,33 @@
-name: Build Windows App
+name: Build HCalculator (Windows x64)
 
-# Skrypt uruchomi się automatycznie po wysłaniu kodu na gałąź "main"
-# oraz pozwoli na ręczne uruchomienie przyciskiem z poziomu GitHuba (workflow_dispatch)
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ main, master ]
   workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
   build-windows:
-    name: Kompilacja na Windows
     runs-on: windows-latest
 
     steps:
-    - name: Pobranie kodu repozytorium
+    - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Konfiguracja środowiska Python
+    - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11' 
+        python-version: '3.11'
 
-    - name: Instalacja zależności
+    - name: Install Windows GUI Dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install wheel pythonnet
         pip install pywebview pyinstaller
 
-    - name: Budowanie aplikacji (PyInstaller)
-      
+    - name: Build Windows Executable
       run: |
         pyinstaller --name "HCalculator" --windowed --noconfirm --add-data "index.html;." --add-data "html2canvas.min.js;." --add-data "flag_pl.svg;." --add-data "flag_en.svg;." --add-data "flag_de.svg;." HCalculator.py
 
