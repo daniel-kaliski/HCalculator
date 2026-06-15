@@ -58,24 +58,23 @@ class Api:
             pass
         return "auto"
 
-    
     def save_png(self, title, b64_data):
         try:
-
             if "," in b64_data:
                 b64_data = b64_data.split(",")[1]
                 
             file_data = base64.b64decode(b64_data)
             window = webview.windows[0]
-        
+            
+            import re
             safe_title = re.sub(r'[\\/*?:"<>|]', "-", title)
-            # Zamiana spacji na podkreślniki
             save_filename = f"{safe_title.replace(' ', '_')}.png"
             
             result = window.create_file_dialog(
                 webview.SAVE_DIALOG, 
                 directory='', 
-                save_filename=save_filename
+                save_filename=save_filename,
+                file_types=('Obrazy PNG (*.png)', 'Wszystkie pliki (*.*)')
             )
             
             if result:
