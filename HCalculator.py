@@ -15,7 +15,8 @@ import json
 import webview
 import sys
 import os
-import base64 
+import base64
+import re
 class Api:
     def __init__(self):
         self.history_file = os.path.join(os.path.expanduser('~'), '.hcalc_history.json')
@@ -60,26 +61,29 @@ class Api:
     
     def save_png(self, title, b64_data):
         try:
-            
+
             if "," in b64_data:
                 b64_data = b64_data.split(",")[1]
                 
             file_data = base64.b64decode(b64_data)
-            
-            
             window = webview.windows[0]
+        
+            safe_title = re.sub(r'[\\/*?:"<>|]', "-", title)
+            # Zamiana spacji na podkreślniki
+            save_filename = f"{safe_title.replace(' ', '_')}.png"
             
-            
-            save_filename = f"{title.replace(' ', '_')}.png"
             result = window.create_file_dialog(
                 webview.SAVE_DIALOG, 
                 directory='', 
                 save_filename=save_filename
             )
             
-            
             if result:
                 file_path = result[0] if isinstance(result, (tuple, list)) else result
+                
+                if not file_path.lower().endswith('.png'):
+                    file_path += '.png'
+                    
                 with open(file_path, 'wb') as f:
                     f.write(file_data)
         except Exception as e:
