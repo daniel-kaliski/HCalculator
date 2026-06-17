@@ -67,6 +67,7 @@ pyinstaller --noconfirm HCalculator.spec
 The compiled ```HCalculator.app``` application will appear in the ```dist/``` folder.
 
 **CI/CD Automation (GitHub Actions)**
+
 This repository includes automated workflows. Every push to the main branch automatically triggers cloud builds for both macOS and Windows. The compiled, ready-to-use packages (```.zip```) are available in the **Actions -> Artifacts** tab.
 
 **Author and License**
