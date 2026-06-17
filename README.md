@@ -49,26 +49,26 @@ python HCalculator.py
 The project is fully configured to be built locally or automatically via GitHub Actions.
 
 **For Windows (.exe)**
-To generate a standalone, single ```.exe``` file without a visible background console, run:
+To generate a standalone, single `.exe` file without a visible background console, run:
 
 ```bash
 pyinstaller --name "HCalculator" --onefile --windowed --icon="HCalculator.ico" --noconfirm --add-data "index.html;." --add-data "html2canvas.min.js;." --add-data "flag_pl.svg;." --add-data "flag_en.svg;." --add-data "flag_de.svg;." HCalculator.py
 ```
 
-The compiled ```HCalculator.exe``` will be located in the ```dist/``` folder.
+The compiled `HCalculator.exe` will be located in the `dist/` folder.
 
 **For macOS (.app)**
-Use the prepared ```.spec``` file, which automatically manages the folder structure, icons, and Apple security settings:
+Use the prepared `.spec` file, which automatically manages the folder structure, icons, and Apple security settings:
 
 ```bash
 pyinstaller --noconfirm HCalculator.spec
 ```
 
-The compiled ```HCalculator.app``` application will appear in the ```dist/``` folder.
+The compiled `HCalculator.app` application will appear in the `dist/` folder.
 
 **CI/CD Automation (GitHub Actions)**
 
-This repository includes automated workflows. Every push to the main branch automatically triggers cloud builds for both macOS and Windows. The compiled, ready-to-use packages (```.zip```) are available in the **Actions -> Artifacts** tab.
+This repository includes automated workflows. Every push to the main branch automatically triggers cloud builds for both macOS and Windows. The compiled, ready-to-use packages (`.zip`) are available in the **Actions -> Artifacts** tab.
 
 **Author and License**
 
