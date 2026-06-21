@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-<title>HCalculator - Hydraulic Calculator v1.1.4</title>
+<title>HCalculator - Hydraulic Calculator v1.2.0</title>
 <script src="html2canvas.min.js"></script>
 <style>
   html, body { 
@@ -339,7 +339,7 @@
         <h3 style="margin-top:0; color:#d9534f;" data-i18n="print_results">Wyniki Obliczeń:</h3>
         <pre id="print-results" style="font-family: 'Segoe UI', sans-serif; font-size: 16px; font-weight: bold; color: #002244; white-space: pre-wrap; margin:0;"></pre>
     </div>
-    <p style="font-size: 12px; color: #999; text-align: center; margin-top: 40px;" data-i18n="print_footer">Wygenerowano w programie HCalculator v1.1.4</p>
+    <p style="font-size: 12px; color: #999; text-align: center; margin-top: 40px;" data-i18n="print_footer">Wygenerowano w programie HCalculator v1.2.0</p>
 </div>
 
 <div class="no-print br-app-container">
@@ -391,6 +391,11 @@
         <button class="br-tab-btn" data-tab="tab-kv" data-i18n="tab_kv">Kv/Cv</button>
         <button class="br-tab-btn" data-tab="tab-waz-srednica" data-i18n="tab_hose_diam">Wąż (Ø)</button>
         <button class="br-tab-btn" data-tab="tab-waz-spadek" data-i18n="tab_hose_drop">Wąż (Δp)</button>
+        <button class="br-tab-btn" data-tab="tab-wyboczenie" data-i18n="tab_buckling">Wyboczenie</button>
+        <button class="br-tab-btn" data-tab="tab-dlawik" data-i18n="tab_orifice">Dławik</button>
+        <button class="br-tab-btn" data-tab="tab-rura" data-i18n="tab_pipe">Rura</button>
+        <button class="br-tab-btn" data-tab="tab-cieplo" data-i18n="tab_heat">Ciepło</button>
+        <button class="br-tab-btn" data-tab="tab-filtracja" data-i18n="tab_filter">Filtracja</button>
         <button class="br-tab-btn" data-tab="tab-historia" data-i18n="tab_history">Historia</button>
       </div>
       <div class="scroll-arrow right-arrow" id="right-scroll-arrow">&rsaquo;</div>
@@ -576,6 +581,82 @@
       </div>
     </div>
 
+    <div class="br-tab-content" id="tab-wyboczenie">
+      <h3 data-i18n="buckling_title">Krytyczna Siła Wyboczenia</h3>
+      <p class="desc" data-i18n="buckling_desc">Oblicz siłę, przy której tłoczysko ulegnie wygięciu (Wzór Eulera).</p>
+      <div class="br-form-group"><label data-i18n="rod">Średnica tłoczyska (mm):</label><input type="number" id="buck-d" data-i18n-ph="ph_40" placeholder="np. 40" min="1"></div>
+      <div class="br-form-group"><label data-i18n="buck_l">Długość siłownika (mm):</label><input type="number" id="buck-l" data-i18n-ph="ph_500" placeholder="np. 500" min="1"></div>
+      <div class="br-form-group"><label data-i18n="buck_k">Sposób mocowania (Współczynnik K):</label>
+        <select id="buck-k">
+          <option value="1.0" data-i18n="buck_k1" selected>Przegub - Przegub (K=1.0)</option>
+          <option value="2.0" data-i18n="buck_k2">Utwierdzenie - Swobodne (K=2.0)</option>
+          <option value="0.5" data-i18n="buck_k3">Utwierdzenie - Utwierdzenie (K=0.5)</option>
+          <option value="0.7" data-i18n="buck_k4">Utwierdzenie - Przegub (K=0.7)</option>
+        </select>
+      </div>
+      <div class="br-form-group"><label data-i18n="buck_e">Moduł Younga (GPa):</label><input type="number" id="buck-e" placeholder="np. 210 dla stali" value="210" min="1"></div>
+      <button class="br-calc-btn" id="calc-buck-btn" data-i18n="btn_buckling">Oblicz wyboczenie</button>
+      <div class="br-results" id="buck-results">
+        <p><strong data-i18n="buck_fk">Krytyczna siła wyboczenia:</strong> <span id="res-buck-fk" style="color: #d9534f; font-weight: bold;">0</span> kg</p>
+        <p style="font-size: 14px;"><span data-i18n="buck_safe">Bezpieczne obciążenie (SF=3.5):</span> <span id="res-buck-safe" style="font-weight: bold;">0</span> kg</p>
+      </div>
+    </div>
+
+    <div class="br-tab-content" id="tab-dlawik">
+      <h3 data-i18n="ori_title">Przepływ przez dławik / kryzę</h3>
+      <p class="desc" data-i18n="ori_desc">Wyznacz natężenie przepływu na podstawie spadku ciśnienia.</p>
+      <div class="br-form-group"><label data-i18n="ori_d">Średnica otworu kryzy (mm):</label><input type="number" id="ori-d" placeholder="np. 2.5" min="0.1" step="0.1"></div>
+      <div class="br-form-group"><label data-i18n="ori_dp">Spadek ciśnienia na kryzie Δp (bar):</label><input type="number" id="ori-dp" placeholder="np. 50" min="0.1" step="0.1"></div>
+      <div class="br-form-group"><label data-i18n="ori_alpha">Współczynnik przepływu (α):</label><input type="number" id="ori-alpha" placeholder="np. 0.65" value="0.65" min="0.1" step="0.01"></div>
+      <div class="br-form-group"><label data-i18n="density">Gęstość oleju (kg/m³):</label><input type="number" id="ori-rho" placeholder="np. 870" value="870" min="1"></div>
+      <button class="br-calc-btn" id="calc-ori-btn" data-i18n="btn_orifice">Oblicz przepływ</button>
+      <div class="br-results" id="ori-results">
+        <p><strong data-i18n="ori_q">Natężenie przepływu:</strong> <span id="res-ori-q" style="color: #d9534f; font-weight: bold;">0</span> L/min</p>
+      </div>
+    </div>
+
+    <div class="br-tab-content" id="tab-rura">
+      <h3 data-i18n="pipe_title">Grubość Ścianki Rury</h3>
+      <p class="desc" data-i18n="pipe_desc">Oblicz bezpieczną grubość stalowej rury hydraulicznej.</p>
+      <div class="br-form-group"><label data-i18n="pipe_D">Zewnętrzna średnica rury (mm):</label><input type="number" id="pipe-d" placeholder="np. 16" min="1" step="0.1"></div>
+      <div class="br-form-group"><label data-i18n="pipe_p">Maksymalne ciśnienie robocze (bar):</label><input type="number" id="pipe-p" data-i18n-ph="ph_180" placeholder="np. 180" min="1"></div>
+      <div class="br-form-group"><label data-i18n="pipe_s">Granica plastyczności materiału Re (MPa):</label>
+        <select id="pipe-s">
+          <option value="235" data-i18n="pipe_s1" selected>Stal E235 / St37.4 (Re = 235 MPa)</option>
+          <option value="355" data-i18n="pipe_s2">Stal E355 / St52.4 (Re = 355 MPa)</option>
+          <option value="205" data-i18n="pipe_s3">Stal Nierdz. AISI 316L (Re = 205 MPa)</option>
+        </select>
+      </div>
+      <div class="br-form-group"><label data-i18n="pipe_sf">Współczynnik bezpieczeństwa (SF):</label><input type="number" id="pipe-sf" placeholder="np. 4" value="4" min="1" step="0.1"></div>
+      <button class="br-calc-btn" id="calc-pipe-btn" data-i18n="btn_pipe">Oblicz grubość ścianki</button>
+      <div class="br-results" id="pipe-results">
+        <p><strong data-i18n="pipe_t">Minimalna grubość ścianki:</strong> <span id="res-pipe-t" style="color: #d9534f; font-weight: bold;">0</span> mm</p>
+      </div>
+    </div>
+
+    <div class="br-tab-content" id="tab-cieplo">
+      <h3 data-i18n="heat_title">Generowanie Ciepła</h3>
+      <p class="desc" data-i18n="heat_desc">Sprawdź moc strat na zaworach przelewowych lub dławikach.</p>
+      <div class="br-form-group"><label data-i18n="flow">Przepływ tracony / zrzucany (L/min):</label><input type="number" id="heat-q" data-i18n-ph="ph_40" placeholder="np. 40" min="0.1" step="0.1"></div>
+      <div class="br-form-group"><label data-i18n="heat_dp">Spadek ciśnienia Δp (bar):</label><input type="number" id="heat-dp" placeholder="np. 150" min="1" step="0.1"></div>
+      <button class="br-calc-btn" id="calc-heat-btn" data-i18n="btn_heat">Oblicz ciepło</button>
+      <div class="br-results" id="heat-results">
+        <p><strong data-i18n="heat_kw">Moc wydzielonego ciepła:</strong> <span id="res-heat-kw" style="color: #d9534f; font-weight: bold;">0</span> kW</p>
+      </div>
+    </div>
+
+    <div class="br-tab-content" id="tab-filtracja">
+      <h3 data-i18n="filt_title">Skuteczność Filtracji (Beta)</h3>
+      <p class="desc" data-i18n="filt_desc">Oblicz współczynnik Beta i rzeczywistą skuteczność filtra.</p>
+      <div class="br-form-group"><label data-i18n="filt_up">Liczba cząstek PRZED filtrem (szt/ml):</label><input type="number" id="filt-up" placeholder="np. 100000" min="1"></div>
+      <div class="br-form-group"><label data-i18n="filt_down">Liczba cząstek ZA filtrem (szt/ml):</label><input type="number" id="filt-down" placeholder="np. 500" min="1"></div>
+      <button class="br-calc-btn" id="calc-filt-btn" data-i18n="btn_filter">Oblicz skuteczność</button>
+      <div class="br-results" id="filt-results">
+        <p><strong data-i18n="filt_beta">Współczynnik Beta (β):</strong> <span id="res-filt-beta" style="color: #d9534f; font-weight: bold;">0</span></p>
+        <p><strong data-i18n="filt_eff">Skuteczność wychwytywania:</strong> <span id="res-filt-eff" style="color: #0055a5; font-weight: bold;">0</span> %</p>
+      </div>
+    </div>
+
     <div class="br-tab-content" id="tab-historia">
       <h3 data-i18n="history_title">Historia Obliczeń</h3>
       <p class="desc" data-i18n="history_desc">Twoje ostatnie 50 wyników (Lokalnie).</p>
@@ -584,7 +665,7 @@
     </div>
     
     <div class="br-tab-content" id="tab-about">
-      <h3 data-i18n="about_title">HCalculator v1.1.4</h3>
+      <h3 data-i18n="about_title">HCalculator v1.2.0</h3>
       <p class="desc" data-i18n="about_desc">Profesjonalny Kalkulator Hydrauliczny</p>
       <p class="desc">🌐 <a href="https://hcalculator.app" target="_blank"><strong>HCalculator.app</strong></a></p>
       <div style="background-color: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; line-height: 1.6;">
@@ -678,7 +759,12 @@ document.addEventListener('DOMContentLoaded', function() {
       "theme_choose": "Wybierz motyw", "theme_light": "Jasny", "theme_auto": "Auto", "theme_dark": "Ciemny",
       "about": "ℹ️ O Programie", "tab_force": "Siła", "tab_speed": "Prędkość", "tab_power": "Moc", "tab_flow": "Wydajność", "tab_tank": "Zbiornik", "tab_history": "Historia",
       "tab_hose_diam": "Wąż (Ø)", "tab_hose_drop": "Wąż (Δp)", "tab_motor": "Silnik", "tab_acc": "Akum.", "tab_cooler": "Chłodnica", "tab_kv": "Kv/Cv",
-      
+      "tab_buckling": "Wyboczenie", "tab_orifice": "Dławik", "tab_pipe": "Rura", "tab_heat": "Ciepło", "tab_filter": "Filtracja",
+      "buckling_title": "Krytyczna Siła Wyboczenia", "buckling_desc": "Oblicz siłę, przy której tłoczysko ulegnie wygięciu.", "buck_l": "Długość siłownika (mm):", "buck_k": "Sposób mocowania (Wsp. K):", "buck_k1": "Przegub - Przegub (K=1.0)", "buck_k2": "Utwierdzenie - Swobodne (K=2.0)", "buck_k3": "Utwierdzenie - Utwierdzenie (K=0.5)", "buck_k4": "Utwierdzenie - Przegub (K=0.7)", "buck_e": "Moduł Younga (GPa):", "btn_buckling": "Oblicz wyboczenie", "buck_fk": "Krytyczna siła wyboczenia:", "buck_safe": "Bezpieczne obciążenie (SF=3.5):",
+      "ori_title": "Przepływ przez dławik", "ori_desc": "Wyznacz natężenie przepływu na podstawie spadku ciśnienia.", "ori_d": "Średnica otworu kryzy (mm):", "ori_dp": "Spadek ciśnienia Δp (bar):", "ori_alpha": "Współczynnik przepływu (α):", "btn_orifice": "Oblicz przepływ", "ori_q": "Natężenie przepływu:",
+      "pipe_title": "Grubość Ścianki Rury", "pipe_desc": "Oblicz bezpieczną grubość stalowej rury hydraulicznej.", "pipe_D": "Zewnętrzna średnica rury (mm):", "pipe_p": "Maksymalne ciśnienie robocze (bar):", "pipe_s": "Granica plastyczności Re (MPa):", "pipe_s1": "Stal E235 (Re = 235 MPa)", "pipe_s2": "Stal E355 (Re = 355 MPa)", "pipe_s3": "Stal Nierdz. 316L (Re = 205 MPa)", "pipe_sf": "Współczynnik bezpieczeństwa (SF):", "btn_pipe": "Oblicz grubość ścianki", "pipe_t": "Minimalna grubość ścianki:",
+      "heat_title": "Generowanie Ciepła", "heat_desc": "Sprawdź moc strat na zaworach przelewowych lub dławikach.", "heat_dp": "Spadek ciśnienia Δp (bar):", "btn_heat": "Oblicz ciepło", "heat_kw": "Moc wydzielonego ciepła:",
+      "filt_title": "Skuteczność Filtracji (Beta)", "filt_desc": "Oblicz współczynnik Beta i rzeczywistą skuteczność filtra.", "filt_up": "Liczba cząstek PRZED filtrem:", "filt_down": "Liczba cząstek ZA filtrem:", "btn_filter": "Oblicz skuteczność", "filt_beta": "Współczynnik Beta (β):", "filt_eff": "Skuteczność wychwytywania:",
       "acc_title": "Dobór Akumulatora", "acc_desc": "Oblicz pojemność całkowitą i ciśnienie gazu.", 
       "acc_v": "Wymagana objętość użyteczna oleju (L):", "acc_p1": "Maksymalne ciśnienie robocze P1 (bar):", "acc_p2": "Minimalne ciśnienie robocze P2 (bar):", 
       "btn_acc": "Oblicz akumulator", "acc_v0": "Całkowita poj. akumulatora (V0):", "acc_p0": "Ciśnienie wstępne gazu (P0):",
@@ -720,21 +806,26 @@ document.addEventListener('DOMContentLoaded', function() {
       "laminar": "Laminarny", "turbulent": "Turbulentny",
       "history_title": "Historia Obliczeń", "history_desc": "Twoje ostatnie 50 wyników (Lokalnie).", "clear_history": "Wyczyść historię", "empty_history": "Brak zapisanej historii.", "hist_input": "Wejście:", "hist_result": "Wynik:",
       "btn_pdf": "📄 Generuj PDF", "copy_btn": "📋 Kopiuj wynik", "btn_png": "Zapisz PNG",
-      "about_title": "HCalculator v1.1.4", "about_desc": "Profesjonalny Kalkulator Hydrauliczny",
+      "about_title": "HCalculator v1.2.0", "about_desc": "Profesjonalny Kalkulator Hydrauliczny",
       "about_text": "Program rozwijany na urządzenia z systemem Windows, telefony Android oraz w przeglądarce. Jest w 100% darmowy, nie wyświetla reklam i szanuje Twoją prywatność działając offline. Jeśli HCalculator zaoszczędził Twój czas w warsztacie lub przy projekcie, możesz wesprzeć jego dalszy rozwój stawiając mi kawę lub sponsorując na GitHubie!",
       "btn_coffee": "Postaw mi kawę", "btn_sponsor": "Sponsoruj na GitHub",
       "ph_180": "np. 180", "ph_80": "np. 80", "ph_40": "np. 40", "ph_500": "np. 500", "ph_14": "np. 14", "ph_custom": "Wpisz...",
       "err_empty": "Proszę poprawnie wypełnić wszystkie pola!",
       "err_bore": "Średnica tłoka musi być większa niż tłoczyska!",
       "err_acc_p": "Max ciśnienie P1 musi być większe niż Min P2!",
-      "print_report": "Raport Obliczeń", "print_params": "Parametry Wejściowe:", "print_results": "Wyniki Obliczeń:", "print_footer": "Wygenerowano w programie HCalculator v1.1.4", "print_date": "Data:"
+      "print_report": "Raport Obliczeń", "print_params": "Parametry Wejściowe:", "print_results": "Wyniki Obliczeń:", "print_footer": "Wygenerowano w programie HCalculator v1.2.0", "print_date": "Data:"
     },
     "en": {
       "update_msg": "A new version is available:",
       "theme_choose": "Choose theme", "theme_light": "Light", "theme_auto": "Auto", "theme_dark": "Dark",
       "about": "ℹ️ About", "tab_force": "Force", "tab_speed": "Speed", "tab_power": "Power", "tab_flow": "Flow", "tab_tank": "Tank", "tab_history": "History",
       "tab_hose_diam": "Hose (Ø)", "tab_hose_drop": "Hose (Δp)", "tab_motor": "Motor", "tab_acc": "Accum.", "tab_cooler": "Cooler", "tab_kv": "Kv/Cv",
-      
+      "tab_buckling": "Buckling", "tab_orifice": "Orifice", "tab_pipe": "Pipe", "tab_heat": "Heat", "tab_filter": "Filtration",
+      "buckling_title": "Critical Buckling Force", "buckling_desc": "Calculate the force at which the rod will bend.", "buck_l": "Cylinder length (mm):", "buck_k": "Mounting type (Factor K):", "buck_k1": "Pinned - Pinned (K=1.0)", "buck_k2": "Fixed - Free (K=2.0)", "buck_k3": "Fixed - Fixed (K=0.5)", "buck_k4": "Fixed - Pinned (K=0.7)", "buck_e": "Young's Modulus (GPa):", "btn_buckling": "Calculate buckling", "buck_fk": "Critical buckling force:", "buck_safe": "Safe load (SF=3.5):",
+      "ori_title": "Flow through orifice", "ori_desc": "Determine flow rate based on pressure drop.", "ori_d": "Orifice diameter (mm):", "ori_dp": "Pressure drop Δp (bar):", "ori_alpha": "Flow coefficient (α):", "btn_orifice": "Calculate flow", "ori_q": "Flow rate:",
+      "pipe_title": "Pipe Wall Thickness", "pipe_desc": "Calculate the safe thickness of a steel hydraulic pipe.", "pipe_D": "Outer pipe diameter (mm):", "pipe_p": "Max working pressure (bar):", "pipe_s": "Yield strength Re (MPa):", "pipe_s1": "Steel E235 (Re = 235 MPa)", "pipe_s2": "Steel E355 (Re = 355 MPa)", "pipe_s3": "Stainless 316L (Re = 205 MPa)", "pipe_sf": "Safety factor (SF):", "btn_pipe": "Calculate thickness", "pipe_t": "Minimum wall thickness:",
+      "heat_title": "Heat Generation", "heat_desc": "Check power losses on relief valves or restrictions.", "heat_dp": "Pressure drop Δp (bar):", "btn_heat": "Calculate heat", "heat_kw": "Generated heat power:",
+      "filt_title": "Filtration Efficiency (Beta)", "filt_desc": "Calculate the Beta ratio and actual filter efficiency.", "filt_up": "Particles UPSTREAM:", "filt_down": "Particles DOWNSTREAM:", "btn_filter": "Calculate efficiency", "filt_beta": "Beta ratio (β):", "filt_eff": "Capture efficiency:",
       "acc_title": "Accumulator Sizing", "acc_desc": "Calculate total volume and pre-charge pressure.", 
       "acc_v": "Required useful fluid volume (L):", "acc_p1": "Max working pressure P1 (bar):", "acc_p2": "Min working pressure P2 (bar):", 
       "btn_acc": "Calculate accumulator", "acc_v0": "Total accumulator volume (V0):", "acc_p0": "Gas pre-charge pressure (P0):",
@@ -776,21 +867,26 @@ document.addEventListener('DOMContentLoaded', function() {
       "laminar": "Laminar", "turbulent": "Turbulent",
       "history_title": "Calculation History", "history_desc": "Your last 50 results (Saved locally).", "clear_history": "Clear History", "empty_history": "No history saved yet.", "hist_input": "Input:", "hist_result": "Result:",
       "btn_pdf": "📄 Generate PDF", "copy_btn": "📋 Copy result", "btn_png": "Save PNG",
-      "about_title": "HCalculator v1.1.4", "about_desc": "Professional Hydraulic Calculator",
+      "about_title": "HCalculator v1.2.0", "about_desc": "Professional Hydraulic Calculator",
       "about_text": "Program developed for Windows devices, Android phones, and modern browsers. It is 100% free, has no ads, and respects your privacy by working offline. If HCalculator saved you time, consider supporting its future development by buying me a coffee or sponsoring on GitHub!",
       "btn_coffee": "Buy me a coffee", "btn_sponsor": "Sponsor on GitHub",
       "ph_180": "e.g. 180", "ph_80": "e.g. 80", "ph_40": "e.g. 40", "ph_500": "e.g. 500", "ph_14": "e.g. 14", "ph_custom": "Enter...",
       "err_empty": "Please fill in all fields correctly!",
       "err_bore": "Bore diameter must be larger than rod diameter!",
       "err_acc_p": "Max pressure P1 must be greater than Min P2!",
-      "print_report": "Calculation Report", "print_params": "Input Parameters:", "print_results": "Calculation Results:", "print_footer": "Generated in HCalculator v1.1.4", "print_date": "Date:"
+      "print_report": "Calculation Report", "print_params": "Input Parameters:", "print_results": "Calculation Results:", "print_footer": "Generated in HCalculator v1.2.0", "print_date": "Date:"
     },
     "de": {
       "update_msg": "Eine neue Version ist verfügbar:",
       "theme_choose": "Design wählen", "theme_light": "Hell", "theme_auto": "Auto", "theme_dark": "Dunkel",
       "about": "ℹ️ Über", "tab_force": "Kraft", "tab_speed": "Zykluszeit", "tab_power": "Leistung", "tab_flow": "Förder.", "tab_tank": "Tank", "tab_history": "Verlauf",
       "tab_hose_diam": "Schlauch (Ø)", "tab_hose_drop": "Schlauch (Δp)", "tab_motor": "Motor", "tab_acc": "Speicher", "tab_cooler": "Kühler", "tab_kv": "Kv/Cv",
-      
+      "tab_buckling": "Knickung", "tab_orifice": "Blende", "tab_pipe": "Rohr", "tab_heat": "Wärme", "tab_filter": "Filtration",
+      "buckling_title": "Kritische Knickkraft", "buckling_desc": "Berechnen Sie die Kraft, bei der sich die Stange biegt.", "buck_l": "Zylinderlänge (mm):", "buck_k": "Befestigungsart (Faktor K):", "buck_k1": "Gelenk - Gelenk (K=1.0)", "buck_k2": "Fest - Frei (K=2.0)", "buck_k3": "Fest - Fest (K=0.5)", "buck_k4": "Fest - Gelenk (K=0.7)", "buck_e": "Elastizitätsmodul (GPa):", "btn_buckling": "Knickung berechnen", "buck_fk": "Kritische Knickkraft:", "buck_safe": "Sichere Last (SF=3.5):",
+      "ori_title": "Durchfluss durch Blende", "ori_desc": "Durchfluss basierend auf Druckabfall ermitteln.", "ori_d": "Blendendurchmesser (mm):", "ori_dp": "Druckabfall Δp (bar):", "ori_alpha": "Durchflusskoeffizient (α):", "btn_orifice": "Durchfluss berechnen", "ori_q": "Durchflussmenge:",
+      "pipe_title": "Rohrwandstärke", "pipe_desc": "Sichere Dicke eines Hydraulikstahlrohrs berechnen.", "pipe_D": "Rohraußendurchmesser (mm):", "pipe_p": "Max. Betriebsdruck (bar):", "pipe_s": "Streckgrenze Re (MPa):", "pipe_s1": "Stahl E235 (Re = 235 MPa)", "pipe_s2": "Stahl E355 (Re = 355 MPa)", "pipe_s3": "Edelstahl 316L (Re = 205 MPa)", "pipe_sf": "Sicherheitsfaktor (SF):", "btn_pipe": "Wandstärke berechnen", "pipe_t": "Minimale Wandstärke:",
+      "heat_title": "Wärmeerzeugung", "heat_desc": "Leistungsverluste an Überdruckventilen prüfen.", "heat_dp": "Druckabfall Δp (bar):", "btn_heat": "Wärme berechnen", "heat_kw": "Erzeugte Wärmeleistung:",
+      "filt_title": "Filtrationseffizienz (Beta)", "filt_desc": "Berechnen Sie das Beta-Verhältnis und die tatsächliche Effizienz.", "filt_up": "Partikel VOR Filter:", "filt_down": "Partikel NACH Filter:", "btn_filter": "Effizienz berechnen", "filt_beta": "Beta-Verhältnis (β):", "filt_eff": "Abscheidegrad:",
       "acc_title": "Speicherauslegung", "acc_desc": "Gesamtvolumen und Vorspanndruck berechnen.", 
       "acc_v": "Benötigtes Nutzvolumen (L):", "acc_p1": "Max. Betriebsdruck P1 (bar):", "acc_p2": "Min. Betriebsdruck P2 (bar):", 
       "btn_acc": "Speicher berechnen", "acc_v0": "Speicher Gesamtvolumen (V0):", "acc_p0": "Gas-Vorspanndruck (P0):",
@@ -832,14 +928,14 @@ document.addEventListener('DOMContentLoaded', function() {
       "laminar": "Laminar", "turbulent": "Turbulent",
       "history_title": "Berechnungsverlauf", "history_desc": "Ihre letzten 50 Ergebnisse (Lokal).", "clear_history": "Verlauf löschen", "empty_history": "Noch kein Verlauf gespeichert.", "hist_input": "Eingabe:", "hist_result": "Ergebnis:",
       "btn_pdf": "📄 PDF erstellen", "copy_btn": "📋 Ergebnis kopieren", "btn_png": "PNG speichern",
-      "about_title": "HCalculator v1.1.4", "about_desc": "Professioneller Hydraulik-Rechner",
+      "about_title": "HCalculator v1.2.0", "about_desc": "Professioneller Hydraulik-Rechner",
       "about_text": "Programm für Windows-Geräte, Android-Smartphones und Webbrowser. Es ist zu 100 % kostenlos, werbefrei und respektiert Ihre Privatsphäre, da es offline funktioniert. Wenn HCalculator Ihnen Zeit gespart hat, spendieren Sie mir einen Kaffee oder sponsern Sie mich auf GitHub!",
       "btn_coffee": "Spendieren Sie mir einen Kaffee", "btn_sponsor": "Sponsor auf GitHub",
       "ph_180": "z.B. 180", "ph_80": "z.B. 80", "ph_40": "z.B. 40", "ph_500": "z.B. 500", "ph_14": "z.B. 14", "ph_custom": "Wert...",
       "err_empty": "Bitte füllen Sie alle Felder korrekt aus!",
       "err_bore": "Kolbendurchmesser muss größer als Stangendurchmesser sein!",
       "err_acc_p": "Max. Druck P1 muss größer als Min. P2 sein!",
-      "print_report": "Berechnungsbericht", "print_params": "Eingabeparameter:", "print_results": "Berechnungsergebnisse:", "print_footer": "Erstellt in HCalculator v1.1.4", "print_date": "Datum:"
+      "print_report": "Berechnungsbericht", "print_params": "Eingabeparameter:", "print_results": "Berechnungsergebnisse:", "print_footer": "Erstellt in HCalculator v1.2.0", "print_date": "Datum:"
     }
   };
 
@@ -1167,7 +1263,114 @@ document.addEventListener('DOMContentLoaded', function() {
       document.querySelectorAll('.br-tab-content').forEach(function(c) { c.classList.remove('active'); });
       document.getElementById('tab-about').classList.add('active');
   });
+  
+  document.getElementById('calc-buck-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      let d = parseFloat(document.getElementById('buck-d').value);
+      let L = parseFloat(document.getElementById('buck-l').value);
+      let K = parseFloat(document.getElementById('buck-k').value);
+      let E_gpa = parseFloat(document.getElementById('buck-e').value);
 
+      if (isNaN(d) || isNaN(L) || isNaN(K) || isNaN(E_gpa) || d <= 0 || L <= 0) return showError('err_empty');
+
+      let I = (Math.PI * Math.pow(d, 4)) / 64; 
+      let E_mpa = E_gpa * 1000;
+      let Le = K * L;
+
+      let Fk_N = (Math.PI * Math.PI * E_mpa * I) / (Le * Le);
+      let Fk_kg = Fk_N / 9.81;
+      let Fk_safe = Fk_kg / 3.5; 
+
+      document.getElementById('res-buck-fk').innerText = Math.round(Fk_kg).toLocaleString();
+      document.getElementById('res-buck-safe').innerText = Math.round(Fk_safe).toLocaleString();
+      document.getElementById('buck-results').style.display = 'block';
+
+      let kKey = document.getElementById('buck-k').options[document.getElementById('buck-k').selectedIndex].getAttribute('data-i18n');
+      let pTxt = `[[rod]] ${d} mm\n[[buck_l]] ${L} mm\n[[buck_k]] [[${kKey}]]\n[[buck_e]] ${E_gpa} GPa`;
+      let rTxt = `[[buck_fk]] ${Math.round(Fk_kg).toLocaleString()} kg\n[[buck_safe]] ${Math.round(Fk_safe).toLocaleString()} kg`;
+      createActionButtons('buck-results', 'copy-buck', 'pdf-buck', pTxt, rTxt, 'buckling_title');
+  });
+
+  document.getElementById('calc-ori-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      let d = parseFloat(document.getElementById('ori-d').value);
+      let dp = parseFloat(document.getElementById('ori-dp').value);
+      let alpha = parseFloat(document.getElementById('ori-alpha').value);
+      let rho = parseFloat(document.getElementById('ori-rho').value);
+
+      if (isNaN(d) || isNaN(dp) || isNaN(alpha) || isNaN(rho) || d <= 0 || dp <= 0) return showError('err_empty');
+
+      let A_m2 = (Math.PI * Math.pow(d, 2) / 4) * 0.000001;
+      let dp_Pa = dp * 100000;
+      let v = Math.sqrt((2 * dp_Pa) / rho);
+      let Q_m3s = alpha * A_m2 * v;
+      let Q_Lmin = Q_m3s * 60000;
+
+      document.getElementById('res-ori-q').innerText = Q_Lmin.toFixed(2);
+      document.getElementById('ori-results').style.display = 'block';
+
+      let pTxt = `[[ori_d]] ${d} mm\n[[ori_dp]] ${dp} bar\n[[ori_alpha]] ${alpha}\n[[density]] ${rho} kg/m³`;
+      let rTxt = `[[ori_q]] ${Q_Lmin.toFixed(2)} L/min`;
+      createActionButtons('ori-results', 'copy-ori', 'pdf-ori', pTxt, rTxt, 'ori_title');
+  });
+
+  document.getElementById('calc-pipe-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      let D = parseFloat(document.getElementById('pipe-d').value);
+      let P = parseFloat(document.getElementById('pipe-p').value);
+      let S = parseFloat(document.getElementById('pipe-s').value);
+      let SF = parseFloat(document.getElementById('pipe-sf').value);
+
+      if (isNaN(D) || isNaN(P) || isNaN(S) || isNaN(SF) || D <= 0 || P <= 0 || SF <= 0) return showError('err_empty');
+
+      let S_allow_bar = (S / SF) * 10; 
+      let t = (P * D) / (2 * S_allow_bar);
+
+      document.getElementById('res-pipe-t').innerText = t.toFixed(2);
+      document.getElementById('pipe-results').style.display = 'block';
+
+      let sKey = document.getElementById('pipe-s').options[document.getElementById('pipe-s').selectedIndex].getAttribute('data-i18n');
+      let pTxt = `[[pipe_D]] ${D} mm\n[[pipe_p]] ${P} bar\n[[pipe_s]] [[${sKey}]]\n[[pipe_sf]] ${SF}`;
+      let rTxt = `[[pipe_t]] ${t.toFixed(2)} mm`;
+      createActionButtons('pipe-results', 'copy-pipe', 'pdf-pipe', pTxt, rTxt, 'pipe_title');
+  });
+
+  document.getElementById('calc-heat-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      let Q = parseFloat(document.getElementById('heat-q').value);
+      let dp = parseFloat(document.getElementById('heat-dp').value);
+
+      if (isNaN(Q) || isNaN(dp) || Q <= 0 || dp <= 0) return showError('err_empty');
+
+      let P_kW = (Q * dp) / 600;
+
+      document.getElementById('res-heat-kw').innerText = P_kW.toFixed(2);
+      document.getElementById('heat-results').style.display = 'block';
+
+      let pTxt = `[[flow]] ${Q} L/min\n[[heat_dp]] ${dp} bar`;
+      let rTxt = `[[heat_kw]] ${P_kW.toFixed(2)} kW`;
+      createActionButtons('heat-results', 'copy-heat', 'pdf-heat', pTxt, rTxt, 'heat_title');
+  });
+
+  document.getElementById('calc-filt-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      let up = parseFloat(document.getElementById('filt-up').value);
+      let down = parseFloat(document.getElementById('filt-down').value);
+
+      if (isNaN(up) || isNaN(down) || up <= 0 || down <= 0 || down > up) return showError('err_empty');
+
+      let beta = up / down;
+      let eff = (1 - (1 / beta)) * 100;
+
+      document.getElementById('res-filt-beta').innerText = beta.toFixed(1);
+      document.getElementById('res-filt-eff').innerText = eff.toFixed(2);
+      document.getElementById('filt-results').style.display = 'block';
+
+      let pTxt = `[[filt_up]] ${up}\n[[filt_down]] ${down}`;
+      let rTxt = `[[filt_beta]] ${beta.toFixed(1)}\n[[filt_eff]] ${eff.toFixed(2)} %`;
+      createActionButtons('filt-results', 'copy-filt', 'pdf-filt', pTxt, rTxt, 'filt_title');
+  });
+  
   const tabsContainer = document.getElementById('main-tabs-container');
   const leftArrow = document.getElementById('left-scroll-arrow');
   const rightArrow = document.getElementById('right-scroll-arrow');
@@ -1241,8 +1444,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  
-  // Siła
   document.getElementById('run-calc-btn').addEventListener('click', function(e) {
     e.preventDefault(); 
     var p = parseFloat(document.getElementById('calc-pressure').value);
@@ -1266,7 +1467,6 @@ document.addEventListener('DOMContentLoaded', function() {
     createActionButtons('calc-results', 'copy-force', 'pdf-force', pTxt, rTxt, 'force_title');
   });
 
-  // Prędkość
   document.getElementById('calc-spd-btn').addEventListener('click', function(e) {
     e.preventDefault();
     var Q = parseFloat(document.getElementById('spd-flow').value);
@@ -1297,7 +1497,6 @@ document.addEventListener('DOMContentLoaded', function() {
     createActionButtons('spd-results', 'copy-speed', 'pdf-speed', pTxt, rTxt, 'speed_title');
   });
 
-  // Moc
   document.getElementById('calc-pmp-btn').addEventListener('click', function(e) {
     e.preventDefault();
     var Q = parseFloat(document.getElementById('pmp-flow').value);
@@ -1318,7 +1517,6 @@ document.addEventListener('DOMContentLoaded', function() {
     createActionButtons('pmp-results', 'copy-power', 'pdf-power', pTxt, rTxt, 'power_title');
   });
 
-  // Wydajność
   var rSel = document.getElementById('flow-rpm-select');
   var rCus = document.getElementById('flow-rpm-custom');
   if (rSel) {
@@ -1345,7 +1543,6 @@ document.addEventListener('DOMContentLoaded', function() {
     createActionButtons('flow-results', 'copy-flow', 'pdf-flow', pTxt, rTxt, 'flow_title');
   });
 
-  // Silnik Hydrauliczny
   document.getElementById('calc-mot-btn').addEventListener('click', function(e) {
       e.preventDefault();
       var Q = parseFloat(document.getElementById('mot-flow').value);
@@ -1369,7 +1566,6 @@ document.addEventListener('DOMContentLoaded', function() {
       createActionButtons('mot-results', 'copy-mot', 'pdf-mot', pTxt, rTxt, 'motor_title');
   });
 
-  // Zbiornik
   document.getElementById('calc-tank-btn').addEventListener('click', function(e) {
     e.preventDefault();
     var Q = parseFloat(document.getElementById('tank-flow').value);
@@ -1390,7 +1586,6 @@ document.addEventListener('DOMContentLoaded', function() {
     createActionButtons('tank-results', 'copy-tank', 'pdf-tank', pTxt, rTxt, 'tank_title');
   });
 
-  // Akumulator
   document.getElementById('calc-acc-btn').addEventListener('click', function(e) {
       e.preventDefault();
       let dV = parseFloat(document.getElementById('acc-v').value);
@@ -1416,7 +1611,6 @@ document.addEventListener('DOMContentLoaded', function() {
       createActionButtons('acc-results', 'copy-acc', 'pdf-acc', pTxt, rTxt, 'acc_title');
   });
 
-  // Chłodnica
   document.getElementById('calc-cool-btn').addEventListener('click', function(e) {
       e.preventDefault();
       let P_sys = parseFloat(document.getElementById('cool-kw').value);
@@ -1443,7 +1637,6 @@ document.addEventListener('DOMContentLoaded', function() {
       createActionButtons('cool-results', 'copy-cool', 'pdf-cool', pTxt, rTxt, 'cool_title');
   });
 
-  // Kv / Cv
   document.getElementById('calc-kv-btn').addEventListener('click', function(e) {
       e.preventDefault();
       let Q = parseFloat(document.getElementById('kv-flow').value);
@@ -1465,7 +1658,6 @@ document.addEventListener('DOMContentLoaded', function() {
       createActionButtons('kv-results', 'copy-kv', 'pdf-kv', pTxt, rTxt, 'kv_title');
   });
 
-  // Dobór Średnicy Węża
   var hdSel = document.getElementById('hd-line-select');
   var hdCus = document.getElementById('hd-vel-custom');
   if (hdSel) {
@@ -1489,7 +1681,6 @@ document.addEventListener('DOMContentLoaded', function() {
       createActionButtons('hd-results', 'copy-hd', 'pdf-hd', pTxt, rTxt, 'hose_diam_title');
   });
 
-  // Spadek Ciśnienia w Wężu
   document.getElementById('calc-pd-btn').addEventListener('click', function(e) {
       e.preventDefault();
       let lang = langSwitch.value;
@@ -1559,7 +1750,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   
   const repo = "daniel-kaliski/HCalculator"; 
-  const currentAppVersion = "1.1.4"; 
+  const currentAppVersion = "1.2.0"; 
   
   fetch(`https://api.github.com/repos/${repo}/releases/latest`)
       .then(response => {
