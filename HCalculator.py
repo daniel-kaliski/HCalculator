@@ -133,7 +133,7 @@ if __name__ == '__main__':
     html_path = get_resource_path('index.html')
     
     webview.create_window(
-        title='HCalculator - Hydraulic Calculator v1.1.4', 
+        title='HCalculator - Hydraulic Calculator v1.2.0', 
         url=html_path, 
         js_api=api,
         width=600,       
@@ -141,7 +141,5 @@ if __name__ == '__main__':
         resizable=False  
     )
     
-    # UWAGA: Uruchomienie z wbudowanym mikro-serwerem! 
-    # Zapobiega to blokowaniu plików JS przez system bezpieczeństwa macOS.
     webview.start(http_server=True)
     os._exit(0)
