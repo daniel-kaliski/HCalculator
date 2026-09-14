@@ -1,3 +1,7 @@
+
+
+https://github.com/user-attachments/assets/6bcf1f20-a903-4fb6-a59a-8f8a4420d9ef
+
 <h1 id="english">HCalculator - Professional Hydraulic Calculator v1.1.4</h1>
 
 **HCalculator** is a proprietary, multilingual application designed for engineers, technicians, and fluid power system designers. The program works 100% offline, making it an ideal tool for work in production halls, workshops, and in the field. 
