@@ -1,5 +1,5 @@
 <p align="center">
-  <video src="https://github.com/user-attachments/assets/6bcf1f20-a903-4fb6-a59a-8f8a4420d9ef" width="300" controls></video><br><br>
+  <video src="./HCalculator.mp4" width="300" controls></video><br><br>
   <a href="https://apps.apple.com/app/hcalculator/id6811343436" target="_blank">
     <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" width="180" alt="Download on the App Store">
   </a>
