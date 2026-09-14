@@ -1,8 +1,8 @@
 
-<p align="center">
-  <video src="https://github.com/user-attachments/assets/6bcf1f20-a903-4fb6-a59a-8f8a4420d9ef" width="300" controls autoplay loop muted></video>
-</p>
-[![Download on the App Store](https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg)](https://apps.apple.com/app/hcalculator/id6811343436)
+<video src="https://github.com/user-attachments/assets/6bcf1f20-a903-4fb6-a59a-8f8a4420d9ef" width="300" controls autoplay loop muted></video>
+  <a href="https://apps.apple.com/app/hcalculator/id6811343436" target="_blank">
+    <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" width="180" alt="Download on the App Store">
+  </a>
 
 <h1 id="english">HCalculator - Professional Hydraulic Calculator v1.1.4</h1>
 
