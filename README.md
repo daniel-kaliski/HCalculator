@@ -3,7 +3,7 @@
     <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" width="180" alt="Download on the App Store">
   </a>
 </p>
-<h1 id="english">HCalculator - Professional Hydraulic Calculator v1.1.4</h1>
+<h1 id="english">HCalculator - Professional Hydraulic Calculator</h1>
 
 **HCalculator** is a proprietary, multilingual application designed for engineers, technicians, and fluid power system designers. The program works 100% offline, making it an ideal tool for work in production halls, workshops, and in the field. 
 
